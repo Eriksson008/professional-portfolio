@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for Claude Code working in this sub-project.
+Guidance for Claude Code working in this repo.
 
 ## What this is
 
@@ -27,3 +27,19 @@ canonical personal details, verifiable-metrics rules, and confidentiality mappin
 - Update the Second Brain project note
   (`../second-brain/02-Projects/Professional-Portfolio/README.md`) when a major
   decision is made.
+
+## TODO / open decisions
+
+- [ ] **Publish via GitHub Pages — decision pending (user, 2026-06-30: "not yet").**
+  The GitHub repo (`Eriksson008/professional-portfolio`) is currently **private**.
+  GitHub Pages on a private repo requires GitHub Pro; otherwise the repo must be made
+  **public** to publish for free. Decide public-vs-private before enabling Pages.
+- [ ] **Before publishing publicly, confirm the raw git-verifiable metrics are OK to
+  expose** (a public site is more exposed than a one-recruiter resume — see the
+  confidentiality rules in the sibling `../resume-project/CLAUDE.md`).
+- [ ] Once the publish decision is made, add concrete deployment notes to `README.md`
+  (Pages source branch/folder, final URL).
+
+### Done
+- [x] GitHub handle set to `Eriksson008` in the header (2026-06-30).
+- [x] `assets/resume.pdf` added (one-page layout, generated from the resume repo).

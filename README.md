@@ -50,7 +50,7 @@ No dependencies to install.
 3. Under **Build and deployment → Source**, choose **Deploy from a branch**.
 4. Branch: **`main`**, folder: **`/ (root)`**. Save.
 5. Wait ~1 minute. Your site publishes at
-   `https://<your-username>.github.io/<repo-name>/`.
+   `https://eriksson008.github.io/professional-portfolio/`.
 
 > If you'd rather publish from a `/docs` folder, move these files into `docs/`
 > and pick that folder in step 4. Root is simplest for this repo.
@@ -69,7 +69,7 @@ All links live in `index.html`. Search for these and edit in place:
 |------|------------------|---------------|
 | Email | `mailto:` links | `eriksson.fredrik08@gmail.com` |
 | LinkedIn | `linkedin.com/in/...` links | `linkedin.com/in/eriksson-fredrik` |
-| GitHub | `data-placeholder="github"` links | `github.com/[your-username]` ← **replace** |
+| GitHub | `data-placeholder="github"` links | `github.com/Eriksson008` (set 2026-06-30) |
 | Resume | `data-placeholder="resume"` links | `assets/resume.pdf` |
 
 There are two of each (hero + contact section) — update both.
@@ -114,7 +114,7 @@ block and edit it. The grid handles layout automatically.
       workflows").
 - [ ] No fabricated metrics — placeholders only, clearly marked, or omitted.
 - [ ] Resume PDF you upload is also confidentiality-clean.
-- [ ] All `[your-username]` placeholders replaced; Resume/GitHub buttons resolve.
+- [x] GitHub handle set to `Eriksson008` (2026-06-30). Resume button still needs `assets/resume.pdf`.
 
 ---
 
