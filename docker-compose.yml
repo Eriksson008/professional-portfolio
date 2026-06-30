@@ -3,7 +3,11 @@ services:
     build: .
     image: professional-portfolio:latest
     container_name: professional-portfolio
-    # Host port is configurable via PORT (defaults to 8789); container always serves on 8789.
+    # Host exposure is configurable (copy .env.example to .env to override):
+    #   BIND_ADDR  127.0.0.1 = localhost only (default, most private);
+    #              0.0.0.0   = reachable on your LAN and over Tailscale.
+    #   PORT       host port (defaults to 8790, this app's family port).
+    # The container always serves on 8790 internally.
     ports:
-      - "${PORT:-8789}:8789"
+      - "${BIND_ADDR:-127.0.0.1}:${PORT:-8790}:8790"
     restart: unless-stopped

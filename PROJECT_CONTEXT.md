@@ -10,7 +10,7 @@ advertises, so it doubles as a work sample.
 ## Current Status
 
 Active. As of 2026-06-30 the site was **rebuilt from a no-build static site into a Vite + React +
-TypeScript app** and **Dockerized** (multi-stage build → nginx, port 8789). Content is migrated
+TypeScript app** and **Dockerized** (multi-stage build → nginx, port 8790). Content is migrated
 into typed data modules and reflects the same git-verifiable metrics and sanitized case studies
 as the résumé. Standalone Git repo on the **private** GitHub repo
 `Eriksson008/professional-portfolio` (branch `main`). Publishing via GitHub Pages is not yet
@@ -21,16 +21,16 @@ decided.
 - React 18 + TypeScript, built with Vite 5
 - Hand-written CSS with a design-token system (`src/styles/tokens.css` + `app.css`)
 - Typed content modules in `src/data/` as the single source of truth
-- Docker: multi-stage node build → nginx (Alpine), serves on port 8789 (host port configurable
-  via `PORT`)
+- Docker: multi-stage node build → nginx (Alpine), serves on port 8790; host exposure
+  configurable via `BIND_ADDR` (default `127.0.0.1`, localhost-only) and `PORT` (see `.env.example`)
 - ESLint (flat config) + Prettier; no tests (static content site)
 
 ## Local Development
 
 ```bash
-npm install && npm run dev      # http://localhost:8789 (HMR)
+npm install && npm run dev      # http://localhost:8790 (HMR)
 npm run build                   # type-check + build to dist/
-docker compose up --build       # production container at http://localhost:8789
+docker compose up --build       # production container at http://localhost:8790 (localhost-only)
 ```
 
 ## Deployment / Access
@@ -44,6 +44,11 @@ docker compose up --build       # production container at http://localhost:8789
 
 ## Important Decisions
 
+- **2026-06-30 — Standardized to the app-family port + safe-by-default binding.** Host/dev/preview
+  and the container now all use **port 8790** (this app's family port; was 8789, which collided
+  with `our-story`). `docker-compose.yml` now publishes via `${BIND_ADDR:-127.0.0.1}:${PORT:-8790}:8790`,
+  so it defaults to **localhost-only** (previously it published on `0.0.0.0`/all interfaces). Set
+  `BIND_ADDR=0.0.0.0` in `.env` for deliberate LAN/Tailscale access. Added `.env.example`.
 - **2026-06-30 — Rebuilt as Vite + React + TypeScript and Dockerized.** Reason: the repo itself
   should demonstrate the senior full-stack/React/TS/Docker skills it claims; typed data modules
   are more maintainable than one large HTML file. Supersedes the earlier "no framework / no build

@@ -28,25 +28,27 @@ Requires Node 20+.
 
 ```bash
 npm install          # install dependencies
-npm run dev          # dev server with HMR at http://localhost:8789
+npm run dev          # dev server with HMR at http://localhost:8790
 npm run build        # type-check + production build to dist/
-npm run preview      # serve the built dist/ at http://localhost:8789
+npm run preview      # serve the built dist/ at http://localhost:8790
 npm run lint         # ESLint
 npm run format       # Prettier
 ```
 
 ## Docker
 
-The container serves the production build via nginx on **port 8789** by default.
+The container serves the production build via nginx on **port 8790** by default, published to
+**localhost only** (`127.0.0.1`) unless you opt into LAN/Tailscale access.
 
 ```bash
-docker compose up --build       # build + run at http://localhost:8789
+docker compose up --build       # build + run at http://localhost:8790
 # or, plain Docker:
 docker build -t professional-portfolio .
-docker run -p 8789:8789 professional-portfolio
+docker run -p 8790:8790 professional-portfolio
 ```
 
-The published host port is configurable; the container always serves on 8789 internally:
+Host binding and port are configurable via a `.env` file (copy `.env.example` to `.env`); the
+container always serves on 8790 internally:
 
 ```bash
 PORT=9000 docker compose up --build   # → http://localhost:9000
@@ -54,9 +56,18 @@ PORT=9000 docker compose up --build   # → http://localhost:9000
 
 ### LAN / Tailscale
 
-Because the container binds normally, it is reachable from other devices on your LAN at
-`http://<host-ip>:8789`, or privately over a Tailscale mesh at `http://<tailscale-ip>:8789`
-without exposing it to the public internet.
+By default the container is published to `127.0.0.1` only (localhost). To reach it from your
+phone or another device, set `BIND_ADDR=0.0.0.0` in `.env`, then it is reachable at:
+
+- LAN:       `http://<host-ip>:8790`
+- Tailscale: `http://<tailscale-ip>:8790`
+
+This stays on your private LAN / tailnet — it is **not** exposed to the public internet. Notes:
+
+- **Windows Firewall** (or Docker Desktop's own block rule) may need an inbound allow rule for
+  port 8790, ideally scoped to your local subnet and the Tailscale range (`100.64.0.0/10`).
+- **Tailscale ACLs** must permit your user/device to reach this host and port.
+- Leave `BIND_ADDR=127.0.0.1` (the default) whenever you don't need remote access.
 
 ## Deployment notes
 
@@ -81,7 +92,7 @@ professional-portfolio/
 ├── public/                 # resume.pdf, favicon.svg, .nojekyll
 ├── Dockerfile              # multi-stage node build → nginx
 ├── nginx.conf              # listens on ${PORT}; SPA fallback; gzip; security headers
-├── docker-compose.yml      # PORT-configurable host mapping
+├── docker-compose.yml      # BIND_ADDR + PORT configurable host mapping (see .env.example)
 ├── CLAUDE.md, PROJECT_CONTEXT.md
 └── resources/              # PRIVATE, gitignored — never committed (see below)
 ```

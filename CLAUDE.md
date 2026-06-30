@@ -7,8 +7,8 @@ Guidance for Claude Code working in this repo.
 **Professional Portfolio** — a production-oriented personal portfolio for Fredrik Eriksson
 (Senior Software Engineer / acting Tech Lead). It is a **Vite + React + TypeScript** single-page
 app, styled with a hand-written CSS design-token system and shipped as a **Dockerized static
-site served by nginx on port 8789**. It supports the résumé (same person, same facts, same
-confidentiality rules).
+site served by nginx on port 8790** (localhost-only by default). It supports the résumé (same
+person, same facts, same confidentiality rules).
 
 This is its own standalone top-level repo (moved out of `resume-project` on 2026-06-29). The
 sibling [`../resume-project/CLAUDE.md`](../resume-project/CLAUDE.md) holds the canonical personal
@@ -56,11 +56,15 @@ too**; keep the two in sync when a shared fact changes.
 ## Docker commands
 
 ```bash
-docker compose up --build         # build + run at http://localhost:8789
+docker compose up --build         # build + run at http://localhost:8790 (localhost-only)
 PORT=9000 docker compose up        # publish on a different host port
+BIND_ADDR=0.0.0.0 docker compose up # expose to LAN / Tailscale (off by default)
 docker build -t professional-portfolio .
-docker run -p 8789:8789 professional-portfolio
+docker run -p 8790:8790 professional-portfolio
 ```
+
+Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` defaults to
+`127.0.0.1` (localhost-only); the container always serves on 8790 internally.
 
 ## TODO / open decisions
 
@@ -71,7 +75,9 @@ docker run -p 8789:8789 professional-portfolio
   a public site is more exposed than a one-recruiter résumé.
 
 ### Done
-- [x] Rebuilt as Vite + React + TypeScript and Dockerized (nginx, port 8789) — 2026-06-30.
+- [x] Rebuilt as Vite + React + TypeScript and Dockerized (nginx, port 8790) — 2026-06-30.
+- [x] Standardized to family port 8790 (was 8789, collided with our-story); added `BIND_ADDR`
+  localhost-only default + `.env.example` — 2026-06-30.
 - [x] GitHub handle `Eriksson008` in the header; `public/resume.pdf` in place — 2026-06-30.
 
 ## Before finishing any meaningful session
