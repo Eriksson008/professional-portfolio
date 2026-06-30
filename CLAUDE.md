@@ -43,3 +43,46 @@ canonical personal details, verifiable-metrics rules, and confidentiality mappin
 ### Done
 - [x] GitHub handle set to `Eriksson008` in the header (2026-06-30).
 - [x] `assets/resume.pdf` added (one-page layout, generated from the resume repo).
+
+## Claude Code Operating Rules
+
+- Read `PROJECT_CONTEXT.md` before making changes.
+- Keep changes simple, maintainable, and aligned with the project purpose.
+- Avoid over-engineering.
+- Prefer small, clear commits.
+- Run relevant checks when available, such as lint, build, or tests.
+
+## Second Brain Sync Rule
+
+Whenever meaningful changes are made in this repo, also update:
+
+`../second-brain/02-Projects/Professional-Portfolio/README.md`
+
+A meaningful change includes:
+
+- new architecture
+- new feature
+- Docker or deployment change
+- Tailscale, networking, or security change
+- environment variable or port change
+- major UI/design direction
+- important bug fix
+- new setup command
+- major project decision
+- changed next actions
+
+Do not update second-brain for:
+
+- typo fixes
+- tiny styling changes
+- formatting-only changes
+- routine dependency updates
+- trivial refactors
+
+Before finishing any meaningful session:
+
+1. Update this repo's `PROJECT_CONTEXT.md`.
+2. Update the matching second-brain project note.
+3. Run relevant checks if available.
+4. Show git status for both this repo and `../second-brain`.
+5. If I explicitly asked to commit/push, commit and push both repos with clear commit messages.
