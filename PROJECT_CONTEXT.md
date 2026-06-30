@@ -2,62 +2,77 @@
 
 ## Purpose
 
-A static, GitHub Pages-ready portfolio website that showcases Fredrik Eriksson's work,
-skills, and experience and *supports* the resume. Conservative enterprise tone (no
-hype words like "rockstar/ninja/guru/10x").
+A production-oriented personal portfolio for Fredrik Eriksson (Senior Software Engineer / acting
+Tech Lead) that showcases work, skills, and experience and *supports* the résumé. Conservative,
+credible enterprise tone (no hype words). The repo is intentionally built with the same stack it
+advertises, so it doubles as a work sample.
 
 ## Current Status
 
-Active. Site is built: `index.html`, `portfolio-standalone.html`, `styles.css`,
-`script.js`, `assets/`, `.nojekyll`. Reflects the same git-verifiable metrics and
-sanitized case studies as the resume. As of 2026-06-30 it is a standalone Git repo
-pushed to the **private** GitHub repo `Eriksson008/professional-portfolio` (branch
-`main`); GitHub handle and resume PDF are in place. Publishing via GitHub Pages is not
-yet decided.
+Active. As of 2026-06-30 the site was **rebuilt from a no-build static site into a Vite + React +
+TypeScript app** and **Dockerized** (multi-stage build → nginx, port 8789). Content is migrated
+into typed data modules and reflects the same git-verifiable metrics and sanitized case studies
+as the résumé. Standalone Git repo on the **private** GitHub repo
+`Eriksson008/professional-portfolio` (branch `main`). Publishing via GitHub Pages is not yet
+decided.
 
 ## Tech Stack
 
-- Plain semantic HTML + CSS, minimal vanilla JS
-- No React/framework, no build step, mobile-responsive, accessible
-- GitHub Pages-ready (`.nojekyll` present)
+- React 18 + TypeScript, built with Vite 5
+- Hand-written CSS with a design-token system (`src/styles/tokens.css` + `app.css`)
+- Typed content modules in `src/data/` as the single source of truth
+- Docker: multi-stage node build → nginx (Alpine), serves on port 8789 (host port configurable
+  via `PORT`)
+- ESLint (flat config) + Prettier; no tests (static content site)
 
 ## Local Development
 
-No tooling — open `index.html` in a browser. Edit HTML/CSS/JS directly.
+```bash
+npm install && npm run dev      # http://localhost:8789 (HMR)
+npm run build                   # type-check + build to dist/
+docker compose up --build       # production container at http://localhost:8789
+```
 
 ## Deployment / Access
 
-- Deploy via GitHub Pages (static). The repo is currently **private**; Pages needs
-  GitHub Pro or making the repo public — decision pending.
-- No automated tests; verify by opening the page and reviewing against the constraints.
-- A public site is more exposed than a one-recruiter resume — confirm before publishing
-  raw git-verifiable metrics.
+- Static `dist/` deploys to any static host (GitHub Pages, Netlify, S3/CloudFront, nginx);
+  `public/.nojekyll` included. Or run the Docker container anywhere (LAN / Tailscale reachable).
+- GitHub repo `Eriksson008/professional-portfolio` is currently **private**; Pages needs GitHub
+  Pro or making the repo public — decision pending.
+- A public site is more exposed than a one-recruiter résumé — confirm before publishing the raw
+  git-verifiable metrics.
 
 ## Important Decisions
 
-- **Shares the resume project's rules** — canonical personal details, no invented
-  metrics, and the confidentiality mapping all live in the sibling repo's
-  `../resume-project/CLAUDE.md`. Pull facts from there; do not retype/drift them.
-- **No Prudential-internal system/project/codenames.** Case studies stay generic
-  (Enterprise Salesforce Platform, Internal AI Assistant, Secure Client Onboarding
-  Portal, Production Support & Release Ownership, Mechanical Engineering Foundation).
-- No stock images, no gimmicky animations, no heavy dependencies.
-- **Split out of `resume-project` into its own standalone top-level repo** (2026-06-29).
-  Reason: cleaner Git history, easier Claude Code usage, easier deployment, and clearer
-  separation from resume experiments.
+- **2026-06-30 — Rebuilt as Vite + React + TypeScript and Dockerized.** Reason: the repo itself
+  should demonstrate the senior full-stack/React/TS/Docker skills it claims; typed data modules
+  are more maintainable than one large HTML file. Supersedes the earlier "no framework / no build
+  step" rule.
+- **Design direction:** tasteful single-theme dark "drafting / engineering title-block"
+  aesthetic — deep ink base, warm brass accent, Sora + IBM Plex Sans/Mono. The hero title block
+  (modeled on an engineering drawing's title block) is the signature device, nodding to the
+  mechanical-engineering origin.
+- **Shares the résumé project's rules** — canonical personal details, no invented metrics, and
+  the confidentiality mapping live in `../resume-project/CLAUDE.md`. Pull facts from there.
+- **No internal system/project/product codenames.** Case studies stay generic.
+- **Split out of `resume-project`** into its own standalone top-level repo (2026-06-29).
+
+## Privacy
+
+`resources/` is local-only source material (performance reviews, old résumé, RESUME-METRICS.md,
+SKILLS-PROFILE.md), gitignored and never committed. Used only to shape safe public themes. The
+site exposes only honest, defensible, public-safe content.
 
 ## Current Next Actions
 
-- Keep the site coherent with the resume whenever a shared fact changes.
-- Keep tone conservative and enterprise-friendly.
-- **Decide GitHub Pages publishing** (private + Pro, or make public). Tracked in `CLAUDE.md` TODO.
-- Confirm the raw git-verifiable metrics are OK to expose publicly *before* enabling Pages.
-- After the publish decision, add concrete deployment notes (Pages source branch/folder,
-  final URL) to `README.md`.
+- Keep the site coherent with the résumé whenever a shared fact changes.
+- Keep tone conservative and enterprise-friendly; metrics git-verifiable only.
+- **Decide GitHub Pages publishing** (private + Pro, or make public). Tracked in `CLAUDE.md`.
+- Confirm the raw git-verifiable metrics are OK to expose publicly *before* publishing.
 
 ## Second Brain Sync
 
 Matching note: `../second-brain/02-Projects/Professional-Portfolio/README.md`
 
-Related: `../second-brain/02-Projects/Repository System.md` (and the sibling
-`resume-project` repo, which holds the canonical facts).
+Related: `../second-brain/02-Projects/Repository System.md` and the sibling `resume-project` repo
+(canonical facts).

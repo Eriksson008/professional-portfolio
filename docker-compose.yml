@@ -1,0 +1,9 @@
+services:
+  portfolio:
+    build: .
+    image: professional-portfolio:latest
+    container_name: professional-portfolio
+    # Host port is configurable via PORT (defaults to 8789); container always serves on 8789.
+    ports:
+      - "${PORT:-8789}:8789"
+    restart: unless-stopped

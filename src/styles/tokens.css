@@ -1,0 +1,34 @@
+:root {
+  /* Surfaces — deep blue-charcoal "ink", not pure black */
+  --ink: #0b0e13;
+  --ink-2: #0e131a;
+  --panel: #131922;
+  --panel-2: #19212c;
+  --line: #28313d;
+  --line-soft: #1d2530;
+
+  /* Text */
+  --text: #e9ecf1;
+  --muted: #98a3b2;
+  --faint: #6b7585;
+
+  /* Accent — warm brass / drafting instrument, used with restraint */
+  --brass: #d7a24b;
+  --brass-bright: #ecbb66;
+  --brass-deep: #b9842f;
+  --brass-wash: rgba(215, 162, 75, 0.12);
+  --brass-line: rgba(215, 162, 75, 0.32);
+
+  /* Type */
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Layout */
+  --wrap: 1140px;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --radius: 4px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
