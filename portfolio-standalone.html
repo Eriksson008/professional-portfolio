@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- STANDALONE BUILD: CSS + JS inlined into this single file. Generated from index.html + styles.css + script.js. Edit those originals, not this file. -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fredrik Eriksson — Senior Software Engineer</title>
+  <meta name="description" content="Fredrik Eriksson — Senior Software Engineer focused on enterprise Salesforce platforms, Java/Spring services, React applications, cloud deployment, and technical leadership." />
+  <meta name="author" content="Fredrik Eriksson" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Fredrik Eriksson — Senior Software Engineer" />
+  <meta property="og:description" content="Enterprise Salesforce platforms, Java/Spring services, React applications, cloud deployment, and technical leadership." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+/* =========================================================================
+   Fredrik Eriksson — Professional Portfolio
+   Static stylesheet. Design language: "engineering documentation" —
+   warm off-white paper, slate-navy brand, one restrained muted-teal accent,
+   monospace metadata labels as the signature thread.
+   ========================================================================= */
+
+/* ------------------------------ Tokens ------------------------------ */
+:root {
+  --paper:        #F6F5F2;
+  --surface:      #FFFFFF;
+  --surface-2:    #FBFAF7;
+  --ink:          #1B2430;
+  --ink-soft:     #44505F;
+  --muted:        #6B7480;
+  --navy:         #233A57;
+  --navy-deep:    #1A2C44;
+  --accent:       #2E6F69;
+  --accent-soft:  #E4EDEB;
+  --line:         #E4E2DC;
+  --line-strong:  #D3D0C8;
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  --wrap:    1120px;
+  --gutter:  clamp(1.25rem, 4vw, 3rem);
+  --radius:  10px;
+  --radius-sm: 6px;
+  --shadow:  0 1px 2px rgba(27, 36, 48, 0.04), 0 8px 24px rgba(27, 36, 48, 0.05);
+}
+
+/* ------------------------------ Reset ------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  margin: 0;
+  font-weight: 600;
+}
+
+p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+img { max-width: 100%; display: block; }
+
+/* ------------------------------ Layout helpers ------------------------------ */
+.wrap {
+  width: 100%;
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+  border-top: 1px solid var(--line);
+}
+.section-alt { background: var(--surface-2); }
+
+.section-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+  gap: clamp(1.5rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.section-head { margin-bottom: 2.5rem; max-width: 60ch; }
+.section-grid .section-head { margin-bottom: 0; }
+.section-head h2 { font-size: clamp(1.5rem, 3vw, 2.05rem); }
+.section-intro { margin-top: 1rem; color: var(--muted); max-width: 60ch; }
+
+/* ------------------------------ Eyebrow (mono signature) ------------------------------ */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.eyebrow::before {
+  content: "";
+  width: 1.6rem;
+  height: 1px;
+  background: var(--accent);
+  display: inline-block;
+}
+.eyebrow-light { color: #A8C4BF; }
+.eyebrow-light::before { background: #A8C4BF; }
+
+.footnote {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2rem;
+  letter-spacing: 0.01em;
+}
+
+/* ------------------------------ Skip link ------------------------------ */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0.5rem;
+  background: var(--navy);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  z-index: 200;
+}
+.skip-link:focus { left: 0.5rem; }
+
+/* ------------------------------ Header / Nav ------------------------------ */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(246, 245, 242, 0.85);
+  backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+}
+.monogram {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.monogram:hover { text-decoration: none; }
+.monogram-mark {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: var(--navy);
+  border-radius: var(--radius-sm);
+  padding: 0.32rem 0.5rem;
+}
+.monogram-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.98rem;
+  letter-spacing: -0.01em;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+}
+.nav-menu a {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+.nav-menu a:hover { color: var(--ink); text-decoration: none; }
+.nav-menu a.is-active { color: var(--accent); }
+.nav-cta {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+}
+.nav-cta:hover { border-color: var(--navy); }
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.6rem;
+  cursor: pointer;
+}
+.nav-toggle-bar {
+  width: 20px;
+  height: 2px;
+  background: var(--ink);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* ------------------------------ Buttons ------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding: 0.7rem 1.3rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  background: var(--surface);
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+.btn:hover { text-decoration: none; border-color: var(--navy); transform: translateY(-1px); }
+.btn-primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+.btn-primary:hover { background: var(--navy-deep); border-color: var(--navy-deep); color: #fff; }
+
+.btn-light { background: #fff; border-color: #fff; color: var(--navy); }
+.btn-light:hover { background: #fff; color: var(--navy-deep); }
+.btn-ghost-light { background: transparent; border-color: rgba(255,255,255,0.4); color: #fff; }
+.btn-ghost-light:hover { background: rgba(255,255,255,0.08); border-color: #fff; color: #fff; }
+
+/* ------------------------------ Hero ------------------------------ */
+.hero { padding-block: clamp(3.5rem, 9vw, 7rem); }
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+.hero-name {
+  font-size: clamp(2.6rem, 7vw, 4.4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-block: 0.4rem 1.4rem;
+}
+.hero-statement {
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  color: var(--ink-soft);
+  max-width: 36ch;
+  line-height: 1.5;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 2rem;
+}
+
+/* Signature: engineering title block */
+.title-block {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.title-block-head {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.title-block-rows > div {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: 0.5rem;
+  padding: 0.7rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  align-items: baseline;
+}
+.title-block-rows > div:last-child { border-bottom: 0; }
+.title-block-rows dt {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.title-block-rows dd {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* ------------------------------ About ------------------------------ */
+.about-body p + p { margin-top: 1.1rem; }
+.section-body p { color: var(--ink-soft); }
+
+/* ------------------------------ Timeline ------------------------------ */
+.timeline {
+  position: relative;
+  margin-top: 1rem;
+  padding-left: 0;
+}
+.timeline-item {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: clamp(1rem, 3vw, 2rem);
+  padding: 1.4rem 0;
+  border-top: 1px solid var(--line);
+  position: relative;
+}
+.timeline-item:first-child { border-top: 0; }
+.timeline-date {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  padding-top: 0.15rem;
+}
+.timeline-content h3 { font-size: 1.08rem; margin-bottom: 0.3rem; }
+.timeline-content p { color: var(--ink-soft); font-size: 0.96rem; }
+.timeline-item.is-current .timeline-content h3 { color: var(--navy); }
+.timeline-item.is-current::before {
+  content: "Current";
+  position: absolute;
+  top: 1.45rem;
+  right: 0;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+
+/* ------------------------------ Cards (shared grid) ------------------------------ */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1.1rem;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.6rem;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.card:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+.strengths-grid .card h3 {
+  font-size: 1.12rem;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--line);
+}
+.strengths-grid .card p { font-size: 0.95rem; color: var(--ink-soft); }
+
+/* ------------------------------ Case studies ------------------------------ */
+.cases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+  gap: 1.25rem;
+}
+.case {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.case-head {
+  padding: 1.5rem 1.6rem 1.2rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.case-head h3 { font-size: 1.2rem; margin-bottom: 0.9rem; }
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.tag-row li {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.18rem 0.6rem;
+}
+.case-body { padding: 1.5rem 1.6rem; }
+.case-field + .case-field { margin-top: 1.1rem; }
+.case-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+.case-field p:not(.case-label) { color: var(--ink-soft); font-size: 0.95rem; }
+.case-list { margin-top: 0.2rem; }
+.case-list li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+.case-list li + li { margin-top: 0.4rem; }
+.case-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+.case-note {
+  margin-top: 1.3rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ------------------------------ Skills ------------------------------ */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 1.6rem 2.5rem;
+}
+.skill-group h3 {
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--navy);
+  padding-bottom: 0.7rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.chip-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chip-list li {
+  font-size: 0.86rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.32rem 0.72rem;
+}
+
+/* ------------------------------ Leadership ------------------------------ */
+.ownership-list { display: grid; gap: 0.55rem; }
+.ownership-list li {
+  position: relative;
+  padding-left: 1.6rem;
+  color: var(--ink-soft);
+}
+.ownership-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--accent);
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+.ownership-list strong { color: var(--ink); font-weight: 600; }
+
+/* ------------------------------ Education ------------------------------ */
+.edu-card .edu-meta {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 0.7rem;
+}
+.edu-card h3 { font-size: 1.05rem; margin-bottom: 0.45rem; }
+.edu-card p { font-size: 0.92rem; color: var(--ink-soft); }
+
+/* ------------------------------ Contact ------------------------------ */
+.section-contact {
+  background: var(--navy);
+  color: #E8ECF1;
+  border-top: 0;
+}
+.section-contact h2 { color: #fff; font-size: clamp(1.6rem, 3.4vw, 2.4rem); }
+.contact-wrap { max-width: 760px; }
+.contact-intro { margin-top: 1rem; color: #B7C2D0; max-width: 52ch; }
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 2rem;
+}
+
+/* ------------------------------ Footer ------------------------------ */
+.site-footer {
+  background: var(--navy-deep);
+  color: #9FB0C2;
+  padding-block: 2.2rem;
+}
+.footer-wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.6rem; align-items: baseline; }
+.footer-name { font-family: var(--font-display); font-weight: 600; color: #fff; }
+.footer-note { font-family: var(--font-mono); font-size: 0.72rem; color: #8294A8; max-width: 60ch; }
+
+/* ------------------------------ Scroll reveal ------------------------------ */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.is-visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ------------------------------ Focus visibility ------------------------------ */
+a:focus-visible, button:focus-visible, .btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+.section-contact a:focus-visible { outline-color: #fff; }
+
+/* ------------------------------ Responsive ------------------------------ */
+@media (max-width: 860px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .section-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+  .title-block { max-width: 420px; }
+
+  .nav-toggle { display: flex; }
+  .nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    padding: 0.5rem var(--gutter) 1rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+  }
+  .nav-menu.is-open { max-height: 420px; }
+  .nav-menu li { border-top: 1px solid var(--line); }
+  .nav-menu a { display: block; padding: 0.85rem 0; }
+  .nav-cta { border: 0; border-radius: 0; padding: 0.85rem 0; color: var(--accent); }
+}
+
+@media (max-width: 520px) {
+  .timeline-item { grid-template-columns: 1fr; gap: 0.35rem; }
+  .timeline-item.is-current::before { position: static; display: inline-block; margin-top: 0.4rem; }
+  .title-block-rows > div { grid-template-columns: 7rem 1fr; }
+  .hero-actions .btn, .contact-actions .btn { flex: 1 1 auto; }
+}
+
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============================= NAV ============================= -->
+  <header class="site-header" id="top">
+    <div class="wrap nav-wrap">
+      <a class="monogram" href="#top" aria-label="Fredrik Eriksson — home">
+        <span class="monogram-mark">FE</span>
+        <span class="monogram-name">Fredrik Eriksson</span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle navigation">
+          <span class="nav-toggle-bar"></span>
+          <span class="nav-toggle-bar"></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="#about">About</a></li>
+          <li><a href="#timeline">Career</a></li>
+          <li><a href="#strengths">Strengths</a></li>
+          <li><a href="#work">Case Studies</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#contact" class="nav-cta">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============================= HERO ============================= -->
+    <section class="hero" aria-labelledby="hero-name">
+      <div class="wrap hero-grid">
+        <div class="hero-lead">
+          <p class="eyebrow">Senior Software Engineer · Austin, TX Metro Area</p>
+          <h1 class="hero-name" id="hero-name">Fredrik&nbsp;Eriksson</h1>
+          <p class="hero-statement">
+            Senior Software Engineer focused on enterprise Salesforce platforms,
+            Java/Spring services, React applications, cloud deployment, and
+            technical leadership.
+          </p>
+
+          <div class="hero-actions">
+            <!-- PLACEHOLDER: drop your resume PDF at assets/resume.pdf -->
+            <a class="btn btn-primary" href="assets/resume.pdf" data-placeholder="resume">Resume</a>
+            <a class="btn" href="https://www.linkedin.com/in/eriksson-fredrik" target="_blank" rel="noopener">LinkedIn</a>
+            <!-- PLACEHOLDER: replace [your-username] with your real GitHub handle -->
+            <a class="btn" href="https://github.com/[your-username]" target="_blank" rel="noopener" data-placeholder="github">GitHub</a>
+            <a class="btn" href="mailto:eriksson.fredrik08@gmail.com">Email</a>
+          </div>
+        </div>
+
+        <!-- Signature: engineering "title block" -->
+        <aside class="title-block" aria-label="At a glance">
+          <p class="title-block-head">Profile / Title Block</p>
+          <dl class="title-block-rows">
+            <div><dt>Role</dt><dd>Senior Software Engineer</dd></div>
+            <div><dt>Domain</dt><dd>Group Insurance Technology</dd></div>
+            <div><dt>Focus</dt><dd>Salesforce · Java/Spring · Cloud</dd></div>
+            <div><dt>Leadership</dt><dd>Acting Tech&nbsp;Lead, ~1.5&nbsp;yrs</dd></div>
+            <div><dt>Scale</dt><dd>750+ commits · 6 repos · 120+ stories</dd></div>
+            <div><dt>Recognition</dt><dd>Exceptional Impact (top rating) · 3 yrs, 2023–2025</dd></div>
+            <div><dt>Location</dt><dd>Austin, TX Metro Area</dd></div>
+            <div><dt>Status</dt><dd>Open to senior roles</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================= ABOUT ============================= -->
+    <section class="section" id="about" aria-labelledby="about-h">
+      <div class="wrap section-grid">
+        <div class="section-head">
+          <p class="eyebrow">About</p>
+          <h2 id="about-h">From mechanical engineering to enterprise software ownership.</h2>
+        </div>
+        <div class="section-body about-body">
+          <p>
+            I started in mechanical engineering — project management, technical
+            drawings, and facility design — where I learned to break ambiguous
+            problems into precise, buildable specifications. After completing the
+            Dev10 software engineering program, I moved into software full-time
+            and joined Prudential Financial's Group Insurance technology
+            organization in 2022.
+          </p>
+          <p>
+            I joined as an Associate Software Engineer and was promoted to Senior
+            Software Engineer in 2024, working across enterprise Salesforce,
+            Java/Spring Boot services, React applications, and AWS deployment
+            architecture. In 2025 I began leading the enterprise Salesforce
+            platform team, and for roughly the last year and a half I've carried
+            acting Tech Lead-level responsibilities — contributing to design
+            decisions, reviewing pull requests, mentoring and onboarding junior
+            engineers, owning production releases, and translating business needs
+            into reliable technical plans.
+          </p>
+          <p>
+            That ownership has been recognized with Prudential's highest
+            performance rating, "Exceptional Impact," for three consecutive years
+            (2023–2025) across both business and leadership outcomes. I care about
+            shipping maintainable systems, raising code quality through reviews
+            and testing, being a dependable owner for the people and platforms I
+            support, and keeping production stable under enterprise reliability
+            standards.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= TIMELINE ============================= -->
+    <section class="section section-alt" id="timeline" aria-labelledby="timeline-h">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Career Timeline</p>
+          <h2 id="timeline-h">A steady progression from engineering foundation to senior ownership.</h2>
+        </div>
+
+        <ol class="timeline" aria-label="Career and education timeline">
+          <li class="timeline-item">
+            <p class="timeline-date">2017</p>
+            <div class="timeline-content">
+              <h3>A.S. Engineering Science — Passaic County Community College</h3>
+              <p>Engineering Science Highest Award (top graduating engineering student). GPA 3.8.</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <p class="timeline-date">2020</p>
+            <div class="timeline-content">
+              <h3>B.S. Mechanical Engineering — New Jersey Institute of Technology</h3>
+              <p>Cum Laude. GPA 3.6.</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <p class="timeline-date">2020 – 2021</p>
+            <div class="timeline-content">
+              <h3>Mechanical Engineer — WTEC</h3>
+              <p>Project management and design for a fabrication facility — AutoCAD mechanical drawings, cable simulations, specification sheets, and site planning.</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <p class="timeline-date">2022</p>
+            <div class="timeline-content">
+              <h3>Dev10 Software Engineering Program — Genesis10</h3>
+              <p>Full-stack training and a capstone application built with React, Spring Boot, and a SQL database on AWS.</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <p class="timeline-date">2022</p>
+            <div class="timeline-content">
+              <h3>Associate Software Engineer — Prudential Financial, Group Insurance Technology</h3>
+              <p>Joined the Group Insurance platform teams, building and supporting enterprise Salesforce and full-stack functionality.</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <p class="timeline-date">2024</p>
+            <div class="timeline-content">
+              <h3>Promoted to Senior Software Engineer</h3>
+              <p>Grew into senior-level ownership across enterprise Salesforce, Java/Spring Boot services, React applications, and AWS deployment — contributing to design decisions, code reviews, and mentoring.</p>
+            </div>
+          </li>
+          <li class="timeline-item is-current">
+            <p class="timeline-date">2025 – Present</p>
+            <div class="timeline-content">
+              <h3>Leading the enterprise Salesforce platform team — acting Tech Lead</h3>
+              <p>Began leading the enterprise Salesforce platform team, carrying acting Tech Lead-level responsibilities — design ownership, code reviews, mentoring and onboarding junior developers, release ownership, and production support.</p>
+            </div>
+          </li>
+        </ol>
+        <p class="footnote">Title progression reflects responsibilities held; "acting Tech Lead" denotes scope of ownership rather than an officially conferred title. Recognized with Prudential's highest performance rating, "Exceptional Impact," for 2023, 2024, and 2025.</p>
+      </div>
+    </section>
+
+    <!-- ============================= STRENGTHS ============================= -->
+    <section class="section" id="strengths" aria-labelledby="strengths-h">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Core Strengths</p>
+          <h2 id="strengths-h">Where I bring senior-level depth and ownership.</h2>
+        </div>
+
+        <ul class="card-grid strengths-grid">
+          <li class="card">
+            <h3>Salesforce Engineering</h3>
+            <p>Apex, LWC, OmniStudio (OmniScripts, FlexCards), SOQL, triggers, and async Apex for enterprise Group Insurance workflows — built and maintained for production reliability.</p>
+          </li>
+          <li class="card">
+            <h3>Backend — Java / Spring</h3>
+            <p>Spring Boot 3 and Java 21 REST APIs and backend services, Node/Express services, application integrations, database migrations, and data-backed services across SQL and NoSQL stores.</p>
+          </li>
+          <li class="card">
+            <h3>Enterprise Frontend</h3>
+            <p>React and TypeScript applications and Lightning Web Components with a focus on clear, accessible, maintainable interfaces.</p>
+          </li>
+          <li class="card">
+            <h3>Cloud &amp; CI/CD</h3>
+            <p>AWS ECS/Fargate, CloudFormation, Secrets Manager/SSM, and ALB deployments with Docker; secure access via OAuth2/OIDC/Azure AD; Jenkins, GitHub Actions, and Copado release pipelines.</p>
+          </li>
+          <li class="card">
+            <h3>Application Security</h3>
+            <p>Passwordless authentication, JWT/RS256 sessions, and OAuth2/OIDC; built to enterprise CIAM, DAST/pen-test requirements — addressing IDOR, CORS, and path-traversal risks.</p>
+          </li>
+          <li class="card">
+            <h3>AI-Assisted Automation</h3>
+            <p>Spring AI and AWS Bedrock integrations, plus multi-agent AI automation workflows for code review, documentation, and knowledge transfer.</p>
+          </li>
+          <li class="card">
+            <h3>Production Support</h3>
+            <p>Release coordination, hotfixes, defect triage, and data corrections under enterprise reliability and change-management standards.</p>
+          </li>
+          <li class="card">
+            <h3>Technical Leadership</h3>
+            <p>Acting Tech Lead-track ownership leading the enterprise Salesforce platform team — design contributions, code reviews, mentoring and onboarding junior developers, and business-to-technical translation across teams.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================= CASE STUDIES ============================= -->
+    <section class="section section-alt" id="work" aria-labelledby="work-h">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Selected Case Studies</p>
+          <h2 id="work-h">Selected highlights — sanitized for confidentiality.</h2>
+          <p class="section-intro">
+            These are representative, genericized examples of enterprise work.
+            Internal system names, proprietary logic, and employer artifacts are
+            deliberately omitted.
+          </p>
+        </div>
+
+        <div class="cases">
+          <!-- Case 1 -->
+          <article class="case">
+            <header class="case-head">
+              <h3>Enterprise Salesforce Platform Work</h3>
+              <ul class="tag-row" aria-label="Technologies">
+                <li>Apex</li><li>LWC</li><li>OmniScripts</li><li>FlexCards</li><li>SOQL</li><li>Batch / Queueable Apex</li><li>Salesforce Flows</li><li>ELK</li><li>Copado</li>
+              </ul>
+            </header>
+            <div class="case-body">
+              <div class="case-field"><p class="case-label">Overview</p><p>An enterprise Salesforce platform supporting Group Insurance business workflows, with ongoing feature development and production support.</p></div>
+              <div class="case-field"><p class="case-label">My Role</p><p>#1 contributor — 470+ commits over ~2 years — and now leading the platform team through feature delivery and production support, building features, optimizing data operations, reviewing code, and supporting weekly production releases.</p></div>
+              <div class="case-field"><p class="case-label">Contributions</p>
+                <ul class="case-list">
+                  <li>Built Apex classes, triggers, and test classes alongside LWC, OmniScripts, and FlexCards for business-facing workflows.</li>
+                  <li>Scaled the platform to support new product lines, extending the data model and workflows for additional business cases.</li>
+                  <li>Evaluated and prototyped platform capabilities — including Salesforce Flows and Canvas Apps — to resolve process bottlenecks.</li>
+                  <li>Implemented Batch Apex and Queueable Apex for high-volume processing, and tuned SOQL and heap usage for reliability.</li>
+                  <li>Built event-capture observability, piping platform events into Elasticsearch/ELK across lower environments for monitoring and debugging.</li>
+                  <li>Supported Copado deployments, release coordination, hotfixes, and data corrections; led the team through production support.</li>
+                  <li>Partnered with business stakeholders, QA, and product owners; reviewed pull requests for maintainability and test coverage.</li>
+                </ul>
+              </div>
+              <div class="case-field"><p class="case-label">What It Demonstrates</p><p>Depth in production Salesforce engineering and the discipline to deliver and support it under enterprise change-management standards.</p></div>
+              <p class="case-note">Confidentiality: described generically; no internal system names, data, or business logic disclosed.</p>
+            </div>
+          </article>
+
+          <!-- Case 2 -->
+          <article class="case">
+            <header class="case-head">
+              <h3>Internal AI Assistant</h3>
+              <ul class="tag-row" aria-label="Technologies">
+                <li>React</li><li>Spring AI / Spring Boot</li><li>AWS Bedrock</li><li>ECS/Fargate</li><li>ALB · OIDC / Azure AD</li><li>ELK</li><li>Jenkins</li>
+              </ul>
+            </header>
+            <div class="case-body">
+              <div class="case-field"><p class="case-label">Overview</p><p>A secure internal AI assistant that lets business users query enterprise information in natural language and get analysis of business data, backed by a managed large language model.</p></div>
+              <div class="case-field"><p class="case-label">My Role</p><p>Single largest contributor — 137 commits (63% of total) — across the React frontend, Spring AI/Spring Boot backend, and the AWS deployment and authentication flow.</p></div>
+              <div class="case-field"><p class="case-label">Contributions</p>
+                <ul class="case-list">
+                  <li>Built the React interface and Spring AI/Spring Boot backend integrating an AWS Bedrock (Claude) model.</li>
+                  <li>Connected search and logging via Elasticsearch/ELK for retrieval over enterprise data.</li>
+                  <li>Deployed on AWS ECS/Fargate behind an Application Load Balancer, with ALB OIDC / Azure AD authentication.</li>
+                  <li>Built multi-agent AI automation workflows supporting code review, documentation, and knowledge transfer.</li>
+                  <li>Supported Jenkins CI/CD and helped explain the security and architecture decisions in demos.</li>
+                </ul>
+              </div>
+              <div class="case-field"><p class="case-label">What It Demonstrates</p><p>Ability to deliver a secure, cloud-hosted AI application end to end — frontend, backend, model integration, and authentication.</p></div>
+              <p class="case-note">Confidentiality: no internal project names, data sources, screenshots, or diagrams included.</p>
+            </div>
+          </article>
+
+          <!-- Case 3 -->
+          <article class="case">
+            <header class="case-head">
+              <h3>Secure Client Onboarding Portal</h3>
+              <ul class="tag-row" aria-label="Technologies">
+                <li>Node/Express</li><li>React/TypeScript</li><li>Spring Boot/Java 21</li><li>PostgreSQL/Aurora</li><li>AWS ECS/Fargate</li><li>Passwordless auth</li><li>Microservices</li>
+              </ul>
+            </header>
+            <div class="case-body">
+              <div class="case-field"><p class="case-label">Overview</p><p>A greenfield client onboarding platform — an internal portal for configuring onboarding workflows paired with an external portal for client/user access, built as 3 integrated microservices.</p></div>
+              <div class="case-field"><p class="case-label">My Role</p><p>Led development of the greenfield platform — ~16,000 lines across 144 commits in under 5 weeks (Node/Express + React/TypeScript, Spring Boot/Java 21, PostgreSQL/Aurora on AWS ECS/Fargate).</p></div>
+              <div class="case-field"><p class="case-label">Contributions</p>
+                <ul class="case-list">
+                  <li>Designed and built 3 integrated microservices spanning the configuration UI, external access flows, and backend APIs.</li>
+                  <li>Implemented passwordless authentication (one-time link → email match → OTP → RS256-signed session) on a stateless, autoscaling topology built to enterprise CIAM and pen-test requirements.</li>
+                  <li>Deployed on AWS ECS/Fargate with PostgreSQL/Aurora, and handled database migrations and cloud architecture.</li>
+                </ul>
+              </div>
+              <div class="case-field"><p class="case-label">What It Demonstrates</p><p>Full-stack and cloud ownership of a greenfield system — delivering integrated microservices and security-aware authentication under enterprise reliability standards.</p></div>
+              <p class="case-note">Confidentiality: proprietary details and internal identifiers omitted.</p>
+            </div>
+          </article>
+
+          <!-- Case 4 -->
+          <article class="case">
+            <header class="case-head">
+              <h3>Production Support &amp; Release Ownership</h3>
+              <ul class="tag-row" aria-label="Practices">
+                <li>Copado</li><li>Release coordination</li><li>Hotfixes</li><li>Defect triage</li><li>Data corrections</li>
+              </ul>
+            </header>
+            <div class="case-body">
+              <div class="case-field"><p class="case-label">Overview</p><p>Ongoing ownership of production Salesforce releases and support for an enterprise platform on a recurring deployment cadence.</p></div>
+              <div class="case-field"><p class="case-label">My Role</p><p>A reliable point of ownership for releases, validation, and production issue resolution — leading the platform team through production support.</p></div>
+              <div class="case-field"><p class="case-label">Contributions</p>
+                <ul class="case-list">
+                  <li>Coordinated recurring Copado deployments and validated changes before and after release.</li>
+                  <li>Debugged production defects, delivered hotfixes, and supported data corrections.</li>
+                  <li>Mentored and onboarded junior developers, sharing release and support practices across the team.</li>
+                  <li>Worked within enterprise reliability, approval, and change-management standards.</li>
+                </ul>
+              </div>
+              <div class="case-field"><p class="case-label">What It Demonstrates</p><p>Senior-level dependability — keeping enterprise systems stable and releases predictable, and growing the team that supports them.</p></div>
+            </div>
+          </article>
+
+          <!-- Case 5 -->
+          <article class="case">
+            <header class="case-head">
+              <h3>Mechanical Engineering Foundation</h3>
+              <ul class="tag-row" aria-label="Background">
+                <li>Project management</li><li>AutoCAD</li><li>Technical design</li><li>Facility planning</li><li>Analytical problem solving</li>
+              </ul>
+            </header>
+            <div class="case-body">
+              <div class="case-field"><p class="case-label">Overview</p><p>A mechanical engineering background that grounds my approach to software — precision, documentation, and systems thinking.</p></div>
+              <div class="case-field"><p class="case-label">Contributions</p>
+                <ul class="case-list">
+                  <li>Managed design work for a fabrication facility, including technical drawings and site planning.</li>
+                  <li>Produced specification-grade documentation and analytical reports.</li>
+                  <li>Transitioned into software engineering through the Dev10 program.</li>
+                </ul>
+              </div>
+              <div class="case-field"><p class="case-label">What It Demonstrates</p><p>A disciplined, specification-first mindset and the adaptability to retrain and grow quickly into enterprise software.</p></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= SKILLS ============================= -->
+    <section class="section" id="skills" aria-labelledby="skills-h">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Skills Matrix</p>
+          <h2 id="skills-h">Tools and practices I work in regularly.</h2>
+        </div>
+
+        <div class="skills-grid">
+          <div class="skill-group">
+            <h3>Salesforce</h3>
+            <ul class="chip-list">
+              <li>Apex</li><li>Apex Triggers</li><li>Test Classes</li><li>SOQL</li><li>Salesforce Data Model</li><li>LWC</li><li>OmniStudio</li><li>OmniScripts</li><li>FlexCards</li><li>Batch Apex</li><li>Queueable Apex</li><li>Async Apex</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <h3>Backend</h3>
+            <ul class="chip-list">
+              <li>Java 21</li><li>Spring Boot 3</li><li>Spring AI</li><li>Node / Express</li><li>REST APIs</li><li>Microservices</li><li>Application Integrations</li><li>SQL</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <h3>Frontend</h3>
+            <ul class="chip-list">
+              <li>React</li><li>TypeScript</li><li>JavaScript</li><li>HTML</li><li>CSS</li><li>Lightning Web Components</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <h3>Cloud &amp; DevOps</h3>
+            <ul class="chip-list">
+              <li>AWS ECS/Fargate</li><li>CloudFormation</li><li>Secrets Manager / SSM</li><li>Application Load Balancer</li><li>Docker</li><li>AWS Bedrock</li><li>Jenkins</li><li>GitHub Actions</li><li>Copado</li><li>CI/CD</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <h3>Security</h3>
+            <ul class="chip-list">
+              <li>OAuth2 / OIDC</li><li>Azure AD</li><li>JWT / RS256</li><li>Passwordless / OTP</li><li>CIAM</li><li>DAST / pen-test</li><li>IDOR / CORS / path-traversal</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <h3>Data</h3>
+            <ul class="chip-list">
+              <li>PostgreSQL / Aurora</li><li>DynamoDB</li><li>Database Migrations</li><li>SOQL</li><li>Elasticsearch / ELK</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <h3>Tools &amp; Practices</h3>
+            <ul class="chip-list">
+              <li>Git</li><li>Jira</li><li>Agile / Scrum</li><li>Code Reviews</li><li>Production Support</li><li>Release Management</li><li>SonarCloud</li><li>Mentoring</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= LEADERSHIP ============================= -->
+    <section class="section section-alt" id="leadership" aria-labelledby="leadership-h">
+      <div class="wrap section-grid">
+        <div class="section-head">
+          <p class="eyebrow">Leadership &amp; Ownership</p>
+          <h2 id="leadership-h">Senior responsibilities, honestly scoped.</h2>
+          <p class="section-intro">Acting Tech Lead-track contributions across two teams — leadership demonstrated through ownership, not title, and recognized with Prudential's highest performance rating, "Exceptional Impact," for three consecutive years (2023–2025) on both business and leadership outcomes.</p>
+        </div>
+        <div class="section-body">
+          <ul class="ownership-list">
+            <li><strong>Team leadership</strong> — leading the enterprise Salesforce platform team through delivery and production support.</li>
+            <li><strong>Mentoring</strong> — mentoring and onboarding junior developers.</li>
+            <li><strong>Code reviews</strong> — reviewing pull requests for quality, test coverage, and maintainability.</li>
+            <li><strong>Release coordination</strong> — owning deployments and validation across recurring releases.</li>
+            <li><strong>Production support</strong> — triaging defects and delivering hotfixes under reliability standards.</li>
+            <li><strong>Cross-team communication</strong> — coordinating work across business and technical groups.</li>
+            <li><strong>Business-to-technical translation</strong> — turning stakeholder needs into reliable technical plans.</li>
+            <li><strong>Design discussions</strong> — contributing to architecture and design decisions.</li>
+            <li><strong>Engineering standards</strong> — helping raise code quality and consistency across teams.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= AWARDS / EDUCATION ============================= -->
+    <section class="section" id="education" aria-labelledby="education-h">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Awards &amp; Education</p>
+          <h2 id="education-h">Credentials and recognition.</h2>
+        </div>
+        <ul class="card-grid edu-grid">
+          <li class="card edu-card">
+            <p class="edu-meta">2023–2025 · Top rating</p>
+            <h3>Exceptional Impact — Prudential Financial</h3>
+            <p>Prudential's highest performance rating, earned three consecutive years across both business and leadership outcomes.</p>
+          </li>
+          <li class="card edu-card">
+            <p class="edu-meta">2022</p>
+            <h3>Dev10 Software Engineering Program</h3>
+            <p>Genesis10 — full-stack software engineering training and capstone.</p>
+          </li>
+          <li class="card edu-card">
+            <p class="edu-meta">2020 · Cum Laude</p>
+            <h3>B.S. Mechanical Engineering</h3>
+            <p>New Jersey Institute of Technology — GPA 3.6, Cum Laude.</p>
+          </li>
+          <li class="card edu-card">
+            <p class="edu-meta">2017 · Highest Award</p>
+            <h3>A.S. Engineering Science</h3>
+            <p>Passaic County Community College — GPA 3.8, Engineering Science Highest Award (top graduating engineering student).</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================= CONTACT ============================= -->
+    <section class="section section-contact" id="contact" aria-labelledby="contact-h">
+      <div class="wrap contact-wrap">
+        <p class="eyebrow eyebrow-light">Contact</p>
+        <h2 id="contact-h">Let's talk about senior engineering roles.</h2>
+        <p class="contact-intro">
+          Open to Senior Software Engineer, Salesforce Engineer, Backend, Full
+          Stack, Cloud/Application Engineer, and Tech Lead-track opportunities.
+        </p>
+        <div class="contact-actions">
+          <a class="btn btn-light" href="mailto:eriksson.fredrik08@gmail.com">eriksson.fredrik08@gmail.com</a>
+          <a class="btn btn-ghost-light" href="https://www.linkedin.com/in/eriksson-fredrik" target="_blank" rel="noopener">LinkedIn</a>
+          <!-- PLACEHOLDER: replace [your-username] -->
+          <a class="btn btn-ghost-light" href="https://github.com/[your-username]" target="_blank" rel="noopener" data-placeholder="github">GitHub</a>
+          <!-- PLACEHOLDER: drop your resume PDF at assets/resume.pdf -->
+          <a class="btn btn-ghost-light" href="assets/resume.pdf" data-placeholder="resume">Download Resume</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-wrap">
+      <p class="footer-name">Fredrik Eriksson</p>
+      <p class="footer-note">Senior Software Engineer · Austin, TX Metro Area. Built as a static site — no employer-confidential content.</p>
+    </div>
+  </footer>
+
+  <script>
+/* Progressive enhancement only — the site is fully readable without JS.
+   Three small behaviors: mobile nav toggle, scroll-reveal, active nav link. */
+(function () {
+  "use strict";
+
+  /* ---- Mobile nav toggle ---- */
+  var toggle = document.querySelector(".nav-toggle");
+  var menu = document.getElementById("nav-menu");
+
+  if (toggle && menu) {
+    toggle.addEventListener("click", function () {
+      var open = menu.classList.toggle("is-open");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+
+    // Close the menu after following an in-page link (mobile).
+    menu.addEventListener("click", function (e) {
+      if (e.target.tagName === "A" && menu.classList.contains("is-open")) {
+        menu.classList.remove("is-open");
+        toggle.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  var reduceMotion =
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- Scroll reveal ---- */
+  var revealTargets = document.querySelectorAll(
+    ".section-head, .card, .case, .timeline-item, .skill-group, .title-block"
+  );
+
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    // No animation: just show everything.
+    revealTargets.forEach(function (el) {
+      el.classList.add("is-visible");
+    });
+  } else {
+    revealTargets.forEach(function (el) {
+      el.classList.add("reveal");
+    });
+    var revealObserver = new IntersectionObserver(
+      function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.1 }
+    );
+    revealTargets.forEach(function (el) {
+      revealObserver.observe(el);
+    });
+  }
+
+  /* ---- Active nav link on scroll ---- */
+  var navLinks = Array.prototype.slice.call(
+    document.querySelectorAll(".nav-menu a[href^='#']")
+  );
+  var sections = navLinks
+    .map(function (link) {
+      return document.querySelector(link.getAttribute("href"));
+    })
+    .filter(Boolean);
+
+  if (sections.length && "IntersectionObserver" in window) {
+    var navObserver = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            navLinks.forEach(function (l) {
+              l.classList.toggle(
+                "is-active",
+                l.getAttribute("href") === "#" + entry.target.id
+              );
+            });
+          }
+        });
+      },
+      { rootMargin: "-45% 0px -50% 0px", threshold: 0 }
+    );
+    sections.forEach(function (s) {
+      navObserver.observe(s);
+    });
+  }
+})();
+
+  </script>
+</body>
+</html>

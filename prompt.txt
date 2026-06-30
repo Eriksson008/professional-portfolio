@@ -1,0 +1,385 @@
+You are an expert frontend engineer, GitHub Pages developer, technical portfolio strategist, and senior software engineering career coach.
+
+Build me a polished professional portfolio website as a side project that supports my resume and job search.
+
+This should be a clean, credible, enterprise-friendly portfolio — not a flashy influencer website. It should make me look like a strong Senior Software Engineer with enterprise software experience, Salesforce depth, backend Java/Spring experience, React/AWS exposure, CI/CD/release ownership, production support experience, and credible Tech Lead-track responsibilities.
+
+Primary goal:
+Create a GitHub Pages-ready professional portfolio that helps recruiters, HR departments, hiring managers, and technical interviewers quickly understand:
+
+* who I am professionally,
+* how my career progressed,
+* what technologies I have used,
+* what kinds of enterprise projects I have contributed to,
+* where I show senior-level ownership,
+* and why I am marketable for Senior Software Engineer, Salesforce Engineer, Backend Engineer, Full Stack Engineer, Cloud/Application Engineer, and Tech Lead-track roles.
+
+Model my positioning honestly:
+
+* Do not call me an official Tech Lead unless I explicitly add that title later.
+* Use phrasing like “acting Tech Lead responsibilities,” “senior engineering ownership,” “technical leadership contributions,” and “Tech Lead-track experience.”
+* Do not oversell me as Staff/Principal.
+* Do not undersell me as only a Salesforce developer.
+* Position me as a Salesforce-heavy Senior Software Engineer who has grown into broader backend, cloud, CI/CD, AI, and leadership work.
+
+My background:
+
+* Name: Fredrik Eriksson.
+* Location: Austin, TX Metro Area.
+* Current/most recent role: Senior Software Engineer at Prudential Financial, Group Insurance technology.
+* Started at Prudential in May 2022 as Software Engineer.
+* Grew into Senior Software Engineer responsibilities and acting Tech Lead-level responsibilities.
+* I have worked across enterprise Salesforce, Java/Spring Boot services, React applications, AWS deployment architecture, CI/CD, production support, release coordination, code reviews, and mentoring.
+* Prior role: Mechanical Engineer at WTEC from February 2020 to November 2021.
+* Education:
+
+  * Dev10 Software Bootcamp / Genesis10, April 2022.
+  * B.S. Mechanical Engineering, NJIT, May 2020, GPA 3.6, Cum Laude.
+  * A.S. Engineering Science, Passaic County Community College, May 2017, GPA 3.8, Engineering Science Highest Award / top graduating engineering student.
+
+Technical skills to represent:
+Salesforce:
+
+* Apex
+* Apex classes
+* Apex triggers
+* Apex test classes
+* SOQL
+* Salesforce data model
+* Lightning Web Components / LWCs
+* OmniStudio
+* OmniScripts
+* FlexCards
+* Batch Apex
+* Queueable Apex
+* Async Apex patterns
+* Salesforce production support
+* Salesforce data fixes
+* Copado deployments
+* Release coordination
+* Debugging
+* Test coverage
+* Code reviews
+
+Backend:
+
+* Java
+* Spring Boot
+* REST APIs
+* SQL
+* PostgreSQL/Aurora exposure
+* DynamoDB
+* Application integrations
+
+Frontend:
+
+* React
+* JavaScript
+* HTML
+* CSS
+* Lightning Web Components
+
+Cloud / DevOps / Platform:
+
+* AWS ECS/Fargate
+* CloudFormation
+* Application Load Balancer
+* OIDC / Azure AD authentication
+* AWS Bedrock / Claude
+* ELK
+* Jenkins
+* GitHub Actions
+* CI/CD
+* Deployment coordination
+* Blue/green deployment concepts
+
+Engineering process:
+
+* Git
+* Jira
+* Agile/Scrum
+* Code reviews
+* Production support
+* Release management
+* SonarCloud
+* Cross-functional collaboration
+* Mentoring
+* Business-to-technical translation
+
+Projects/case studies to include, sanitized and professional:
+
+1. Enterprise Salesforce Platform Work
+   Use this as one of the strongest case studies.
+   Describe it generically without confidential system names.
+   Focus on:
+
+* Apex, LWC, OmniScripts, FlexCards, SOQL, triggers, test classes.
+* Batch Apex and Queueable Apex.
+* Salesforce production support.
+* Copado deployments.
+* Release coordination.
+* Data fixes and hotfix support.
+* Working with business stakeholders, QA, product owners, and engineers.
+* Code reviews and maintainability.
+
+2. Internal AI Assistant / Enterprise AI Application
+   Describe generically.
+   Focus on:
+
+* React frontend.
+* Spring AI / Spring Boot backend.
+* AWS Bedrock / Claude model integration.
+* AWS ECS/Fargate deployment.
+* Application Load Balancer.
+* OIDC / Azure AD authentication.
+* ELK/search/logging integration.
+* Jenkins CI/CD.
+* Secure internal enterprise application concepts.
+  Do not expose confidential internal project names, data names, screenshots, or diagrams.
+
+3. Secure Client Onboarding Portal
+   Describe generically.
+   Focus on:
+
+* Internal portal for configuration workflows.
+* External portal/client access.
+* Email OTP verification.
+* Session-based access.
+* 15-minute idle timeout.
+* Silent refresh/session renewal concepts.
+* Backend APIs.
+* Security-aware design.
+* React/Spring Boot/cloud architecture discussions.
+  Keep proprietary details out.
+
+4. Production Support & Release Ownership
+   This can be a section or case study.
+   Focus on:
+
+* Weekly/repeated deployment support.
+* Copado.
+* Hotfixes.
+* Debugging production defects.
+* Coordinating validation.
+* Supporting data corrections.
+* Working under enterprise reliability standards.
+
+5. Mechanical Engineering to Software Engineering
+   Use this as a career story section, not a huge case study.
+   Focus on:
+
+* Engineering foundation.
+* Project management.
+* Technical drawings/design.
+* Facility planning.
+* Analytical problem solving.
+* Transition through Dev10 into software engineering.
+
+Website requirements:
+
+* Static site.
+* GitHub Pages ready.
+* Use plain HTML, CSS, and minimal JavaScript.
+* No React build step unless there is a very strong reason.
+* No heavy frameworks.
+* Fast loading.
+* Mobile responsive.
+* Accessible.
+* Clean semantic HTML.
+* Conservative enterprise-friendly design.
+* One-page site preferred, with optional separate case-study pages only if it materially improves clarity.
+* No stock images.
+* No gimmicky animations.
+* No icons unless lightweight and professional.
+* No tables for layout.
+* No confidential screenshots or work artifacts.
+* No fake metrics.
+* Use placeholder metrics only where clearly marked.
+
+Design direction:
+
+* Premium but understated.
+* Modern executive/technical style.
+* Neutral palette: off-white, cream, charcoal, muted navy, slate, soft gray, subtle accent.
+* Strong typography.
+* Good whitespace, but not empty or sparse.
+* Cards for case studies.
+* Timeline for career progression.
+* Skills grouped into clean categories.
+* Clear call-to-action buttons.
+* Polished enough to link on a resume.
+
+Site sections:
+
+1. Hero
+
+   * Fredrik Eriksson
+   * Senior Software Engineer
+   * Austin, TX Metro Area
+   * Positioning line:
+     “Senior Software Engineer focused on enterprise Salesforce platforms, Java/Spring services, React applications, cloud deployment, and technical leadership.”
+   * Buttons:
+     Resume
+     LinkedIn
+     GitHub
+     Email
+
+2. About
+
+   * Brief professional story.
+   * Mechanical engineering foundation.
+   * Transition to software.
+   * Growth into enterprise Senior Software Engineer.
+   * Production ownership and technical leadership contributions.
+
+3. Career Timeline
+   Include:
+
+   * A.S. Engineering Science, PCCC — Highest Award / top engineering student.
+   * B.S. Mechanical Engineering, NJIT — Cum Laude.
+   * Mechanical Engineer, WTEC.
+   * Dev10 Software Bootcamp.
+   * Software Engineer, Prudential Financial.
+   * Senior Software Engineer responsibilities at Prudential.
+   * Acting Tech Lead-level responsibilities.
+
+4. Core Strengths
+   Include cards for:
+
+   * Salesforce Engineering
+   * Backend Java/Spring
+   * Enterprise Frontend
+   * Cloud & CI/CD
+   * Production Support
+   * Technical Leadership
+
+5. Selected Case Studies
+   Create cards or sections for:
+
+   * Enterprise Salesforce Platform Work
+   * Internal AI Assistant
+   * Secure Client Onboarding Portal
+   * Production Support & Release Ownership
+   * Mechanical Engineering Foundation
+
+For each case study, include:
+
+* Overview
+* My Role
+* Technologies
+* Contributions
+* What It Demonstrates
+* Confidentiality-safe note where appropriate
+
+6. Skills Matrix
+   Group into:
+
+   * Salesforce
+   * Backend
+   * Frontend
+   * Cloud & DevOps
+   * Data
+   * Tools & Practices
+     Avoid keyword stuffing, but include relevant ATS/search terms naturally.
+
+7. Leadership & Ownership
+   Include:
+
+   * Mentoring
+   * PR/code reviews
+   * Release coordination
+   * Production support
+   * Cross-team communication
+   * Business-to-technical translation
+   * Helping onboard other engineers
+   * Supporting architecture/design discussions
+
+8. Awards & Education
+   Include:
+
+   * Cum Laude
+   * Engineering Science Highest Award
+   * Dev10
+   * Degrees
+
+9. Contact
+   Include:
+
+   * Email placeholder: [eriksson.fredrik08@gmail.com](mailto:eriksson.fredrik08@gmail.com)
+   * LinkedIn placeholder
+   * GitHub placeholder
+   * Resume download placeholder
+
+Files to create:
+
+* index.html
+* styles.css
+* script.js only if necessary
+* README.md
+* /assets folder
+* /assets/resume.pdf placeholder or instructions
+* Optional: /case-studies folder if you choose separate pages
+* Optional: /docs folder if you recommend serving GitHub Pages from docs
+
+README requirements:
+
+* Explain what the portfolio is.
+* Explain how to run locally.
+* Explain how to deploy on GitHub Pages.
+* Explain how to update contact links.
+* Explain how to replace the resume PDF.
+* Explain how to edit case studies.
+* Include a confidentiality checklist before publishing.
+* Include suggested repo description and topics.
+
+Confidentiality and safety rules:
+
+* Do not include internal Prudential project names.
+* Do not include internal system names unless genericized.
+* Do not include screenshots from employer systems.
+* Do not include private review content.
+* Do not include proprietary business logic.
+* Do not include architecture diagrams showing internal networks/systems.
+* Use generic labels like:
+
+  * “enterprise Salesforce platform”
+  * “internal AI assistant”
+  * “secure client onboarding portal”
+  * “Group Insurance workflows”
+  * “production Salesforce releases”
+  * “enterprise application support”
+
+Content style:
+
+* Professional, confident, grounded.
+* No hype.
+* No “rockstar,” “ninja,” “guru,” “visionary,” or “10x engineer.”
+* Use language that would be believable in an interview.
+* Use “contributed to,” “supported,” “implemented,” “maintained,” “coordinated,” “reviewed,” “partnered with,” and “helped design” where accurate.
+* Use “selected highlights” instead of pretending to show every project.
+
+Deliverables:
+
+1. Generate the complete website code.
+2. Generate the README.
+3. Give me a short publishing checklist.
+4. Recommend a repo name.
+5. Recommend a GitHub repo description.
+6. Recommend GitHub topics/tags.
+7. Recommend where to place the portfolio link on my resume.
+8. Recommend what should be linked on LinkedIn.
+9. Clearly mark any placeholders I need to update.
+10. Explain any design decisions briefly.
+
+Suggested repo names:
+
+* fredrik-eriksson-portfolio
+* professional-portfolio
+* engineering-portfolio
+* fredrik-portfolio
+
+Suggested repo description:
+“Professional portfolio for Fredrik Eriksson, a Senior Software Engineer focused on enterprise Salesforce platforms, Java/Spring services, React applications, cloud deployment, and technical leadership.”
+
+Final goal:
+Build a polished GitHub Pages portfolio that strengthens my job applications by showing my professional progression, enterprise engineering experience, Salesforce depth, broader software engineering skills, production ownership, and leadership trajectory — while staying honest, conservative, and safe from confidentiality issues.
