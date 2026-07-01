@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file should stay aligned with CLAUDE.md so Codex and Claude Code follow the same project workflow.
+This file must stay aligned with CLAUDE.md so Codex and Claude Code follow the same project workflow. When editing this file, update CLAUDE.md in the same change.
 
 Guidance for Codex working in this repo.
 
