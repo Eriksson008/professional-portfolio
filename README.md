@@ -35,6 +35,48 @@ npm run lint         # ESLint
 npm run format       # Prettier
 ```
 
+## Cinematic scroll hero
+
+The landing page opens with a **scroll-driven cinematic hero** (`src/components/ScrollHero.tsx`).
+A tall section pins a full-screen viewport while scroll progress cross-fades **nine cinematic
+frames** and their synchronized HTML text stages — a matte "system vault" opens, components rise,
+architecture connects, a dashboard assembles, and it closes on the identity card (name + tagline +
+**View Projects** / **Read Experience**).
+
+How it works:
+
+- **Progress → narrative.** `src/hooks/useScrollProgress.ts` reports scroll progress `0..1` for the
+  pinned section (rAF-throttled, passive listeners). The component maps that to a position along the
+  nine stages and cross-fades the frames (`opacity = 1 − |pos − i|`), with a short "hold" band so the
+  opening and closing stages stay fully readable.
+- **Real text, not the imagery.** The frames are **decorative background layers only**. Every
+  readable word is HTML, driven by two data arrays: `src/data/heroStages.ts` (the nine stages) and
+  `src/data/heroSystems.ts` (the six professional-area cards). The frames' own baked-in text is
+  reference — a left-weighted scrim keeps it from competing with the overlay.
+- **Accessibility / fallback.** Under `prefers-reduced-motion` (or no JS), a **static hero** renders
+  the destination directly — final identity + CTAs + the system cards as a real grid, no
+  scroll-jacking. The name is a real `<h1>`; CTAs are real, keyboard-focusable links.
+- **Responsive.** Desktop gets the full experience; narrower widths veil the frame more evenly so it
+  reads as an atmospheric backdrop with a shorter scroll.
+
+### Hero frames — where they live and how to replace them
+
+| Location | Contents | Deployed? |
+| --- | --- | --- |
+| `assets/hero-sequence/` | Source **PNG** frames (`frame-01…09-*.png`) | No (kept in-repo as source) |
+| `public/hero-sequence/` | Optimized **WebP** frames the site actually loads | Yes |
+
+To replace or add frames: drop new PNGs into `assets/hero-sequence/` (keep the `frame-NN-*.png`
+naming so ordering is stable), update the filenames/copy in `src/data/heroStages.ts`, then run:
+
+```bash
+npm run frames      # PNG (assets/) → optimized WebP (public/) via sharp
+```
+
+`sharp` is a **dev-only** dependency used solely by this script — it never ships in the site bundle.
+The nine frames total ~0.4 MB of WebP (down from ~8.4 MB of PNG); frame 1 is preloaded in
+`index.html` so the sequence paints immediately.
+
 ## Docker
 
 The container serves the production build via nginx on **port 8790** by default, published to
@@ -101,15 +143,18 @@ host that serves at the domain root, build with the default base (`npm run build
 
 ```
 professional-portfolio/
-├── index.html              # Vite entry + SEO / OpenGraph / JSON-LD metadata
+├── index.html              # Vite entry + SEO / OpenGraph / JSON-LD metadata + frame-1 preload
 ├── .github/workflows/      # deploy.yml — build + publish to GitHub Pages on push to main
 ├── src/
 │   ├── main.tsx, App.tsx
-│   ├── data/               # profile, experience, skills, projects, highlights (typed content)
-│   ├── components/         # Nav, Hero, About, Experience, Highlights, Projects, Skills, …
-│   ├── hooks/useReveal.ts  # reduced-motion-aware scroll reveal
-│   └── styles/             # tokens.css + app.css (design system)
+│   ├── data/               # profile, experience, skills, projects, highlights + heroStages, heroSystems
+│   ├── components/         # Nav, ScrollHero, About, Experience, Highlights, Projects, Skills, …
+│   ├── hooks/              # useReveal.ts, useScrollProgress.ts (both reduced-motion-aware)
+│   └── styles/             # tokens.css + app.css + scroll-hero.css (design system)
+├── public/hero-sequence/   # optimized WebP hero frames (deployed)
 ├── public/                 # resume.pdf, favicon.svg, og-image.png, .nojekyll
+├── assets/hero-sequence/   # SOURCE PNG frames (not deployed); assets/references/ (storyboard)
+├── scripts/optimize-frames.mjs  # PNG → WebP (run via `npm run frames`, dev-only sharp)
 ├── Dockerfile              # multi-stage node build → nginx
 ├── nginx.conf              # listens on ${PORT}; SPA fallback; gzip; security headers
 ├── docker-compose.yml      # BIND_ADDR + PORT configurable host mapping (see .env.example)

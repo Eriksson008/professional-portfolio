@@ -52,6 +52,20 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-01 — Scroll-driven cinematic hero (branch `redesign-scroll-hero`).** Replaced the
+  static "engineering title-block" hero with a premium, scroll-driven hero built on a red/gold/black
+  "system-vault" image sequence (nine frames). A tall section pins a full-screen viewport while
+  scroll progress cross-fades the frames and synchronized **HTML** text stages, closing on the
+  identity card (name + tagline + View Projects / Read Experience). Key choices: (1) frames are
+  decorative background only — all real content is HTML overlays driven by data arrays
+  (`src/data/heroStages.ts`, `heroSystems.ts`), with a left-weighted scrim hiding the frames'
+  baked-in text; (2) `prefers-reduced-motion` / no-JS renders a **static** destination hero (no
+  scroll-jacking); (3) frames optimized to WebP (~8.4 MB PNG → ~0.4 MB) via a dev-only
+  `scripts/optimize-frames.mjs` (`npm run frames`), PNG sources kept in `assets/hero-sequence/`
+  (not deployed). New files: `components/ScrollHero.tsx`, `hooks/useScrollProgress.ts`,
+  `styles/scroll-hero.css`. Old `Hero.tsx` retired. Design spec:
+  `docs/superpowers/specs/2026-07-01-scroll-hero-design.md`. Introduces a hero-scoped red accent
+  (`--sh-red`) alongside the existing brass; the rest of the token system is unchanged.
 - **2026-06-30 — Standardized to the app-family port + safe-by-default binding.** Host/dev/preview
   and the container now all use **port 8790** (this app's family port; was 8789, which collided
   with `our-story`). `docker-compose.yml` now publishes via `${BIND_ADDR:-127.0.0.1}:${PORT:-8790}:8790`,
