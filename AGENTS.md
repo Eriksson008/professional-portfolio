@@ -41,7 +41,7 @@ too**; keep the two in sync when a shared fact changes.
 - Style with the existing CSS tokens (`src/styles/tokens.css`); don't introduce new color/spacing
   values ad hoc. Watch selector specificity in `src/styles/app.css`.
 - Accessibility floor: semantic HTML, visible keyboard focus, `prefers-reduced-motion` respected.
-- Run `npm run lint` and `npm run build` before claiming work is done.
+- Run `npm run lint` and `npm run build` before claiming code or build-affecting work is done.
 
 ## Privacy & public-safe content rules
 
@@ -89,7 +89,7 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
 
 1. Update this repo's `PROJECT_CONTEXT.md`.
 2. Update the matching second-brain note (`../second-brain/02-Projects/Professional-Portfolio/README.md`).
-3. Run `npm run lint` and `npm run build`.
+3. Run `npm run lint` and `npm run build` if code, content, build config, or assets changed.
 4. Show git status for both this repo and `../second-brain`.
 5. If explicitly asked to commit/push, commit and push both repos with clear messages.
 
