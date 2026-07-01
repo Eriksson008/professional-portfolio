@@ -13,12 +13,34 @@ const sections = [
 export function Nav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState('');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Scroll-spy: highlight the nav link for the section currently in view.
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return;
+    const targets = sections
+      .map((s) => document.getElementById(s.id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (targets.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActive(visible.target.id);
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
+    );
+    targets.forEach((t) => observer.observe(t));
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -42,7 +64,13 @@ export function Nav() {
 
         <nav id="nav-menu" className={`nav-menu ${open ? 'is-open' : ''}`} aria-label="Primary">
           {sections.map((s) => (
-            <a key={s.id} href={`#${s.id}`} onClick={() => setOpen(false)}>
+            <a
+              key={s.id}
+              href={`#${s.id}`}
+              className={active === s.id ? 'is-active' : ''}
+              aria-current={active === s.id ? 'true' : undefined}
+              onClick={() => setOpen(false)}
+            >
               {s.label}
             </a>
           ))}

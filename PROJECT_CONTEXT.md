@@ -12,9 +12,14 @@ advertises, so it doubles as a work sample.
 Active. As of 2026-06-30 the site was **rebuilt from a no-build static site into a Vite + React +
 TypeScript app** and **Dockerized** (multi-stage build → nginx, port 8790). Content is migrated
 into typed data modules and reflects the same git-verifiable metrics and sanitized case studies
-as the résumé. Standalone Git repo on the **private** GitHub repo
-`Eriksson008/professional-portfolio` (branch `main`). Publishing via GitHub Pages is not yet
-decided.
+as the résumé. Standalone Git repo `Eriksson008/professional-portfolio` (branch `main`).
+
+**2026-06-30 — Publishing via GitHub Pages (decided).** A GitHub Actions workflow
+(`.github/workflows/deploy.yml`) builds and deploys to Pages on every push to `main`. Going
+**public** to enable free Pages (user approved exposing the git-verifiable metrics, which were
+already sanitized/public-safe by design). Live at
+https://eriksson008.github.io/professional-portfolio/ once the repo is public and Pages source
+is set to "GitHub Actions".
 
 ## Tech Stack
 
@@ -35,12 +40,15 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Deployment / Access
 
-- Static `dist/` deploys to any static host (GitHub Pages, Netlify, S3/CloudFront, nginx);
-  `public/.nojekyll` included. Or run the Docker container anywhere (LAN / Tailscale reachable).
-- GitHub repo `Eriksson008/professional-portfolio` is currently **private**; Pages needs GitHub
-  Pro or making the repo public — decision pending.
-- A public site is more exposed than a one-recruiter résumé — confirm before publishing the raw
-  git-verifiable metrics.
+- **GitHub Pages (primary):** GitHub Actions builds with `VITE_BASE=/professional-portfolio/`
+  and publishes `dist/` on push to `main`. Live at
+  https://eriksson008.github.io/professional-portfolio/. One-time repo setup: make public +
+  Settings → Pages → Source = "GitHub Actions".
+- Base path is env-driven: Pages uses `/professional-portfolio/`; local/dev/Docker default to
+  `/`. Runtime asset paths use `import.meta.env.BASE_URL`. Anchor-only nav → no 404 fallback
+  needed.
+- Also runs as the Docker container anywhere (LAN / Tailscale reachable); `dist/` deploys to any
+  static host (Netlify, S3/CloudFront, nginx). `public/.nojekyll` included.
 
 ## Important Decisions
 
@@ -70,10 +78,12 @@ site exposes only honest, defensible, public-safe content.
 
 ## Current Next Actions
 
+- **Finish going live:** make the GitHub repo public and set Settings → Pages → Source =
+  "GitHub Actions" (the workflow handles the rest on push to `main`).
+- After first deploy, verify the live site: asset paths, résumé download, and the OG preview
+  (paste the URL into LinkedIn Post Inspector / X card validator).
 - Keep the site coherent with the résumé whenever a shared fact changes.
 - Keep tone conservative and enterprise-friendly; metrics git-verifiable only.
-- **Decide GitHub Pages publishing** (private + Pro, or make public). Tracked in `CLAUDE.md`.
-- Confirm the raw git-verifiable metrics are OK to expose publicly *before* publishing.
 
 ## Second Brain Sync
 

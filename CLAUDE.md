@@ -68,13 +68,16 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
 
 ## TODO / open decisions
 
-- [ ] **Publish via GitHub Pages — decision pending (user, 2026-06-30: "not yet").** Repo is
-  **private**; Pages on a private repo needs GitHub Pro, otherwise make it public. Decide
-  public-vs-private before enabling Pages. (Static `dist/` also deploys to any static host.)
-- [ ] **Before publishing publicly, confirm the raw git-verifiable metrics are OK to expose** —
-  a public site is more exposed than a one-recruiter résumé.
+- [ ] **Finish going live (manual, in GitHub UI):** make the repo **public**, then Settings →
+  Pages → Source = **"GitHub Actions"**. The `deploy.yml` workflow then builds + publishes on
+  every push to `main`. Live at https://eriksson008.github.io/professional-portfolio/.
+- [ ] **After first deploy, sanity-check the live site:** asset paths, résumé download, and the
+  OG social preview (LinkedIn Post Inspector / X card validator).
 
 ### Done
+- [x] **GitHub Pages deployment configured (user approved going public) — 2026-06-30.** Actions
+  workflow `deploy.yml`; env-driven Vite base (`/professional-portfolio/` on Pages, `/`
+  elsewhere); SEO/OpenGraph/JSON-LD metadata + `public/og-image.png`; typography/spacing polish.
 - [x] Rebuilt as Vite + React + TypeScript and Dockerized (nginx, port 8790) — 2026-06-30.
 - [x] Standardized to family port 8790 (was 8789, collided with our-story); added `BIND_ADDR`
   localhost-only default + `.env.example` — 2026-06-30.

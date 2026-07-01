@@ -69,27 +69,47 @@ This stays on your private LAN / tailnet — it is **not** exposed to the public
 - **Tailscale ACLs** must permit your user/device to reach this host and port.
 - Leave `BIND_ADDR=127.0.0.1` (the default) whenever you don't need remote access.
 
-## Deployment notes
+## Deployment
 
-- **Static hosting:** the `dist/` output can be served by any static host (GitHub Pages,
-  Netlify, S3/CloudFront, nginx). `public/.nojekyll` is included for GitHub Pages.
-- **GitHub Pages publish decision is still pending** — the repo is currently private; Pages on
-  a private repo needs GitHub Pro, otherwise the repo must be made public. Confirm the
-  git-verifiable metrics are OK to expose publicly before enabling Pages (a public site is more
-  exposed than a one-recruiter résumé).
+### GitHub Pages (primary)
+
+The site deploys to GitHub Pages automatically via GitHub Actions
+(`.github/workflows/deploy.yml`) on every push to `main`.
+
+**Live URL:** https://eriksson008.github.io/professional-portfolio/
+
+One-time setup in the GitHub repo:
+
+1. **Settings → Pages → Build and deployment → Source: `GitHub Actions`.**
+2. The repo must be **public** (or on a plan that allows Pages for private repos).
+3. Push to `main` — the workflow builds and publishes `dist/` automatically.
+
+How the base path works: the project site is served under `/professional-portfolio/`, so the
+workflow builds with `VITE_BASE=/professional-portfolio/`. Locally and in Docker, `VITE_BASE`
+is unset, so the base defaults to `/`. Runtime asset references (e.g. the résumé PDF) use
+`import.meta.env.BASE_URL`, so they resolve correctly in both cases. The app uses in-page
+anchor navigation (no client-side router), so refreshes and deep links work without a 404
+fallback.
+
+### Other static hosts
+
+The `dist/` output can be served by any static host (Netlify, S3/CloudFront, nginx). For a
+host that serves at the domain root, build with the default base (`npm run build`).
+`public/.nojekyll` is included so GitHub Pages serves files/paths beginning with `_` verbatim.
 
 ## Project structure
 
 ```
 professional-portfolio/
-├── index.html              # Vite entry
+├── index.html              # Vite entry + SEO / OpenGraph / JSON-LD metadata
+├── .github/workflows/      # deploy.yml — build + publish to GitHub Pages on push to main
 ├── src/
 │   ├── main.tsx, App.tsx
 │   ├── data/               # profile, experience, skills, projects, highlights (typed content)
 │   ├── components/         # Nav, Hero, About, Experience, Highlights, Projects, Skills, …
 │   ├── hooks/useReveal.ts  # reduced-motion-aware scroll reveal
 │   └── styles/             # tokens.css + app.css (design system)
-├── public/                 # resume.pdf, favicon.svg, .nojekyll
+├── public/                 # resume.pdf, favicon.svg, og-image.png, .nojekyll
 ├── Dockerfile              # multi-stage node build → nginx
 ├── nginx.conf              # listens on ${PORT}; SPA fallback; gzip; security headers
 ├── docker-compose.yml      # BIND_ADDR + PORT configurable host mapping (see .env.example)

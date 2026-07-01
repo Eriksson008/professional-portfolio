@@ -9,7 +9,8 @@ export const profile = {
     email: 'eriksson.fredrik08@gmail.com',
     linkedin: 'https://www.linkedin.com/in/eriksson-fredrik',
     github: 'https://github.com/Eriksson008',
-    resume: '/resume.pdf',
+    // Base-aware so it resolves under the Pages project path and at "/" in Docker.
+    resume: `${import.meta.env.BASE_URL}resume.pdf`,
   },
   // The "title block" — modeled on the title block of an engineering drawing.
   titleBlock: [
