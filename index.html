@@ -12,8 +12,25 @@
     <meta name="author" content="Fredrik Eriksson" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#0b0e13" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
     <link rel="canonical" href="https://eriksson008.github.io/professional-portfolio/" />
+
+    <!-- Apply the saved / preferred theme before first paint (no flash). -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t !== 'light' && t !== 'dark') {
+            t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.dataset.theme = t;
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.content = t === 'light' ? '#ffffff' : '#0b0e13';
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />

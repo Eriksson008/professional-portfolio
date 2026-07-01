@@ -61,10 +61,13 @@ docker compose up --build       # production container at http://localhost:8790 
   should demonstrate the senior full-stack/React/TS/Docker skills it claims; typed data modules
   are more maintainable than one large HTML file. Supersedes the earlier "no framework / no build
   step" rule.
-- **Design direction:** tasteful single-theme dark "drafting / engineering title-block"
-  aesthetic — deep ink base, warm brass accent, Sora + IBM Plex Sans/Mono. The hero title block
-  (modeled on an engineering drawing's title block) is the signature device, nodding to the
-  mechanical-engineering origin.
+- **Design direction:** tasteful "drafting / engineering title-block" aesthetic — deep ink base,
+  warm brass accent, Sora + IBM Plex Sans/Mono. The hero title block (modeled on an engineering
+  drawing's title block) is the signature device, nodding to the mechanical-engineering origin.
+  **Dark + light themes** (2026-06-30): dark is the ink base; light is white drafting paper with
+  ink linework and deepened brass. Same design system, only the palette changes via
+  `:root[data-theme]`; nav toggle persists the choice (localStorage) and honors
+  `prefers-color-scheme`, with an inline boot script preventing a flash on load.
 - **Shares the résumé project's rules** — canonical personal details, no invented metrics, and
   the confidentiality mapping live in `../resume-project/CLAUDE.md`. Pull facts from there.
 - **No internal system/project/product codenames.** Case studies stay generic.
