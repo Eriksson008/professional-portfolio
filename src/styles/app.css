@@ -562,8 +562,8 @@ img {
   font-size: clamp(2rem, 4vw, 2.8rem);
   font-weight: 600;
   letter-spacing: -0.02em;
-  /* The standout achievement figures are the one restrained gold moment below the hero. */
-  color: var(--brass);
+  /* The standout achievement figures — red, matching the constellation accent. */
+  color: var(--red);
 }
 .metric-label {
   margin-top: 0.3rem;
@@ -887,4 +887,25 @@ img {
     opacity: 1;
     transform: none;
   }
+}
+
+/* ============================================================
+   Constellation echo — silver hairlines + red node dots on the
+   data sections, so the lower page reads as an echo of the hero.
+   ============================================================ */
+.metric-grid {
+  background: var(--silver-line);
+  border-color: var(--silver-line);
+}
+.metric::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  margin-bottom: 0.7rem;
+}
+.skill-group h3 {
+  border-bottom-color: var(--silver-line);
 }
