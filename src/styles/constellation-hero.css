@@ -377,3 +377,97 @@
     text-shadow: none;
   }
 }
+
+/* ---- tablet: keep the map, compress + enlarge type ---- */
+@media (max-width: 900px) {
+  .c-field {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+  .c-node {
+    max-width: 170px;
+    padding: 0.45rem 0.6rem;
+  }
+  .c-metric__value {
+    font-size: 1.25rem;
+  }
+  .c-node__title {
+    font-size: 0.82rem;
+  }
+  .c-stars circle {
+    opacity: 0.18;
+  }
+}
+
+/* ---- mobile: flatten to a vertical spine, revealed on scroll ---- */
+@media (max-width: 600px) {
+  .c-hero {
+    height: auto;
+  }
+  .c-pin {
+    position: static;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    padding: clamp(2.5rem, 8vh, 5rem) var(--gutter) 4rem;
+  }
+  .c-field {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+    max-width: 460px;
+    margin: 0 auto;
+    padding: 0 0 0 1.25rem;
+    border-left: 1px solid var(--silver-line);
+  }
+  .c-edges,
+  .c-stars,
+  .c-scrim,
+  .c-cue {
+    display: none;
+  }
+  .c-identity {
+    position: static;
+    transform: none;
+    width: auto;
+    order: -1;
+    text-align: left;
+    margin: 0 0 1.5rem -1.25rem;
+  }
+  .c-name {
+    text-shadow: none;
+  }
+  .c-cta {
+    opacity: 1;
+    visibility: visible;
+  }
+  .c-actions {
+    justify-content: flex-start;
+  }
+  .c-group {
+    display: contents; /* children join the single vertical spine in DOM order */
+  }
+  .c-node {
+    position: static;
+    transform: translateY(var(--ty, 0));
+    text-align: left;
+    max-width: none;
+    min-width: 0;
+  }
+  .c-node::before {
+    content: '';
+    position: absolute;
+    left: -1.6rem;
+    top: 1rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--silver);
+    border: 1px solid var(--ink);
+  }
+  .c-node.is-active::before {
+    background: var(--red);
+  }
+}
