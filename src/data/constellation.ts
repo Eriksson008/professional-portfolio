@@ -167,7 +167,9 @@ function seededStars(count: number, seed: number): Star[] {
   };
   const out: Star[] = [];
   for (let i = 0; i < count; i += 1) {
-    out.push({ x: rand(), y: rand(), r: 0.6 + rand() * 1.1 });
+    // Small radii: the field SVG stretches with preserveAspectRatio="none", so
+    // keep these tiny or they render as large ellipses on wide viewports.
+    out.push({ x: rand(), y: rand(), r: 0.1 + rand() * 0.24 });
   }
   return out;
 }

@@ -41,7 +41,9 @@ function ScrambleText({ text, play }: { text: string; play: boolean }) {
   const done = useRef(false);
   useEffect(() => {
     if (!play) {
-      if (!done.current) setOut(text);
+      // Always land on the final text when not playing — this also resolves a
+      // scramble that was interrupted mid-flight (fast scroll past the focus window).
+      setOut(text);
       return;
     }
     if (done.current) return;
@@ -105,8 +107,17 @@ export function ConstellationHero() {
 
   // Static mode (reduced-motion / no-JS): render the resolved map, everything visible.
   const p = interactive ? progress : 1;
-  const ctaReveal = interactive ? clamp01((progress - CTA_AT) / (1 - CTA_AT)) : 1;
+  // Resolve the CTA (and the field-dimming scrim) a touch before the very end so the
+  // final state — settled map + identity + CTA — holds for a beat instead of flashing
+  // by only at the pin-release point.
+  const ctaReveal = interactive ? clamp01((progress - CTA_AT) / (0.96 - CTA_AT)) : 1;
   const ctaLive = ctaReveal > 0.4;
+
+  // The centred identity is the opening + closing bookend: full at the start, it
+  // fades out so the constellation owns the middle, then returns with the CTA.
+  const identityOpacity = interactive
+    ? Math.max(1 - clamp01((progress - 0.08) / 0.08), ctaReveal)
+    : 1;
 
   const sectionStyle = {
     '--scrim': ctaReveal,
@@ -202,7 +213,10 @@ export function ConstellationHero() {
             ))}
           </ul>
 
-          <div className={`c-identity ${ctaLive ? 'is-live' : ''}`}>
+          <div
+            className={`c-identity ${ctaLive ? 'is-live' : ''}`}
+            style={{ '--ido': identityOpacity } as CSSProperties}
+          >
             <p className="c-eyebrow">Constellation of Impact</p>
             <h1 className="c-name" id={headingId}>
               <ScrambleText text={profile.name} play={interactive} />
