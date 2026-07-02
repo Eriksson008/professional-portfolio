@@ -1,3 +1,4 @@
+import { LazyMotion, domAnimation } from 'framer-motion';
 import { Nav } from './components/Nav';
 import { ConstellationHero } from './components/ConstellationHero';
 import { About } from './components/About';
@@ -11,7 +12,7 @@ import { Footer } from './components/Footer';
 
 export default function App() {
   return (
-    <>
+    <LazyMotion features={domAnimation} strict>
       <a className="skip-link" href="#about">
         Skip to content
       </a>
@@ -27,6 +28,6 @@ export default function App() {
         <Contact />
       </main>
       <Footer />
-    </>
+    </LazyMotion>
   );
 }

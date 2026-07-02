@@ -1,3 +1,6 @@
+import { m } from 'framer-motion';
+import { headerStagger, headerItem, ruleDraw } from './motion';
+
 interface SectionHeaderProps {
   index: string;
   eyebrow: string;
@@ -5,16 +8,30 @@ interface SectionHeaderProps {
   intro?: string;
 }
 
+/**
+ * Cinematic section header: inherits the parent Section's in-view trigger and
+ * cascades — number, rule line drawing left→right, eyebrow, title, intro.
+ */
 export function SectionHeader({ index, eyebrow, title, intro }: SectionHeaderProps) {
   return (
-    <div className="section-head">
+    <m.div className="section-head" variants={headerStagger}>
       <p className="sheet-mark">
-        <span className="sheet-no">{index}</span>
-        <span className="sheet-rule" aria-hidden="true" />
-        <span className="sheet-eyebrow">{eyebrow}</span>
+        <m.span className="sheet-no" variants={headerItem}>
+          {index}
+        </m.span>
+        <m.span className="sheet-rule" aria-hidden="true" variants={ruleDraw} style={{ originX: 0 }} />
+        <m.span className="sheet-eyebrow" variants={headerItem}>
+          {eyebrow}
+        </m.span>
       </p>
-      <h2 className="section-title">{title}</h2>
-      {intro && <p className="section-intro">{intro}</p>}
-    </div>
+      <m.h2 className="section-title" variants={headerItem}>
+        {title}
+      </m.h2>
+      {intro && (
+        <m.p className="section-intro" variants={headerItem}>
+          {intro}
+        </m.p>
+      )}
+    </m.div>
   );
 }

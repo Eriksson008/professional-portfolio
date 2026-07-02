@@ -1,13 +1,17 @@
-import { useReveal } from '../hooks/useReveal';
+import { m, useReducedMotion } from 'framer-motion';
 import { profile } from '../data/profile';
+import { riseIn, VIEWPORT } from './motion';
 
 export function Contact() {
-  const { ref, shown } = useReveal<HTMLElement>();
+  const reduced = useReducedMotion();
   return (
-    <section
+    <m.section
       id="contact"
-      ref={ref}
-      className={`section section-contact reveal ${shown ? 'is-shown' : ''}`}
+      className="section section-contact"
+      variants={riseIn}
+      initial={reduced ? false : 'hidden'}
+      whileInView="show"
+      viewport={VIEWPORT}
     >
       <div className="wrap contact-inner">
         <p className="sheet-mark">
@@ -32,6 +36,6 @@ export function Contact() {
           </a>
         </div>
       </div>
-    </section>
+    </m.section>
   );
 }
