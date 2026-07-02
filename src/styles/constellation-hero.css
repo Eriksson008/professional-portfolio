@@ -450,7 +450,7 @@
     display: contents; /* children join the single vertical spine in DOM order */
   }
   .c-node {
-    position: static;
+    position: relative;
     transform: translateY(var(--ty, 0));
     text-align: left;
     max-width: none;
