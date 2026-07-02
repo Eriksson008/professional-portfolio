@@ -37,27 +37,32 @@ npm run format       # Prettier
 
 ## Cinematic scroll hero
 
-The landing page opens with a **scroll-driven cinematic hero** (`src/components/ScrollHero.tsx`).
-A tall section pins a full-screen viewport while scroll progress cross-fades **nine cinematic
-frames** and their synchronized HTML text stages — a matte "system vault" opens, components rise,
-architecture connects, a dashboard assembles, and it closes on the identity card (name + tagline +
-**View Projects** / **Read Experience**).
+The landing page opens with a **scroll-driven, 2.5D "system-vault" hero** (`ScrollHero` +
+`VaultScene`). A tall section pins a full-screen viewport; as you scroll, a matte black vault
+**opens**, **red light emerges**, the six **system cards rise in 3D** and settle into a **connected
+architecture**, **dashboard panels assemble**, and the scene recedes for the **identity card**
+(name + tagline + **View Projects** / **Read Experience**).
 
 How it works:
 
 - **Progress → narrative.** `src/hooks/useScrollProgress.ts` reports scroll progress `0..1` for the
-  pinned section (rAF-throttled, passive listeners). The component maps that to a position along the
-  nine stages and cross-fades the frames (`opacity = 1 − |pos − i|`), with a short "hold" band so the
-  opening and closing stages stay fully readable.
-- **Real text, not the imagery.** The frames are **decorative background layers only**. Every
-  readable word is HTML, driven by two data arrays: `src/data/heroStages.ts` (the nine stages) and
-  `src/data/heroSystems.ts` (the six professional-area cards). The frames' own baked-in text is
-  reference — a left-weighted scrim keeps it from competing with the overlay.
+  pinned section (rAF-throttled, passive listeners). `ScrollHero` derives an eased position with a
+  "hold" band at each end (opening + closing stay readable) and drives three layers.
+- **The 3D vault (`src/components/VaultScene.tsx`).** The animated protagonist — real DOM/SVG, no
+  3D libraries. Scroll progress drives CSS `perspective`/`transform` phases: lid `rotateX` opens the
+  vault, a radial glow emerges, system cards interpolate from the vault mouth to architecture
+  positions (`translateZ` depth), SVG connectors draw between them (`stroke-dashoffset`), then
+  dashboard panels assemble as the cards recede. All timings live at the top of the component.
+- **Atmospheric frames.** The nine cinematic frames are now a **dimmed backdrop** (~0.42 opacity)
+  that cross-fades behind the vault — texture, not content.
+- **Real text, not the imagery.** Copy is HTML from data arrays: `src/data/heroStages.ts` (the nine
+  caption stages) and `src/data/heroSystems.ts` (the six professional areas, rendered as the vault's
+  floating cards). A left-weighted scrim keeps the caption column clean.
 - **Accessibility / fallback.** Under `prefers-reduced-motion` (or no JS), a **static hero** renders
-  the destination directly — final identity + CTAs + the system cards as a real grid, no
-  scroll-jacking. The name is a real `<h1>`; CTAs are real, keyboard-focusable links.
-- **Responsive.** Desktop gets the full experience; narrower widths veil the frame more evenly so it
-  reads as an atmospheric backdrop with a shorter scroll.
+  the destination directly — identity + CTAs + the system cards as a real grid, no scroll-jacking or
+  vault animation. The name is a real `<h1>`; CTAs are keyboard-focusable links.
+- **Responsive.** Desktop (>900px) gets the full 3D vault; below that the vault is dropped and the
+  caption shows the system cards inline as a simplified fallback, over the atmospheric backdrop.
 
 ### Hero frames — where they live and how to replace them
 
@@ -148,7 +153,7 @@ professional-portfolio/
 ├── src/
 │   ├── main.tsx, App.tsx
 │   ├── data/               # profile, experience, skills, projects, highlights + heroStages, heroSystems
-│   ├── components/         # Nav, ScrollHero, About, Experience, Highlights, Projects, Skills, …
+│   ├── components/         # Nav, ScrollHero, VaultScene, About, Experience, Projects, Skills, …
 │   ├── hooks/              # useReveal.ts, useScrollProgress.ts (both reduced-motion-aware)
 │   └── styles/             # tokens.css + app.css + scroll-hero.css (design system)
 ├── public/hero-sequence/   # optimized WebP hero frames (deployed)

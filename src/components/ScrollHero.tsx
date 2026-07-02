@@ -3,6 +3,7 @@ import { heroStages, heroRoles, type HeroStage } from '../data/heroStages';
 import { heroSystems } from '../data/heroSystems';
 import { profile } from '../data/profile';
 import { useScrollProgress } from '../hooks/useScrollProgress';
+import { VaultScene } from './VaultScene';
 
 const BASE = import.meta.env.BASE_URL;
 const N = heroStages.length;
@@ -85,6 +86,7 @@ function StageContent({ stage, headingId }: { stage: HeroStage; headingId: strin
         <Headline text={stage.headline} accent={stage.accent} />
       </p>
       {stage.sub && <p className="sh-sub">{stage.sub}</p>}
+      {/* Shown only on small screens; on desktop the vault scene renders these cards. */}
       {stage.kind === 'systems' && <SystemCluster />}
     </div>
   );
@@ -140,7 +142,7 @@ export function ScrollHero() {
       style={sectionStyle}
     >
       <div className="scroll-hero__pin">
-        {/* Cinematic frame layers — decorative background only. */}
+        {/* Cinematic frame layers — dimmed atmospheric backdrop only. */}
         <div className="sh-frames" aria-hidden="true">
           {heroStages.map((stage, i) => (
             <div
@@ -148,12 +150,15 @@ export function ScrollHero() {
               className="sh-frame"
               style={{
                 backgroundImage: `url(${frameUrl(stage.frame)})`,
-                opacity: Math.max(0, 1 - Math.abs(pos - i)),
+                opacity: Math.max(0, 1 - Math.abs(pos - i)) * 0.42,
               }}
             />
           ))}
           <div className="sh-scrim" />
         </div>
+
+        {/* 2.5D system-vault reveal — the animated protagonist. */}
+        <VaultScene progress={eff} />
 
         {/* Synchronized HTML text stages — the real content. */}
         <div className="sh-stage-layer">

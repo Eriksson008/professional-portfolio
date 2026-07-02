@@ -66,6 +66,14 @@ docker compose up --build       # production container at http://localhost:8790 
   `styles/scroll-hero.css`. Old `Hero.tsx` retired. Design spec:
   `docs/superpowers/specs/2026-07-01-scroll-hero-design.md`. Introduces a hero-scoped red accent
   (`--sh-red`) alongside the existing brass; the rest of the token system is unchanged.
+  **Update (same day) — upgraded from editorial slides to a scroll-controlled 2.5D "system-vault"
+  reveal** (`components/VaultScene.tsx`): real DOM/SVG (no 3D libraries). Scroll progress drives CSS
+  `perspective`/`transform` phases — a matte vault lid opens (`rotateX`), a red glow emerges, the six
+  system cards rise in 3D and settle into a connected architecture (SVG connectors draw via
+  `stroke-dashoffset`), then dashboard panels assemble before the identity card resolves. The nine
+  frames are now a **dimmed atmospheric backdrop** (~0.42 opacity); scrim lightened accordingly. The
+  vault runs on desktop (>900px); below that it is dropped for a simplified inline system-card
+  fallback in the caption. Reduced-motion still renders the static hero.
 - **2026-06-30 — Standardized to the app-family port + safe-by-default binding.** Host/dev/preview
   and the container now all use **port 8790** (this app's family port; was 8789, which collided
   with `our-story`). `docker-compose.yml` now publishes via `${BIND_ADDR:-127.0.0.1}:${PORT:-8790}:8790`,
