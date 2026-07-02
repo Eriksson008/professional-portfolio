@@ -2,7 +2,33 @@
 
 **Date:** 2026-07-01
 **Branch:** `redesign-scroll-hero`
-**Status:** Approved design → implementation
+**Status:** Approved design → implementation (amended with igloo.inc-inspired award-style polish)
+
+## Inspiration — igloo.inc (Awwwards SOTD)
+
+Reference: igloo.inc is a super-smooth, scroll-activated 3D world (Three.js/GSAP/WebGL) —
+a single iceberg monolith hides many ventures revealed on descent, with eased scroll,
+chromatic-aberration scene transitions, shader-based text glitch/scramble, cursor-reactive
+particle fields, procedurally-varied per-project objects, and synced sound; kept fast with
+compressed assets and `prefers-reduced-motion` fallbacks.
+
+We adopt its **feel**, not its stack. A senior-engineer portfolio on GitHub Pages should
+stay lean and maintainable, so we reproduce the award-style experience in **pure
+React/CSS/SVG (2.5D, no WebGL, no new deps)** — the restraint is itself a signal of
+engineering taste. Adaptations, all gated off for reduced-motion / touch / coarse pointer:
+
+- **Lerp-smoothed scroll** — displayed progress eases toward the scroll target each rAF
+  (igloo's "super-smooth scroll"), replacing raw per-event progress.
+- **Cursor-reactive 2.5D parallax** — starfield, node groups, and the identity move at
+  different depths with the pointer, so the map feels like an explorable world.
+- **Decode-scramble text** — metric values and the name resolve via a brief monospace
+  character-scramble (igloo's shader text scramble, done cheaply in JS).
+- **Chromatic-aberration accent** — a subtle red/silver split on the name and active node
+  titles for the "tech vibe."
+- **Interactive nodes** — hovering a node lights its connected edges; the constellation
+  invites exploration rather than only being watched.
+- **Sound: deliberately omitted** — autoplay audio harms accessibility and the
+  conservative, professional tone.
 
 ## Problem
 
