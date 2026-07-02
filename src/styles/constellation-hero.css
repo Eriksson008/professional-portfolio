@@ -389,6 +389,9 @@
   }
   .c-node {
     max-width: 170px;
+    /* Base rule sets min-width: max-content, which would override max-width and
+       let long nodes overflow at tablet — release it so max-width caps and text wraps. */
+    min-width: 0;
     padding: 0.45rem 0.6rem;
   }
   .c-metric__value {
