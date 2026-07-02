@@ -5,11 +5,8 @@ import { profile } from '../data/profile';
 import { useScrollProgress } from '../hooks/useScrollProgress';
 import { VaultScene } from './VaultScene';
 
-const BASE = import.meta.env.BASE_URL;
 const N = heroStages.length;
 const finalStage = heroStages[N - 1];
-
-const frameUrl = (frame: string) => `${BASE}hero-sequence/${frame}`;
 
 /** Render a headline with one accent word/phrase highlighted in red. */
 function Headline({ text, accent }: { text: string; accent?: string }) {
@@ -99,13 +96,7 @@ function StageContent({ stage, headingId }: { stage: HeroStage; headingId: strin
 function StaticHero({ headingId }: { headingId: string }) {
   return (
     <section className="scroll-hero scroll-hero--static" id="top" aria-labelledby={headingId}>
-      <div
-        className="sh-frames"
-        aria-hidden="true"
-        style={{ backgroundImage: `url(${frameUrl(finalStage.frame)})` }}
-      >
-        <div className="sh-scrim" />
-      </div>
+      <div className="sh-backdrop" aria-hidden="true" />
       <div className="wrap sh-static-inner">
         <FinalCard headingId={headingId} />
         <SystemCluster />
@@ -142,20 +133,8 @@ export function ScrollHero() {
       style={sectionStyle}
     >
       <div className="scroll-hero__pin">
-        {/* Cinematic frame layers — dimmed atmospheric backdrop only. */}
-        <div className="sh-frames" aria-hidden="true">
-          {heroStages.map((stage, i) => (
-            <div
-              key={stage.frame}
-              className="sh-frame"
-              style={{
-                backgroundImage: `url(${frameUrl(stage.frame)})`,
-                opacity: Math.max(0, 1 - Math.abs(pos - i)) * 0.42,
-              }}
-            />
-          ))}
-          <div className="sh-scrim" />
-        </div>
+        {/* Clean matte-black / graphite backdrop (no imagery). */}
+        <div className="sh-backdrop" aria-hidden="true" />
 
         {/* 2.5D system-vault reveal — the animated protagonist. */}
         <VaultScene progress={eff} />

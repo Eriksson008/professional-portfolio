@@ -1,11 +1,11 @@
 /* ============================================================
-   Scroll-driven cinematic hero
+   Scroll-driven system-vault hero
    ------------------------------------------------------------
    A tall section pins a full-screen viewport; scroll progress
-   cross-fades nine cinematic frames + synchronized HTML text.
-   The hero is always dark (it sits over dark imagery in both
-   themes), so it uses its own fixed accent scale rather than the
-   theme tokens.
+   drives a 2.5D matte-black vault reveal (real DOM/SVG) over a
+   clean graphite backdrop — no imagery. Always dark in both
+   themes, so it uses its own fixed accent scale (black/white/red,
+   gold reserved for the final premium moment).
    ============================================================ */
 .scroll-hero {
   --sh-text: #f5f6f8;
@@ -31,44 +31,31 @@
   overflow: hidden;
 }
 
-/* ---- Frame layers ---- */
-.sh-frames {
-  position: absolute;
-  inset: 0;
-  background: #05060a;
-}
-.sh-frame {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: 60% 50%;
-  background-repeat: no-repeat;
-  will-change: opacity;
-}
-
-/* Left-weighted scrim: hides the frames' baked-in text and gives the
-   real HTML overlay its contrast. Plus top/bottom falloff. */
-.sh-scrim {
+/* ---- Backdrop: clean matte black / graphite (no imagery) ---- */
+.sh-backdrop {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(
-      90deg,
-      rgba(5, 6, 10, 0.97) 0%,
-      rgba(5, 6, 10, 0.9) 30%,
-      rgba(5, 6, 10, 0.5) 50%,
-      rgba(5, 6, 10, 0.24) 72%,
-      rgba(5, 6, 10, 0.42) 100%
-    ),
-    /* Keep the caption column readable and give the lower band some weight
-       (the frames are already dimmed to ~0.5 behind the vault scene). */
-      linear-gradient(
-        180deg,
-        rgba(5, 6, 10, 0.4) 0%,
-        rgba(5, 6, 10, 0) 20%,
-        rgba(5, 6, 10, 0) 58%,
-        rgba(5, 6, 10, 0.62) 100%
-      );
+    /* soft graphite pool that lifts the vault off the floor */
+    radial-gradient(120% 90% at 62% 44%, #14171d 0%, #0a0c11 46%, #05060a 100%),
+    #05060a;
+}
+/* Faint engineering grid + edge vignette, masked toward the centre. */
+.sh-backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(236, 239, 244, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(236, 239, 244, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 90% 70% at 60% 42%, #000 0%, transparent 72%);
+}
+.sh-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(130% 100% at 50% 42%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
 }
 
 /* ---- Stage text layer ---- */
@@ -168,7 +155,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--sh-gold);
+  color: var(--sh-red-bright);
   margin-bottom: 0.3rem;
 }
 .sh-system__tools {
@@ -356,10 +343,6 @@
   padding-block: clamp(6rem, 14vh, 9rem);
   border-bottom: 1px solid var(--line-soft);
 }
-.scroll-hero--static .sh-frames {
-  background-size: cover;
-  background-position: 60% 50%;
-}
 .sh-static-inner {
   position: relative;
   z-index: 1;
@@ -371,9 +354,9 @@
 }
 
 /* ============================================================
-   Vault scene — 2.5D "system vault" reveal
+   Vault scene — 2.5D matte "system vault" reveal
    ------------------------------------------------------------
-   Sits above the dimmed frame backdrop, below the caption text.
+   Sits over the clean backdrop, below the caption text.
    Everything is real DOM/SVG driven by scroll progress.
    ============================================================ */
 .vault-scene {
@@ -382,87 +365,91 @@
   bottom: 0;
   left: 38%;
   right: 0;
-  perspective: 1500px;
-  perspective-origin: 52% 44%;
+  perspective: 1600px;
+  perspective-origin: 52% 42%;
   pointer-events: none;
   z-index: 1;
 }
-.vault-3d {
-  position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-}
 
-/* Red inner glow + vertical light beam */
-.vault__glow {
+/* ---- Matte black geometric platform + hinged lid ---- */
+.vault {
   position: absolute;
   left: 50%;
-  top: 62%;
-  width: 62%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 96, 86, 0.5) 0%,
-    rgba(229, 72, 77, 0.26) 34%,
-    rgba(229, 72, 77, 0.08) 56%,
-    transparent 72%
-  );
-  filter: blur(6px);
-  will-change: opacity, transform;
-}
-.vault__beam {
-  position: absolute;
-  left: 50%;
-  top: 18%;
-  width: 30%;
-  height: 48%;
-  transform: translateX(-50%) scaleY(var(--beam, 1));
-  transform-origin: 50% 100%;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(229, 72, 77, 0.1) 55%,
-    rgba(255, 96, 86, 0.24) 100%
-  );
-  filter: blur(12px);
-  mask-image: linear-gradient(180deg, transparent 0%, #000 72%);
-  will-change: opacity, transform;
-}
-
-/* Vault body + hinged lid */
-.vault__body {
-  position: absolute;
-  left: 50%;
-  top: 64%;
-  width: min(46%, 360px);
-  height: 21%;
+  top: 58%;
+  width: min(64%, 460px);
+  height: 260px;
   transform: translate(-50%, -50%);
-  transform-style: preserve-3d;
+  perspective: 1200px;
 }
-.vault__mouth {
+.vault__shadow {
   position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at 50% 46%,
-    rgba(229, 72, 77, calc(var(--glow, 0) * 0.85)) 0%,
-    rgba(120, 22, 26, calc(var(--glow, 0) * 0.5)) 42%,
-    #06070b 72%
-  );
-  border: 1px solid rgba(231, 181, 103, 0.38);
-  box-shadow:
-    inset 0 8px 26px rgba(0, 0, 0, 0.85),
-    0 0 46px rgba(229, 72, 77, calc(var(--glow, 0) * 0.4));
+  left: 50%;
+  bottom: 4%;
+  width: 82%;
+  height: 44px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.72) 0%, transparent 70%);
+  filter: blur(10px);
 }
+/* Platform top surface, tilted back into perspective. */
+.vault__platform {
+  position: absolute;
+  left: 50%;
+  bottom: 10%;
+  width: 78%;
+  height: 158px;
+  transform: translateX(-50%) rotateX(56deg);
+  transform-origin: 50% 100%;
+  transform-style: preserve-3d;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #1b1f26 0%, #0f1217 58%, #070809 100%);
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.05),
+    0 34px 60px rgba(0, 0, 0, 0.6);
+}
+/* The carved opening (recessed well). */
+.vault__well {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: 62%;
+  height: 52%;
+  transform: translate(-50%, -50%);
+  border-radius: 8px;
+  background: #050609;
+  box-shadow:
+    inset 0 4px 16px rgba(0, 0, 0, 0.9),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+/* Controlled red light inside the well (contained — not an orb). */
+.vault__well-glow {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(
+    ellipse at 50% 62%,
+    rgba(255, 96, 86, 0.7) 0%,
+    rgba(229, 72, 77, 0.28) 42%,
+    transparent 76%
+  );
+  will-change: opacity;
+}
+/* Lid — lies flat over the well, hinged at the far edge, lifts open. */
 .vault__lid {
   position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  transform-origin: 50% 6%;
-  background: linear-gradient(180deg, #181b21 0%, #090a0e 100%);
-  border: 1px solid rgba(231, 181, 103, 0.5);
-  box-shadow: 0 -10px 26px rgba(0, 0, 0, 0.6);
+  left: 50%;
+  top: 42%;
+  width: 66%;
+  height: 56%;
+  transform-origin: 50% 0%;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #23272e 0%, #12151b 55%, #0c0e13 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  /* Gold hairline only surfaces in the final premium moment. */
+  box-shadow:
+    0 -8px 20px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(231, 181, 103, calc(var(--gold, 0) * 0.5));
   backface-visibility: hidden;
   will-change: transform;
 }
@@ -482,43 +469,55 @@
   filter: drop-shadow(0 0 3px rgba(229, 72, 77, 0.45));
 }
 
-/* System cards rising from the vault */
+/* System cards rising from the vault — premium engineering UI */
 .vault-card {
   position: absolute;
-  width: clamp(118px, 14vw, 168px);
-  padding: 0.7rem 0.85rem;
+  width: clamp(120px, 14vw, 172px);
+  padding: 0.72rem 0.85rem 0.78rem;
   border-radius: 8px;
-  background: linear-gradient(160deg, rgba(21, 25, 33, 0.92), rgba(10, 12, 17, 0.94));
-  border: 1px solid rgba(236, 239, 244, 0.14);
+  background: linear-gradient(158deg, rgba(24, 28, 36, 0.95), rgba(12, 14, 19, 0.96));
+  border: 1px solid rgba(236, 239, 244, 0.13);
   box-shadow:
-    0 12px 34px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    0 16px 36px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(3px);
   will-change: left, top, transform, opacity;
 }
+/* Gold hairline only surfaces in the final premium moment (var --gold). */
 .vault-card::before {
   content: '';
   position: absolute;
-  left: 0.7rem;
-  right: 0.7rem;
+  left: 0;
+  right: 0;
   top: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(231, 181, 103, 0.6), transparent);
+  height: 2px;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(90deg, transparent, rgba(231, 181, 103, calc(var(--gold, 0) * 0.85)), transparent);
+}
+.vault-card__dot {
+  position: absolute;
+  top: 0.78rem;
+  right: 0.78rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sh-red);
+  box-shadow: 0 0 8px rgba(229, 72, 77, 0.55);
 }
 .vault-card__area {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--sh-gold);
-  margin-bottom: 0.28rem;
+  color: #eceff3;
+  margin-bottom: 0.32rem;
 }
 .vault-card__tools {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   line-height: 1.4;
-  color: rgba(236, 239, 244, 0.82);
+  color: rgba(236, 239, 244, 0.7);
 }
 
 /* Dashboard panels assembling near the end */
@@ -567,7 +566,7 @@
   width: 34px;
   height: 8px;
   border-radius: 4px;
-  background: linear-gradient(90deg, var(--sh-red), var(--sh-gold));
+  background: linear-gradient(90deg, var(--sh-red), var(--sh-red-bright));
 }
 .vdash__tiles {
   display: grid;
@@ -602,7 +601,7 @@
   display: block;
   height: 100%;
   transform-origin: left;
-  background: linear-gradient(90deg, var(--sh-red), var(--sh-gold));
+  background: linear-gradient(90deg, var(--sh-red), var(--sh-red-bright));
 }
 .vdash__spark {
   display: block;
@@ -623,28 +622,6 @@
 @media (max-width: 900px) {
   .scroll-hero {
     --sh-stage: 48vh;
-  }
-  .sh-frame,
-  .scroll-hero--static .sh-frames {
-    background-position: 58% 50%;
-  }
-  /* Narrower than the split composition works for: veil the frame more evenly
-     so it reads as an atmospheric backdrop and text stays readable. */
-  .sh-scrim {
-    background:
-      linear-gradient(
-        180deg,
-        rgba(5, 6, 10, 0.62) 0%,
-        rgba(5, 6, 10, 0.34) 40%,
-        rgba(5, 6, 10, 0.5) 70%,
-        rgba(5, 6, 10, 0.85) 100%
-      ),
-      linear-gradient(
-        90deg,
-        rgba(5, 6, 10, 0.85) 0%,
-        rgba(5, 6, 10, 0.55) 55%,
-        rgba(5, 6, 10, 0.4) 100%
-      );
   }
   /* The 3D vault needs room; below this width, drop it and let the caption
      show the system cards inline as the simplified fallback. */

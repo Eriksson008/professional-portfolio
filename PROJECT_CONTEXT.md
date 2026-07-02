@@ -74,6 +74,16 @@ docker compose up --build       # production container at http://localhost:8790 
   frames are now a **dimmed atmospheric backdrop** (~0.42 opacity); scrim lightened accordingly. The
   vault runs on desktop (>900px); below that it is dropped for a simplified inline system-card
   fallback in the caption. Reduced-motion still renders the static hero.
+  **Update (same day) — polish pass + palette unification.** The vault is now a **matte black
+  geometric platform with a lifting lid** (was a red oval/orb); glow is contained inside the well and
+  reduced (depth/shadow over glow). **The AI-generated frame sequence is no longer rendered** — the
+  hero backdrop is clean matte black/graphite with a faint CSS grid; the generated images are demoted
+  to prototype/reference art in `assets/` (moved out of `public/`, not deployed). Removed the
+  `optimize-frames.mjs` script + the `sharp` devDependency (no longer needed). **Palette unified to
+  black/white/red primary** with gold as a rare premium highlight: `app.css` accents shifted from
+  brass → new `--red*` tokens site-wide, with gold retained only on the standout metric figures
+  (Highlights) and the hero's final moment (secondary CTA, role ticks, lid hairline). Red/gold tokens
+  defined for both themes in `tokens.css`.
 - **2026-06-30 — Standardized to the app-family port + safe-by-default binding.** Host/dev/preview
   and the container now all use **port 8790** (this app's family port; was 8789, which collided
   with `our-story`). `docker-compose.yml` now publishes via `${BIND_ADDR:-127.0.0.1}:${PORT:-8790}:8790`,

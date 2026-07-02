@@ -76,12 +76,12 @@ img {
 }
 
 ::selection {
-  background: var(--brass);
-  color: var(--on-brass);
+  background: var(--red);
+  color: var(--on-red);
 }
 
 :focus-visible {
-  outline: 2px solid var(--brass-bright);
+  outline: 2px solid var(--red-bright);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -98,8 +98,8 @@ img {
   left: -999px;
   top: 0;
   z-index: 200;
-  background: var(--brass);
-  color: var(--on-brass);
+  background: var(--red);
+  color: var(--on-red);
   padding: 0.6rem 1rem;
   font-family: var(--font-mono);
   font-size: 0.8rem;
@@ -133,20 +133,20 @@ img {
     transform 0.2s var(--ease);
 }
 .btn:hover {
-  border-color: var(--brass-line);
-  color: var(--brass-bright);
+  border-color: var(--red-line);
+  color: var(--red-bright);
   transform: translateY(-1px);
 }
 .btn-primary {
-  background: var(--brass);
-  border-color: var(--brass);
-  color: var(--on-brass);
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--on-red);
   font-weight: 500;
 }
 .btn-primary:hover {
-  background: var(--brass-bright);
-  border-color: var(--brass-bright);
-  color: var(--on-brass);
+  background: var(--red-bright);
+  border-color: var(--red-bright);
+  color: var(--on-red);
 }
 .btn-ghost {
   border-color: var(--line-soft);
@@ -187,8 +187,8 @@ img {
   place-items: center;
   width: 34px;
   height: 34px;
-  border: 1px solid var(--brass-line);
-  color: var(--brass);
+  border: 1px solid var(--red-line);
+  color: var(--red);
   font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 500;
@@ -222,17 +222,17 @@ img {
   display: block;
   height: 1px;
   margin-top: 4px;
-  background: var(--brass-line);
+  background: var(--red-line);
 }
 .nav-menu .nav-cta {
-  color: var(--brass);
-  border: 1px solid var(--brass-line);
+  color: var(--red);
+  border: 1px solid var(--red-line);
   padding: 0.45rem 0.9rem;
   border-radius: var(--radius);
 }
 .nav-menu .nav-cta:hover {
-  color: var(--on-brass);
-  background: var(--brass);
+  color: var(--on-red);
+  background: var(--red);
 }
 .nav-toggle {
   display: none;
@@ -275,8 +275,8 @@ img {
     background 0.2s var(--ease);
 }
 .theme-toggle:hover {
-  border-color: var(--brass-line);
-  color: var(--brass);
+  border-color: var(--red-line);
+  color: var(--red);
 }
 .theme-toggle svg {
   width: 17px;
@@ -326,8 +326,8 @@ img {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--brass);
-  box-shadow: 0 0 0 3px var(--brass-wash);
+  background: var(--red);
+  box-shadow: 0 0 0 3px var(--red-wash);
 }
 .hero-name {
   font-size: clamp(2.75rem, 7vw, 4.75rem);
@@ -368,7 +368,7 @@ img {
   color: var(--faint);
 }
 .tb-rev {
-  color: var(--brass);
+  color: var(--red);
 }
 .tb-rows {
   padding: 0.4rem 0;
@@ -400,7 +400,7 @@ img {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  color: var(--brass-line);
+  color: var(--red-line);
   font-family: var(--font-mono);
 }
 .tb-ticks span {
@@ -447,13 +447,13 @@ img {
 .sheet-no {
   font-family: var(--font-mono);
   font-size: 0.8rem;
-  color: var(--brass);
+  color: var(--red);
   letter-spacing: 0.05em;
 }
 .sheet-rule {
   width: 38px;
   height: 1px;
-  background: var(--brass-line);
+  background: var(--red-line);
 }
 .sheet-eyebrow {
   font-family: var(--font-mono);
@@ -512,16 +512,16 @@ img {
   transform: rotate(45deg);
 }
 .tl-item.is-current .tl-marker {
-  border-color: var(--brass);
-  background: var(--brass);
-  box-shadow: 0 0 0 4px var(--brass-wash);
+  border-color: var(--red);
+  background: var(--red);
+  box-shadow: 0 0 0 4px var(--red-wash);
 }
 .tl-period {
   font-family: var(--font-mono);
   font-size: 0.76rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--brass);
+  color: var(--red);
   margin-bottom: 0.35rem;
 }
 .tl-content h3 {
@@ -562,6 +562,7 @@ img {
   font-size: clamp(2rem, 4vw, 2.8rem);
   font-weight: 600;
   letter-spacing: -0.02em;
+  /* The standout achievement figures are the one restrained gold moment below the hero. */
   color: var(--brass);
 }
 .metric-label {
@@ -600,7 +601,7 @@ img {
     background 0.25s var(--ease);
 }
 .project-card:hover {
-  border-color: var(--brass-line);
+  border-color: var(--red-line);
   transform: translateY(-3px);
   box-shadow: var(--shadow-lift);
   background: var(--panel-2);
@@ -622,8 +623,8 @@ img {
   border-radius: 2px;
 }
 .kind-enterprise {
-  border-color: var(--brass-line);
-  color: var(--brass);
+  border-color: var(--red-line);
+  color: var(--red);
 }
 .pc-conf {
   font-family: var(--font-mono);
@@ -646,7 +647,7 @@ img {
   margin-top: 0.8rem;
   font-family: var(--font-mono);
   font-size: 0.82rem;
-  color: var(--brass);
+  color: var(--red);
   line-height: 1.5;
 }
 .pc-bullets {
@@ -665,7 +666,7 @@ img {
   content: '+';
   position: absolute;
   left: 0;
-  color: var(--brass);
+  color: var(--red);
   font-family: var(--font-mono);
 }
 .pc-tags {
@@ -689,10 +690,10 @@ img {
   margin-top: 1.2rem;
   font-family: var(--font-mono);
   font-size: 0.82rem;
-  color: var(--brass);
+  color: var(--red);
 }
 .pc-link:hover {
-  color: var(--brass-bright);
+  color: var(--red-bright);
 }
 
 /* ============================================================
@@ -708,7 +709,7 @@ img {
   font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--brass);
+  color: var(--red);
   font-weight: 500;
   padding-bottom: 0.7rem;
   margin-bottom: 0.9rem;

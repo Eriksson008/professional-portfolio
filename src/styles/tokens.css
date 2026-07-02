@@ -12,7 +12,15 @@
   --muted: #98a3b2;
   --faint: #6b7585;
 
-  /* Accent — warm brass / drafting instrument, used with restraint */
+  /* Primary accent — red: controlled system energy. */
+  --red: #e5484d;
+  --red-bright: #ff5b60;
+  --red-deep: #c5313a;
+  --red-wash: rgba(229, 72, 77, 0.12);
+  --red-line: rgba(229, 72, 77, 0.34);
+  --on-red: #ffffff;
+
+  /* Premium highlight — gold, used rarely (standout figures, final polish). */
   --brass: #d7a24b;
   --brass-bright: #ecbb66;
   --brass-deep: #b9842f;
@@ -60,7 +68,15 @@
   --muted: #545c68;
   --faint: #8a929f;
 
-  /* Accent — deepened brass so it stays legible on white */
+  /* Primary accent — red, deepened so it stays legible on white */
+  --red: #d1373c;
+  --red-bright: #b92f34;
+  --red-deep: #9e2529;
+  --red-wash: rgba(209, 55, 60, 0.1);
+  --red-line: rgba(209, 55, 60, 0.32);
+  --on-red: #ffffff;
+
+  /* Premium highlight — deepened brass so it stays legible on white */
   --brass: #a97a1e;
   --brass-bright: #8c6416;
   --brass-deep: #785413;
