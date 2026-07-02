@@ -72,22 +72,57 @@ export const metricNodes: MetricNode[] = [
 ];
 
 export const projectNodes: ProjectNode[] = [
-  { id: 'p-onboard', title: 'Secure Onboarding Portal', tags: ['Java 21', 'React', 'Aurora'], revealAt: 0.31 },
+  {
+    id: 'p-onboard',
+    title: 'Secure Onboarding Portal',
+    tags: ['Java 21', 'React', 'Aurora'],
+    revealAt: 0.31,
+  },
   { id: 'p-ai', title: 'AI Client-Assist', tags: ['Spring AI', 'Bedrock', 'ECS'], revealAt: 0.34 },
-  { id: 'p-sf', title: 'Enterprise Salesforce Platform', tags: ['Apex', 'LWC', 'Copado'], revealAt: 0.37 },
+  {
+    id: 'p-sf',
+    title: 'Enterprise Salesforce Platform',
+    tags: ['Apex', 'LWC', 'Copado'],
+    revealAt: 0.37,
+  },
   { id: 'p-homebase', title: 'Homebase', tags: ['Docker', 'AES-256-GCM', 'SQLite'], revealAt: 0.4 },
-  { id: 'p-afr', title: 'AFR — Members\' Hub', tags: ['Next.js', 'TypeScript', 'Tailwind'], revealAt: 0.42 },
+  {
+    id: 'p-afr',
+    title: "AFR — Members' Hub",
+    tags: ['Next.js', 'TypeScript', 'Tailwind'],
+    revealAt: 0.42,
+  },
   { id: 'p-portfolio', title: 'This Portfolio', tags: ['Vite', 'React', 'nginx'], revealAt: 0.44 },
-  { id: 'p-lab', title: 'Self-Hosting / Tailscale Lab', tags: ['Docker', 'Tailscale', 'Linux'], revealAt: 0.46 },
+  {
+    id: 'p-lab',
+    title: 'Self-Hosting / Tailscale Lab',
+    tags: ['Docker', 'Tailscale', 'Linux'],
+    revealAt: 0.46,
+  },
 ];
 
 export const skillClusters: SkillCluster[] = [
   { id: 's-frontend', name: 'Frontend', items: ['React', 'TypeScript', 'Next.js'], revealAt: 0.5 },
   { id: 's-backend', name: 'Backend', items: ['Java', 'Spring Boot', 'Spring AI'], revealAt: 0.53 },
   { id: 's-cloud', name: 'Cloud', items: ['AWS ECS', 'ALB', 'Bedrock', 'Aurora'], revealAt: 0.56 },
-  { id: 's-enterprise', name: 'Enterprise', items: ['Salesforce', 'Apex', 'LWC', 'Copado'], revealAt: 0.59 },
-  { id: 's-devops', name: 'DevOps', items: ['Jenkins', 'GitHub Actions', 'Docker'], revealAt: 0.62 },
-  { id: 's-leadership', name: 'Leadership', items: ['Tech Lead', 'Mentorship', 'Delivery'], revealAt: 0.65 },
+  {
+    id: 's-enterprise',
+    name: 'Enterprise',
+    items: ['Salesforce', 'Apex', 'LWC', 'Copado'],
+    revealAt: 0.59,
+  },
+  {
+    id: 's-devops',
+    name: 'DevOps',
+    items: ['Jenkins', 'GitHub Actions', 'Docker'],
+    revealAt: 0.62,
+  },
+  {
+    id: 's-leadership',
+    name: 'Leadership',
+    items: ['Tech Lead', 'Mentorship', 'Delivery'],
+    revealAt: 0.65,
+  },
 ];
 
 export const careerNodes: CareerNode[] = [

@@ -19,7 +19,12 @@ export function SectionHeader({ index, eyebrow, title, intro }: SectionHeaderPro
         <m.span className="sheet-no" variants={headerItem}>
           {index}
         </m.span>
-        <m.span className="sheet-rule" aria-hidden="true" variants={ruleDraw} style={{ originX: 0 }} />
+        <m.span
+          className="sheet-rule"
+          aria-hidden="true"
+          variants={ruleDraw}
+          style={{ originX: 0 }}
+        />
         <m.span className="sheet-eyebrow" variants={headerItem}>
           {eyebrow}
         </m.span>

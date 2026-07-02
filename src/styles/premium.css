@@ -1,0 +1,109 @@
+/* ============================================================
+   Premium surface layer — GlowPanel, SystemCard, MetricNode.
+   Gradients, hairlines, and grain built only from existing tokens
+   and inline SVG (no image assets).
+   ============================================================ */
+
+.glow-panel {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--panel) 94%, transparent),
+    color-mix(in srgb, var(--ink-2) 90%, transparent)
+  );
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* Gradient hairline along the top edge, warming to red at center. */
+.glow-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--silver-line) 30%,
+    var(--red-line) 50%,
+    var(--silver-line) 70%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Film grain — inline feTurbulence, imperceptible but kills flatness. */
+.glow-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+/* ---- SystemCard: a project as a system node ---- */
+.sys-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.6rem;
+  transition:
+    border-color 0.25s var(--ease),
+    transform 0.25s var(--ease),
+    box-shadow 0.25s var(--ease);
+}
+.sys-card:hover {
+  border-color: var(--red-line);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(11, 14, 19, 0.45);
+}
+
+/* Corner node — silver at rest, lights red when the card is engaged. */
+.sys-node {
+  position: absolute;
+  top: 0.95rem;
+  right: 0.95rem;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--silver-2);
+  opacity: 0.55;
+  transition:
+    background 0.25s var(--ease),
+    box-shadow 0.25s var(--ease),
+    opacity 0.25s var(--ease);
+}
+.sys-card:hover .sys-node,
+.sys-card:focus-within .sys-node {
+  background: var(--red);
+  opacity: 1;
+  box-shadow: 0 0 0 4px var(--red-wash);
+}
+
+/* ---- MetricNode: highlight figure as a constellation node ---- */
+.mn-dot {
+  position: relative;
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  margin-bottom: 0.7rem;
+}
+.mn-ring {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px solid var(--red);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sys-card:hover {
+    transform: none;
+  }
+  .mn-ring {
+    display: none;
+  }
+}

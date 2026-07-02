@@ -97,7 +97,8 @@ export function ConstellationHero() {
             <p className="c-role">Senior Software Engineer · Acting Tech Lead</p>
             <div className="c-cta">
               <p className="c-tagline">
-                Building AI-enabled enterprise systems, cloud platforms, and polished digital products.
+                Building AI-enabled enterprise systems, cloud platforms, and polished digital
+                products.
               </p>
               <div className="c-actions">
                 <a className="c-btn c-btn--primary" href="#projects">

@@ -29,3 +29,21 @@ export const ruleDraw: Variants = {
   hidden: { scaleX: 0 },
   show: { scaleX: 1, transition: { duration: 0.6, ease: EASE } },
 };
+
+/** Card/tile entrance inside a staggered grid. */
+export const cardRise: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+};
+
+/** Grid orchestration: children cascade in. */
+export const gridStagger: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.09 } },
+};
+
+/** One-shot expanding ring on a node dot when it first reveals. */
+export const ringPulse: Variants = {
+  hidden: { opacity: 0.9, scale: 0.4 },
+  show: { opacity: 0, scale: 2.4, transition: { duration: 1.1, ease: 'easeOut', delay: 0.2 } },
+};

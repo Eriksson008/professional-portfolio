@@ -75,7 +75,13 @@ interface ConstellationMapProps {
  * this is the information layer and the guaranteed fallback under the
  * optional WebGL backdrop.
  */
-export function ConstellationMap({ p, interactive, hovered, onHover, starsQuiet }: ConstellationMapProps) {
+export function ConstellationMap({
+  p,
+  interactive,
+  hovered,
+  onHover,
+  starsQuiet,
+}: ConstellationMapProps) {
   const nodeHandlers = (id: NodeId) =>
     interactive ? { onMouseEnter: () => onHover(id), onMouseLeave: () => onHover(null) } : {};
 

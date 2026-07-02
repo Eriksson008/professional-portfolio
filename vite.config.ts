@@ -13,4 +13,10 @@ export default defineConfig({
   plugins: [react()],
   server: { port: 8790, host: true },
   preview: { port: 8790, host: true },
+  build: {
+    // The WebGL backdrop chunk (three + R3F) is intentionally large and lazy —
+    // it is only fetched on capable desktops after idle. Keep the warning
+    // threshold above it so genuine main-bundle regressions still surface.
+    chunkSizeWarningLimit: 950,
+  },
 });

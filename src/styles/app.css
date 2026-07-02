@@ -586,26 +586,7 @@ img {
   grid-template-columns: repeat(2, 1fr);
   gap: 1.35rem;
 }
-.project-card {
-  display: flex;
-  flex-direction: column;
-  padding: 1.6rem;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  transition:
-    border-color 0.25s var(--ease),
-    transform 0.25s var(--ease),
-    box-shadow 0.25s var(--ease),
-    background 0.25s var(--ease);
-}
-.project-card:hover {
-  border-color: var(--red-line);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lift);
-  background: var(--panel-2);
-}
+/* Card surface lives in premium.css (.glow-panel / .sys-card). */
 .pc-head {
   display: flex;
   align-items: center;
@@ -878,15 +859,7 @@ img {
   background: var(--silver-line);
   border-color: var(--silver-line);
 }
-.metric::before {
-  content: '';
-  display: block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--red);
-  margin-bottom: 0.7rem;
-}
+/* The metric node dot lives in premium.css (.mn-dot / .mn-ring). */
 .skill-group h3 {
   border-bottom-color: var(--silver-line);
 }

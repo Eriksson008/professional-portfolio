@@ -24,9 +24,9 @@ export function ScrambleText({ text, play }: { text: string; play: boolean }) {
         text
           .split('')
           .map((ch, i) =>
-            i < revealCount || ch === ' ' ? ch : GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+            i < revealCount || ch === ' ' ? ch : GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
           )
-          .join(''),
+          .join('')
       );
       if (frame >= total) {
         window.clearInterval(id);

@@ -59,7 +59,13 @@ export const projects: Project[] = [
       'Implemented passwordless authentication (one-time link → email match → OTP → RS256-signed session) on a stateless, autoscaling topology.',
       'Built to enterprise CIAM and pen-test requirements; deployed on AWS ECS/Fargate with PostgreSQL/Aurora.',
     ],
-    tags: ['Node / Express', 'React / TypeScript', 'Spring Boot / Java 21', 'PostgreSQL / Aurora', 'Passwordless auth'],
+    tags: [
+      'Node / Express',
+      'React / TypeScript',
+      'Spring Boot / Java 21',
+      'PostgreSQL / Aurora',
+      'Passwordless auth',
+    ],
   },
   {
     id: 'homebase',
@@ -127,6 +133,9 @@ export const projects: Project[] = [
       'Containerized with a multi-stage Docker build served by nginx; accessible, responsive, and reduced-motion aware.',
     ],
     tags: ['Vite', 'React', 'TypeScript', 'Docker', 'nginx'],
-    link: { label: 'View on GitHub', href: 'https://github.com/Eriksson008/professional-portfolio' },
+    link: {
+      label: 'View on GitHub',
+      href: 'https://github.com/Eriksson008/professional-portfolio',
+    },
   },
 ];

@@ -22,8 +22,7 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(120% 90% at 50% 40%, rgba(255, 255, 255, 0.03), transparent 60%),
-    var(--ink);
+    radial-gradient(120% 90% at 50% 40%, rgba(255, 255, 255, 0.03), transparent 60%), var(--ink);
 }
 /* Faint technical grid, masked to a vignette. */
 .c-backdrop::before {
@@ -96,7 +95,9 @@
 .c-edge {
   stroke: var(--silver-line);
   stroke-width: 1;
-  transition: stroke 0.3s var(--ease), stroke-width 0.3s var(--ease);
+  transition:
+    stroke 0.3s var(--ease),
+    stroke-width 0.3s var(--ease);
 }
 .c-edge.is-active {
   stroke: var(--red);
@@ -170,8 +171,14 @@
   animation: c-pulse 1.6s var(--ease) infinite;
 }
 @keyframes c-pulse {
-  0% { opacity: 0.7; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.15); }
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
 }
 
 .c-metric__value {
@@ -196,7 +203,9 @@
 }
 /* subtle chromatic-aberration on the focused title */
 .c-node.is-active .c-node__title {
-  text-shadow: 0.6px 0 var(--red), -0.6px 0 var(--silver);
+  text-shadow:
+    0.6px 0 var(--red),
+    -0.6px 0 var(--silver);
 }
 .c-node__tags {
   font-family: var(--font-mono);
@@ -235,7 +244,9 @@
   line-height: 1.02;
   margin: 0;
   color: var(--text);
-  text-shadow: 0.8px 0 rgba(229, 72, 77, 0.35), -0.8px 0 rgba(184, 192, 204, 0.3);
+  text-shadow:
+    0.8px 0 rgba(229, 72, 77, 0.35),
+    -0.8px 0 rgba(184, 192, 204, 0.3);
 }
 .c-role {
   font-size: 0.95rem;
@@ -271,7 +282,10 @@
   font-weight: 600;
   text-decoration: none;
   border: 1px solid transparent;
-  transition: background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+  transition:
+    background 0.2s var(--ease),
+    border-color 0.2s var(--ease),
+    color 0.2s var(--ease);
 }
 .c-btn--primary {
   background: var(--red);
