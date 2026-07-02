@@ -19,8 +19,7 @@ export function ConstellationHero() {
   const pointer = usePointer();
   const tier = useVisualTier();
   const [hovered, setHovered] = useState<NodeId | null>(null);
-  const [glReady, setGlReady] = useState(false);
-  const [glFailed, setGlFailed] = useState(false);
+  const [glLive, setGlLive] = useState(false);
   const headingId = 'hero-name';
 
   // The WebGL scene reads motion through a ref — no state crosses into the
@@ -30,7 +29,7 @@ export function ConstellationHero() {
     motionRef.current = { progress, px: pointer.x, py: pointer.y };
   }, [progress, pointer]);
 
-  const webgl = interactive && tier !== 'off' && !glFailed;
+  const webgl = interactive && tier !== 'off';
 
   // Static mode (reduced-motion / no-JS): render the resolved map, everything visible.
   const p = interactive ? progress : 1;
@@ -70,8 +69,7 @@ export function ConstellationHero() {
               <WebGLBackdrop
                 motionRef={motionRef}
                 tier={tier === 'lite' ? 'lite' : 'full'}
-                onReady={() => setGlReady(true)}
-                onFail={() => setGlFailed(true)}
+                onLive={setGlLive}
               />
             </Suspense>
           </SafeVisual>
@@ -83,7 +81,7 @@ export function ConstellationHero() {
             interactive={interactive}
             hovered={hovered}
             onHover={setHovered}
-            starsQuiet={webgl && glReady}
+            starsQuiet={webgl && glLive}
           />
 
           <div

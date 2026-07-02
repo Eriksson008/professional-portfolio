@@ -39,18 +39,19 @@ function Edges({ p, hovered }: { p: number; hovered: NodeId | null }) {
         const a = layout[c.from];
         const b = layout[c.to];
         const reveal = clamp01((p - c.revealAt) / FADE);
+        if (reveal === 0) return null;
         const hot = hovered != null && (c.from === hovered || c.to === hovered);
+        // Draw by interpolating the endpoint — the dash-offset trick misrenders in
+        // Chrome when combined with non-scaling-stroke (dashes computed in screen
+        // space), leaking stray fragments from "hidden" lines.
         return (
           <line
             key={`${c.from}-${c.to}`}
             x1={a.x * 100}
             y1={a.y * 100}
-            x2={b.x * 100}
-            y2={b.y * 100}
+            x2={(a.x + (b.x - a.x) * reveal) * 100}
+            y2={(a.y + (b.y - a.y) * reveal) * 100}
             className={`c-edge ${isActive(c.revealAt, p) ? 'is-active' : ''} ${hot ? 'is-hover' : ''}`}
-            pathLength={100}
-            strokeDasharray={100}
-            strokeDashoffset={100 * (1 - reveal)}
             vectorEffect="non-scaling-stroke"
           />
         );

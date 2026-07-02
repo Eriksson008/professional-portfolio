@@ -9,10 +9,13 @@ import type { VisualTier } from '../hooks/useVisualTier';
 interface WebGLBackdropProps {
   motionRef: MutableRefObject<HeroMotion>;
   tier: Exclude<VisualTier, 'off'>;
-  /** Called once the GL context is live — parent may quiet its SVG star layer. */
-  onReady: () => void;
-  /** Called if the GL context is lost — parent falls back to the SVG field. */
-  onFail: () => void;
+  /**
+   * Reports whether the GL context is live. While not live (initializing, or
+   * context lost) the canvas stays hidden and the parent keeps its SVG star
+   * layer at full strength; three.js restores lost contexts by itself, so
+   * this flips back to true on recovery.
+   */
+  onLive: (live: boolean) => void;
 }
 
 /** Lerps the camera toward pointer parallax and scroll-driven dolly each frame. */
@@ -58,10 +61,14 @@ function CoreGlow() {
  * all information lives in the DOM/SVG layers above it. Pauses rendering
  * while the hero is off-screen; fades in once the context is created.
  */
-export default function WebGLBackdrop({ motionRef, tier, onReady, onFail }: WebGLBackdropProps) {
+export default function WebGLBackdrop({ motionRef, tier, onLive }: WebGLBackdropProps) {
   const wrap = useRef<HTMLDivElement>(null);
   const [onScreen, setOnScreen] = useState(true);
   const [ready, setReady] = useState(false);
+  const setLive = (live: boolean) => {
+    setReady(live);
+    onLive(live);
+  };
 
   useEffect(() => {
     const node = wrap.current;
@@ -79,9 +86,9 @@ export default function WebGLBackdrop({ motionRef, tier, onReady, onFail }: WebG
         gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
         frameloop={onScreen ? 'always' : 'never'}
         onCreated={({ gl }) => {
-          setReady(true);
-          onReady();
-          gl.domElement.addEventListener('webglcontextlost', onFail);
+          setLive(true);
+          gl.domElement.addEventListener('webglcontextlost', () => setLive(false));
+          gl.domElement.addEventListener('webglcontextrestored', () => setLive(true));
         }}
       >
         <Rig motionRef={motionRef} />
