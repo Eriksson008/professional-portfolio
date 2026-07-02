@@ -11,14 +11,16 @@ business logic.
 
 ## Tech stack
 
-| Layer        | Choice                                              |
-| ------------ | --------------------------------------------------- |
-| Framework    | React 18 + TypeScript                               |
-| Build tool   | Vite 5                                              |
-| Styling      | Hand-written CSS with a design-token system         |
-| Content      | Typed data modules (`src/data/`) as source of truth |
-| Container    | Multi-stage Docker build → nginx (Alpine)           |
-| Tooling      | ESLint (flat config) + Prettier                     |
+| Layer        | Choice                                                                |
+| ------------ | --------------------------------------------------------------------- |
+| Framework    | React 18 + TypeScript                                                 |
+| Build tool   | Vite 5                                                                 |
+| Styling      | Hand-written CSS with a design-token system                            |
+| Motion       | framer-motion (LazyMotion) for section transitions                     |
+| 3D (optional)| three + React Three Fiber v8 — lazy chunk, capability-gated, WebGL only (no WebGPU) |
+| Content      | Typed data modules (`src/data/`) as source of truth                    |
+| Container    | Multi-stage Docker build → nginx (Alpine)                              |
+| Tooling      | ESLint (flat config) + Prettier                                        |
 
 No backend, no database, no auth — it is a static site by design.
 
@@ -38,19 +40,27 @@ npm run format       # Prettier
 ## "Constellation of Impact" hero
 
 The landing page opens with a scroll-driven **"Constellation of Impact"** hero
-(`ConstellationHero`) — an award-style interactive system map, built entirely from **real DOM /
-CSS / SVG, no WebGL, no GSAP, no new dependencies**. A tall pinned section (~700vh) accumulates
-real metric, project, skill, and career nodes into one connected constellation as you scroll:
-revealed nodes stay on screen (silver), the node(s) currently in focus light up red, and SVG
-connector lines draw between related nodes via `stroke-dashoffset`. The centered identity fades
-out as the constellation takes over the middle of the screen, then returns at the end with the
-CTA card (name + tagline + **View Projects** / **Read Experience**).
+(`ConstellationHero`) — an award-style interactive system map. The information layer is **real
+DOM / CSS / SVG**: a tall pinned section (~700vh) accumulates real metric, project, skill, and
+career nodes into one connected constellation as you scroll — revealed nodes stay on screen
+(silver), the node(s) currently in focus light up red, and SVG connector lines draw between
+related nodes. The centered identity fades out as the constellation takes over the middle of
+the screen, then returns at the end with the CTA card (name + tagline + **View Projects** /
+**Read Experience**).
 
-The feel is inspired by igloo.inc's award-winning scroll experience, reproduced without its
-WebGL/GSAP stack: lerp-smoothed scroll progress, cursor-reactive 2.5D parallax on the node
-groups, a brief monospace decode-scramble on metric values and the name, a subtle chromatic-
-aberration accent, and hover-to-highlight connector edges. There is no autoplay sound
-(deliberate — accessibility and tone).
+Behind that sits an **optional WebGL backdrop** (`src/webgl/`, three + React Three Fiber): a
+slowly rotating 3D particle shell (silver with sparse red, additive blending) and a breathing
+red core glow, with a gentle camera dolly on scroll and cursor parallax. It is pure atmosphere
+— capability-gated by `src/hooks/useVisualTier.ts` (`full` / `lite` / `off`), loaded lazily in
+its own chunk after first idle, paused off-screen, and wrapped in an error boundary with
+context-lost handling. If WebGL is unavailable (or on small screens, reduced motion, or
+data-saver), the hero renders exactly as before from the DOM/SVG layers — it can never blank.
+**WebGPU is deliberately not used.**
+
+The feel is inspired by igloo.inc's award-winning scroll experience: lerp-smoothed scroll
+progress, cursor-reactive 2.5D parallax on the node groups, a brief monospace decode-scramble
+on metric values and the name, a subtle chromatic-aberration accent, and hover-to-highlight
+connector edges. There is no autoplay sound (deliberate — accessibility and tone).
 
 How it works:
 

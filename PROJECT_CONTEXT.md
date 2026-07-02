@@ -24,7 +24,10 @@ is set to "GitHub Actions".
 ## Tech Stack
 
 - React 18 + TypeScript, built with Vite 5
-- Hand-written CSS with a design-token system (`src/styles/tokens.css` + `app.css`)
+- Hand-written CSS with a design-token system (`src/styles/tokens.css` + `app.css` + `premium.css`)
+- **WebGL layer (optional enhancement):** three + @react-three/fiber v8, lazy-loaded in its own
+  chunk behind a capability gate (`src/hooks/useVisualTier.ts`); framer-motion (LazyMotion) for
+  section transitions. WebGPU deliberately not used.
 - Typed content modules in `src/data/` as the single source of truth
 - Docker: multi-stage node build → nginx (Alpine), serves on port 8790; host exposure
   configurable via `BIND_ADDR` (default `127.0.0.1`, localhost-only) and `PORT` (see `.env.example`)
@@ -52,6 +55,30 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-02 — WebGL visual layer added (user-directed; supersedes the "no WebGL / no new
+  dependencies" restraint of 2026-07-01).** The constellation hero now has an optional 3D
+  backdrop — a slowly rotating flattened particle shell (silver + sparse red, additive) with a
+  breathing red core glow, camera dolly on scroll and lerped pointer parallax — built with
+  **three + React Three Fiber v8** (R3F v9 needs React 19; we're on 18). **Stance: WebGL-first,
+  WebGPU deliberately not used** (would complicate the build for no visible gain at this scene
+  complexity). Key architecture: (1) `src/hooks/useVisualTier.ts` gates the whole layer —
+  `full` / `lite` (few cores/low memory → fewer particles, dpr 1) / `off` (reduced motion,
+  <900px, no WebGL, data-saver) — and only upgrades after first idle; (2) the 3D code
+  (`src/webgl/`: `WebGLBackdrop`, `ParticleField`, runtime-generated canvas textures, no image
+  assets) is a **separate lazy Vite chunk (~235 KB gz)** never in the main bundle (~84 KB gz);
+  (3) the DOM/SVG constellation stays mounted as the information layer and guaranteed floor —
+  `SafeVisual` error boundary + context-lost/restored handling mean the hero can never blank
+  (verified: with WebGL disabled browser-wide the production build renders the previous design
+  with an empty console). **Framer-motion (LazyMotion/domAnimation, `m.*`)** replaced the
+  `useReveal` CSS reveal: sections fade+rise once in view, `SectionHeader` cascades (rule line
+  draws), grids stagger; `useReducedMotion` renders everything static. **New premium surface
+  components** (`GlowPanel` glass panel with gradient hairline + inline-SVG film grain;
+  `SystemCard` project cards with corner node dot; `MetricNode` highlight tiles with one-shot
+  reveal ring) in `src/styles/premium.css`, tokens only. Also fixed a **pre-existing edge
+  artifact**: connector lines now draw by endpoint interpolation because Chrome computes
+  dash patterns in screen space under `non-scaling-stroke`, leaking fragments from hidden
+  edges. `ConstellationMap`/`ScrambleText` extracted from `ConstellationHero`. Design spec:
+  `docs/superpowers/specs/2026-07-02-webgl-visual-layer-design.md`.
 - **2026-07-01 — Pivot to "Constellation of Impact" hero (branch `redesign-scroll-hero`,
   supersedes the scroll-vault hero below).** The box/vault/orb "opening" metaphor read as a
   generic AI-landing-page trope rather than an evidence-driven senior-engineer portfolio, so it
