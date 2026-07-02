@@ -35,46 +35,55 @@ npm run lint         # ESLint
 npm run format       # Prettier
 ```
 
-## Scroll-driven system-vault hero
+## "Constellation of Impact" hero
 
-The landing page opens with a **scroll-driven, 2.5D "system-vault" hero** (`ScrollHero` +
-`VaultScene`), built entirely from **real DOM / CSS / SVG — no imagery and no 3D libraries**. A tall
-section pins a full-screen viewport; as you scroll, a matte black vault **lid opens**, a **controlled
-red light** leaks out, the six **system cards rise in perspective** and settle into a **connected
-architecture**, **SVG connectors draw** between them, **dashboard panels assemble**, and the scene
-recedes for the **identity card** (name + tagline + **View Projects** / **Read Experience**).
+The landing page opens with a scroll-driven **"Constellation of Impact"** hero
+(`ConstellationHero`) — an award-style interactive system map, built entirely from **real DOM /
+CSS / SVG, no WebGL, no GSAP, no new dependencies**. A tall pinned section (~700vh) accumulates
+real metric, project, skill, and career nodes into one connected constellation as you scroll:
+revealed nodes stay on screen (silver), the node(s) currently in focus light up red, and SVG
+connector lines draw between related nodes via `stroke-dashoffset`. The centered identity fades
+out as the constellation takes over the middle of the screen, then returns at the end with the
+CTA card (name + tagline + **View Projects** / **Read Experience**).
+
+The feel is inspired by igloo.inc's award-winning scroll experience, reproduced without its
+WebGL/GSAP stack: lerp-smoothed scroll progress, cursor-reactive 2.5D parallax on the node
+groups, a brief monospace decode-scramble on metric values and the name, a subtle chromatic-
+aberration accent, and hover-to-highlight connector edges. There is no autoplay sound
+(deliberate — accessibility and tone).
 
 How it works:
 
-- **Progress → narrative.** `src/hooks/useScrollProgress.ts` reports scroll progress `0..1` for the
-  pinned section (rAF-throttled, passive listeners). `ScrollHero` derives an eased position with a
-  "hold" band at each end (opening + closing stay readable), then renders a clean matte backdrop, the
-  vault scene, and the caption stages.
-- **The vault (`src/components/VaultScene.tsx`).** The animated protagonist. Scroll progress drives
-  CSS `perspective`/`transform` phases: a matte platform's lid `rotateX`-opens, a contained red glow
-  rises from the well, system cards interpolate from the vault to architecture positions
-  (`translateZ` depth), SVG connectors draw (`stroke-dashoffset`), then dashboard panels assemble as
-  the cards recede. All phase timings + the node/link/card data live at the top of the component.
-- **Clean backdrop, no imagery.** The background is matte black / graphite with a faint engineering
-  grid and vignette (`.sh-backdrop`, pure CSS). The earlier AI-generated frame sequence is **not
-  rendered** — it is kept only as prototype/reference art in `assets/` (see below).
-- **Real text, always.** All copy is HTML from data arrays: `src/data/heroStages.ts` (caption
-  stages) and `src/data/heroSystems.ts` (the six professional areas, rendered as the vault's cards).
-  Nothing readable depends on text embedded in an image.
-- **Palette.** Black / white / red is primary — red is controlled system energy. **Gold is rare**:
-  only the final identity moment (secondary CTA outline, role ticks, a lid hairline).
-- **Accessibility / fallback.** Under `prefers-reduced-motion` (or no JS), a **static hero** renders
-  the destination directly — identity + CTAs + the system cards as a real grid, no scroll-jacking or
-  vault animation. The name is a real `<h1>`; CTAs are keyboard-focusable links.
-- **Responsive.** Desktop (>900px) gets the full vault; below that the vault is dropped and the
-  caption shows the system cards inline as a simplified fallback, over the same clean backdrop.
+- **Hero data (`src/data/constellation.ts`) is the single source of truth.** Edit `metricNodes`,
+  `projectNodes`, `skillClusters`, and `careerNodes` to change content; `layout` (normalized 0..1
+  positions) to reposition nodes; `connections` to rewire which nodes are linked. Each node/edge
+  has a `revealAt` (0..1) scroll-progress threshold that controls when it appears — once revealed
+  it stays (the map only ever accumulates, nothing disappears).
+- **The component (`src/components/ConstellationHero.tsx`)** maps that data onto absolute-
+  positioned DOM nodes plus one SVG connector layer, driven by two small hooks:
+  `src/hooks/useSmoothProgress.ts` (rAF-throttled scroll progress, lerp-smoothed toward the
+  target) and `src/hooks/usePointer.ts` (normalized cursor position for the parallax depth
+  layers). Both gate themselves off under `prefers-reduced-motion` and on touch/coarse-pointer
+  devices.
+- **Real text, always.** Every value (metric figures, project titles/tags, skill items, career
+  entries) is rendered as real HTML from `constellation.ts`, sourced from the existing
+  `highlights.ts` / `projects.ts` / `skills.ts` / `experience.ts` data — nothing readable is baked
+  into an image.
+- **Palette.** Black / white / red / silver: graphite background, white primary text, silver for
+  settled/inactive nodes and edges, red for the current focus window and connector highlights. No
+  imagery, no neon/gaming styling.
+- **Accessibility / fallback.** Under `prefers-reduced-motion` (or no JS), the hero renders a
+  **static, fully resolved constellation** — all node groups plus the CTA shown as a plain
+  vertical layout, no scroll-jacking, no parallax/scramble. The name is a real `<h1>`; CTAs are
+  keyboard-focusable links with visible focus.
+- **Responsive.** Desktop keeps the full 2D constellation; mobile and narrow viewports collapse to
+  a static vertical spine (nodes stacked top-to-bottom with a connecting line), matching the
+  reduced-motion fallback.
+- **Testing locally:** `npm run dev` (the printed port may shift to 8791/8792 etc. if 8790 is
+  busy) — check the hero at ~1440px, ~768px, and ~375px widths, and again with
+  `prefers-reduced-motion: reduce` enabled in devtools.
 
-### Reference art
-
-The `assets/` directory holds **prototype/reference images only** — a red/gold/black storyboard
-(`assets/references/`) and an early cinematic frame sequence (`assets/hero-sequence/`). These shaped
-the concept but are **not used at runtime**; the shipped hero is real DOM/CSS/SVG. They are kept out
-of `public/`, so they never deploy.
+Design spec: `docs/superpowers/specs/2026-07-01-constellation-hero-design.md`.
 
 ## Docker
 
@@ -146,12 +155,12 @@ professional-portfolio/
 ├── .github/workflows/      # deploy.yml — build + publish to GitHub Pages on push to main
 ├── src/
 │   ├── main.tsx, App.tsx
-│   ├── data/               # profile, experience, skills, projects, highlights + heroStages, heroSystems
-│   ├── components/         # Nav, ScrollHero, VaultScene, About, Experience, Projects, Skills, …
-│   ├── hooks/              # useReveal.ts, useScrollProgress.ts (both reduced-motion-aware)
-│   └── styles/             # tokens.css + app.css + scroll-hero.css (design system)
+│   ├── data/               # profile, experience, skills, projects, highlights + constellation.ts
+│   ├── components/         # Nav, ConstellationHero, About, Experience, Projects, Skills, …
+│   ├── hooks/              # useReveal.ts, useSmoothProgress.ts, usePointer.ts (reduced-motion-aware)
+│   └── styles/             # tokens.css + app.css + constellation-hero.css (design system)
 ├── public/                 # resume.pdf, favicon.svg, og-image.png, .nojekyll
-├── assets/                 # prototype/REFERENCE art only (storyboard + early frames); not deployed
+├── assets/                 # prototype/REFERENCE art only (earlier hero concepts); not deployed
 ├── Dockerfile              # multi-stage node build → nginx
 ├── nginx.conf              # listens on ${PORT}; SPA fallback; gzip; security headers
 ├── docker-compose.yml      # BIND_ADDR + PORT configurable host mapping (see .env.example)

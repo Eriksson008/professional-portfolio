@@ -52,6 +52,36 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-01 — Pivot to "Constellation of Impact" hero (branch `redesign-scroll-hero`,
+  supersedes the scroll-vault hero below).** The box/vault/orb "opening" metaphor read as a
+  generic AI-landing-page trope rather than an evidence-driven senior-engineer portfolio, so it
+  was replaced with a scroll-driven, award-style interactive **system map**: real metric,
+  project, skill, and career nodes accumulate into one connected constellation over a ~700vh
+  pinned section — revealed nodes stay (silver), the current focus window highlights red, and
+  SVG connector lines draw between related nodes via `stroke-dashoffset`. The centered identity
+  fades out mid-scroll so the constellation owns the screen, then returns with the CTA
+  (`View Projects` / `Read Experience`). Inspired by igloo.inc's (Awwwards SOTD) award-style
+  *feel* — lerp-smoothed scroll, cursor-reactive 2.5D parallax, monospace decode-scramble on
+  metric values and the name, a subtle chromatic-aberration accent, hover-to-highlight connector
+  edges — reproduced in **pure React/CSS/SVG, no WebGL/GSAP, no new dependencies** (the restraint
+  is itself an engineering-taste signal on GitHub Pages). No autoplay sound (deliberate).
+  **Palette unified to black/white/red/silver**: gold retired from the primary theme (`--brass*`
+  tokens remain defined in `tokens.css` but are no longer used by the hero; new `--silver*`
+  tokens added for both themes); the lower page (Highlights/Skills) was lightly recolored for
+  cohesion. **Data-driven**: all hero content lives in `src/data/constellation.ts`
+  (`metricNodes`/`projectNodes`/`skillClusters`/`careerNodes`, `layout` positions,
+  `connections` edges, `revealAt` reveal order) — sourced from the existing `highlights.ts` /
+  `projects.ts` / `skills.ts` / `experience.ts` data, so every figure stays git-verifiable.
+  **Component:** `src/components/ConstellationHero.tsx`; **styles:**
+  `src/styles/constellation-hero.css`; **new hooks:** `src/hooks/useSmoothProgress.ts`
+  (lerp-smoothed rAF scroll progress) and `src/hooks/usePointer.ts` (normalized cursor position
+  for parallax) — both reduced-motion/touch-aware, replacing the earlier `useScrollProgress.ts`.
+  **Reduced-motion / mobile:** collapses to a static, fully resolved vertical spine (all node
+  groups + CTA, no scroll-jacking, no parallax/scramble). **Removed:** `ScrollHero.tsx`,
+  `VaultScene.tsx`, `heroStages.ts`, `heroSystems.ts`, `scroll-hero.css`, `useScrollProgress.ts`
+  — the vault concept is fully out of the render path. Verified in-browser at 1440/768/375 and
+  under `prefers-reduced-motion`; `npm run lint` + `npm run build` green. Design spec:
+  `docs/superpowers/specs/2026-07-01-constellation-hero-design.md`.
 - **2026-07-01 — Scroll-driven cinematic hero (branch `redesign-scroll-hero`).** Replaced the
   static "engineering title-block" hero with a premium, scroll-driven hero built on a red/gold/black
   "system-vault" image sequence (nine frames). A tall section pins a full-screen viewport while
@@ -113,6 +143,8 @@ site exposes only honest, defensible, public-safe content.
 
 ## Current Next Actions
 
+- **Merge the Constellation of Impact hero:** `redesign-scroll-hero` is implemented,
+  browser-verified, and docs are current — merge to `main` so it ships via the Pages workflow.
 - **Finish going live:** make the GitHub repo public and set Settings → Pages → Source =
   "GitHub Actions" (the workflow handles the rest on push to `main`).
 - After first deploy, verify the live site: asset paths, résumé download, and the OG preview
