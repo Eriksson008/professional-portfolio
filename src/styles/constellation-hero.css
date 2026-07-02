@@ -1,0 +1,379 @@
+/* ============================================================
+   Constellation of Impact hero — award-style interactive system map.
+   Desktop: pinned full-viewport field, absolutely-positioned nodes over
+   an SVG edge layer, revealed by smoothed scroll, with cursor parallax.
+   Mobile / reduced-motion: static vertical stack (Task 5 refines small screens).
+   ============================================================ */
+
+.c-hero {
+  position: relative;
+  height: 700vh; /* tall scroll region → slow, readable pacing */
+  background: var(--ink);
+}
+
+.c-pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.c-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 40%, rgba(255, 255, 255, 0.03), transparent 60%),
+    var(--ink);
+}
+/* Faint technical grid, masked to a vignette. */
+.c-backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--silver-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--silver-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.1;
+  mask-image: radial-gradient(120% 100% at 50% 50%, #000 40%, transparent 85%);
+}
+
+.c-field {
+  position: absolute;
+  inset: 0;
+  margin: 0 auto;
+  max-width: 1240px;
+  width: 100%;
+}
+
+/* ---- starfield (deepest parallax layer, moves opposite the pointer) ---- */
+.c-stars {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: translate(calc(var(--px, 0) * -14px), calc(var(--py, 0) * -14px));
+  transition: transform 0.35s var(--ease);
+}
+.c-stars circle {
+  fill: var(--silver);
+  opacity: 0.25;
+}
+
+/* ---- edges ---- */
+.c-edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: translate(calc(var(--px, 0) * 4px), calc(var(--py, 0) * 4px));
+  transition: transform 0.3s var(--ease);
+}
+.c-edge {
+  stroke: var(--silver-line);
+  stroke-width: 1;
+  transition: stroke 0.3s var(--ease), stroke-width 0.3s var(--ease);
+}
+.c-edge.is-active {
+  stroke: var(--red);
+  stroke-width: 1.5;
+}
+.c-edge.is-hover {
+  stroke: var(--red-bright);
+  stroke-width: 1.75;
+}
+
+/* ---- node groups reset + parallax depth per band ---- */
+.c-group {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.c-group--metric,
+.c-group--career {
+  --pd: 12px; /* outer bands drift more */
+}
+.c-group--project,
+.c-group--skill {
+  --pd: 7px;
+}
+
+/* ---- nodes (desktop absolute layout) ---- */
+.c-node {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: calc(var(--y) * 100%);
+  opacity: var(--o, 0);
+  transform: translate(-50%, -50%)
+    translate(calc(var(--px, 0) * var(--pd, 8px)), calc(var(--py, 0) * var(--pd, 8px)))
+    translateY(var(--ty, 0));
+  transition:
+    opacity 0.5s var(--ease),
+    transform 0.35s var(--ease),
+    border-color 0.3s var(--ease),
+    color 0.3s var(--ease),
+    box-shadow 0.3s var(--ease);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--silver-line);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  backdrop-filter: blur(2px);
+  color: var(--silver);
+  text-align: center;
+  min-width: max-content;
+  max-width: 220px;
+  will-change: opacity, transform;
+}
+.c-node:hover {
+  border-color: var(--red-line);
+  color: var(--text);
+  z-index: 3;
+}
+.c-node.is-active {
+  border-color: var(--red);
+  color: var(--text);
+  box-shadow: 0 0 0 3px var(--red-wash);
+}
+.c-node.is-active::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid var(--red);
+  animation: c-pulse 1.6s var(--ease) infinite;
+}
+@keyframes c-pulse {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.15); }
+}
+
+.c-metric__value {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum' 1; /* tabular figures — no shift during scramble */
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+.c-metric__label,
+.c-node__tags,
+.c-career__period {
+  font-size: 0.72rem;
+  color: var(--silver-2);
+}
+.c-node__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+/* subtle chromatic-aberration on the focused title */
+.c-node.is-active .c-node__title {
+  text-shadow: 0.6px 0 var(--red), -0.6px 0 var(--silver);
+}
+.c-node__tags {
+  font-family: var(--font-mono);
+  letter-spacing: 0.01em;
+}
+.c-career__period {
+  font-family: var(--font-mono);
+  color: var(--red);
+}
+
+/* ---- identity / CTA (center) ---- */
+.c-identity {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  text-align: center;
+  width: min(90%, 640px);
+}
+.c-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin: 0 0 0.6rem;
+}
+.c-name {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  font-weight: 700;
+  line-height: 1.02;
+  margin: 0;
+  color: var(--text);
+  text-shadow: 0.8px 0 rgba(229, 72, 77, 0.35), -0.8px 0 rgba(184, 192, 204, 0.3);
+}
+.c-role {
+  font-size: 0.95rem;
+  color: var(--silver);
+  margin: 0.5rem 0 0;
+}
+.c-cta {
+  opacity: var(--cta, 0);
+  visibility: hidden;
+  transition: opacity 0.5s var(--ease);
+  margin-top: 1rem;
+}
+.c-identity.is-live .c-cta {
+  visibility: visible;
+}
+.c-tagline {
+  color: var(--muted);
+  max-width: 46ch;
+  margin: 0 auto 1.2rem;
+  line-height: 1.5;
+}
+.c-actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.c-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+.c-btn--primary {
+  background: var(--red);
+  color: var(--on-red);
+  border-color: var(--red);
+}
+.c-btn--primary:hover {
+  background: var(--red-bright);
+  border-color: var(--red-bright);
+}
+.c-btn--ghost {
+  color: var(--text);
+  border-color: var(--silver-line);
+}
+.c-btn--ghost:hover {
+  border-color: var(--silver);
+}
+.c-btn:focus-visible {
+  outline: 2px solid var(--red-bright);
+  outline-offset: 3px;
+}
+
+/* dim the field as the CTA resolves so identity reads clearly */
+.c-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 50%, rgba(11, 14, 19, 0.86), rgba(11, 14, 19, 0.5));
+  opacity: var(--scrim, 0);
+  transition: opacity 0.4s var(--ease);
+}
+
+/* ---- scroll cue ---- */
+.c-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--silver-2);
+  transition: opacity 0.4s var(--ease);
+}
+.c-cue.is-hidden {
+  opacity: 0;
+}
+.c-cue__label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.c-cue__line {
+  width: 1px;
+  height: 34px;
+  background: linear-gradient(var(--silver), transparent);
+}
+
+/* ============================================================
+   Static path (reduced-motion / no-JS): resolved vertical map.
+   ============================================================ */
+.c-hero--static {
+  height: auto;
+}
+.c-hero--static .c-pin {
+  position: static;
+  height: auto;
+  min-height: 100vh;
+  padding: clamp(3rem, 8vh, 6rem) var(--gutter);
+}
+.c-hero--static .c-field {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.c-hero--static .c-edges,
+.c-hero--static .c-stars,
+.c-hero--static .c-scrim,
+.c-hero--static .c-cue {
+  display: none;
+}
+.c-hero--static .c-identity {
+  position: static;
+  transform: none;
+  order: -1;
+  margin-bottom: 1.5rem;
+}
+.c-hero--static .c-name {
+  text-shadow: none;
+}
+.c-hero--static .c-cta {
+  opacity: 1;
+  visibility: visible;
+}
+.c-hero--static .c-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  max-width: 900px;
+}
+.c-hero--static .c-node {
+  position: static;
+  transform: none;
+  opacity: 1;
+}
+.c-hero--static .c-node.is-active::after {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c-node,
+  .c-edge,
+  .c-stars,
+  .c-edges,
+  .c-cta,
+  .c-scrim {
+    transition: none;
+  }
+  .c-node.is-active::after {
+    animation: none;
+  }
+  .c-name,
+  .c-node.is-active .c-node__title {
+    text-shadow: none;
+  }
+}

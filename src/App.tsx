@@ -1,5 +1,5 @@
 import { Nav } from './components/Nav';
-import { ScrollHero } from './components/ScrollHero';
+import { ConstellationHero } from './components/ConstellationHero';
 import { About } from './components/About';
 import { Experience } from './components/Experience';
 import { Highlights } from './components/Highlights';
@@ -17,7 +17,7 @@ export default function App() {
       </a>
       <Nav />
       <main>
-        <ScrollHero />
+        <ConstellationHero />
         <About />
         <Experience />
         <Highlights />
