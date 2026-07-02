@@ -20,6 +20,12 @@
   --red-line: rgba(229, 72, 77, 0.34);
   --on-red: #ffffff;
 
+  /* Silver — inactive nodes, edges, hairlines, supporting labels. */
+  --silver: #b8c0cc;
+  --silver-2: #8b95a3;
+  --silver-line: rgba(184, 192, 204, 0.28);
+  --silver-wash: rgba(184, 192, 204, 0.08);
+
   /* Premium highlight — gold, used rarely (standout figures, final polish). */
   --brass: #d7a24b;
   --brass-bright: #ecbb66;
@@ -75,6 +81,12 @@
   --red-wash: rgba(209, 55, 60, 0.1);
   --red-line: rgba(209, 55, 60, 0.32);
   --on-red: #ffffff;
+
+  /* Silver — deepened for legibility on paper. */
+  --silver: #6b7280;
+  --silver-2: #8a929f;
+  --silver-line: rgba(84, 92, 104, 0.26);
+  --silver-wash: rgba(84, 92, 104, 0.06);
 
   /* Premium highlight — deepened brass so it stays legible on white */
   --brass: #a97a1e;
