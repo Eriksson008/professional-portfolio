@@ -1,23 +1,20 @@
 /* ============================================================
    Premium surface layer — GlowPanel, SystemCard, MetricNode.
-   Gradients, hairlines, and grain built only from existing tokens
-   and inline SVG (no image assets).
+   Slate glass, gradient hairlines, and grain built only from
+   existing tokens and inline SVG (no image assets).
    ============================================================ */
 
 .glow-panel {
   position: relative;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--panel) 94%, transparent),
-    color-mix(in srgb, var(--ink-2) 90%, transparent)
-  );
+  background: linear-gradient(180deg, var(--panel), rgba(56, 62, 78, 0.18));
+  backdrop-filter: blur(8px);
   box-shadow: var(--shadow);
   overflow: hidden;
 }
 
-/* Gradient hairline along the top edge, warming to red at center. */
+/* Gradient hairline along the top edge, warming to violet at center. */
 .glow-panel::before {
   content: '';
   position: absolute;
@@ -27,7 +24,7 @@
     90deg,
     transparent,
     var(--silver-line) 30%,
-    var(--red-line) 50%,
+    var(--accent-line) 50%,
     var(--silver-line) 70%,
     transparent
   );
@@ -55,12 +52,12 @@
     box-shadow 0.25s var(--ease);
 }
 .sys-card:hover {
-  border-color: var(--red-line);
+  border-color: var(--accent-line);
   transform: translateY(-3px);
-  box-shadow: 0 16px 40px rgba(11, 14, 19, 0.45);
+  box-shadow: var(--shadow-lift);
 }
 
-/* Corner node — silver at rest, lights red when the card is engaged. */
+/* Corner node — silver at rest, lights violet when the card is engaged. */
 .sys-node {
   position: absolute;
   top: 0.95rem;
@@ -77,9 +74,9 @@
 }
 .sys-card:hover .sys-node,
 .sys-card:focus-within .sys-node {
-  background: var(--red);
+  background: var(--accent-bright);
   opacity: 1;
-  box-shadow: 0 0 0 4px var(--red-wash);
+  box-shadow: 0 0 0 4px var(--accent-wash);
 }
 
 /* ---- MetricNode: highlight figure as a constellation node ---- */
@@ -89,14 +86,14 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--red);
+  background: var(--accent);
   margin-bottom: 0.7rem;
 }
 .mn-ring {
   position: absolute;
   inset: -5px;
   border-radius: 50%;
-  border: 1px solid var(--red);
+  border: 1px solid var(--accent);
 }
 
 @media (prefers-reduced-motion: reduce) {
