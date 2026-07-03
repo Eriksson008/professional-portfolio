@@ -110,15 +110,33 @@ export function AstronautHero() {
       if (!raf) raf = requestAnimationFrame(apply);
     };
 
+    // Mobile browsers don't paint seeks on a never-played video — prime the
+    // decode pipeline with one muted play → pause (allowed without a gesture
+    // because the video is muted + playsInline).
+    let primed = false;
+    const prime = () => {
+      if (primed) return;
+      primed = true;
+      const p = video.play();
+      if (p) {
+        p.then(() => video.pause()).catch(() => {
+          primed = false;
+        });
+      }
+    };
+
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     video.addEventListener('loadedmetadata', onScroll);
+    video.addEventListener('loadedmetadata', prime);
+    prime();
     onScroll();
     return () => {
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
       video.removeEventListener('loadedmetadata', onScroll);
+      video.removeEventListener('loadedmetadata', prime);
     };
   }, [scrub]);
 

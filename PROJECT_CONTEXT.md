@@ -82,7 +82,14 @@ docker compose up --build       # production container at http://localhost:8790 
   labels — Exceptional ×3, 750+ commits, 120+ stories, Tech Lead — slide in 0.80–0.98); the cue
   retires mid-film; everything reverses when scrolling back up (`translate` is used so the HUD's
   mirroring `transform`s stay intact; non-scrub paths keep the load-time animations and render
-  resolved); (4) **palette reduced to pure
+  resolved). Two mobile fixes (same day): the video is **primed with one muted play → pause**
+  (mobile browsers don't paint seeks on a never-played video — it sat on the start frame), and
+  in-page anchors (View Work, nav) use a **JS rAF glide** (`useAnchorGlide`, replaces CSS
+  `scroll-behavior: smooth`) because native hash jumps don't fire IntersectionObserver on
+  mobile WebKit, leaving every `whileInView` section invisible until a manual scroll; the glide
+  produces real scroll frames so reveals fire along the way, offsets for the 68px nav, focuses
+  the target for AT, and is cancelled by wheel/touch input (reduced motion jumps instantly);
+  (4) **palette reduced to pure
   black/white/silver glass** — violet/ice accents retired, token names kept so the whole CSS
   system reskinned in place; glass cards standardized (rgba-white 0.045 bg, 1px rgba-white 0.12
   border, blur(18px), radius 22px); (5) sections renamed to the mission frame — 01 Mission

@@ -1,5 +1,6 @@
 import { LazyMotion, domAnimation } from 'framer-motion';
 import { Nav } from './components/Nav';
+import { useAnchorGlide } from './components/useAnchorGlide';
 import { AstronautHero } from './components/AstronautHero';
 import { About } from './components/About';
 import { Highlights } from './components/Highlights';
@@ -10,6 +11,7 @@ import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 
 export default function App() {
+  useAnchorGlide();
   return (
     <LazyMotion features={domAnimation} strict>
       <a className="skip-link" href="#about">
