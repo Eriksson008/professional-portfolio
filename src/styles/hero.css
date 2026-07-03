@@ -7,8 +7,9 @@
    the choreography block at the end of this file eases every
    segment into frame on its own progress window — identity
    while the astronaut moves, telemetry after the film ends.
-   Without a film (mobile / reduced motion / failure) the
-   original load-time animations run instead. All motion is
+   The film scrubs on every viewport (phones get a 720p encode
+   and a portrait pan); without one (reduced motion / failure)
+   the original load-time animations run instead. All motion is
    opacity / translate / filter.
    ============================================================ */
 
@@ -355,13 +356,25 @@
 }
 
 @media (max-width: 719px) {
-  /* Mobile: poster frame, stacked identity over a strong base gradient. */
+  /* Mobile: the film still scrubs — stacked identity, no HUD density. */
   .hero {
     min-height: 92svh;
   }
   .hero-hud,
   .hero-scroll {
     display: none;
+  }
+  /* The cue is the only affordance for the scrub — keep it when the film runs. */
+  .hero-runway.is-scrub .hero-scroll {
+    display: flex;
+  }
+  /* Portrait crop: hold the astronaut in frame, panning to center with the
+     film (he enters at the left of the 16:9 frame and settles centered). */
+  .hero-runway.is-scrub .hero-media {
+    background-position: 30% center;
+  }
+  .hero-runway.is-scrub .hero-media video {
+    object-position: calc(30% + clamp(0, calc(var(--p) / 0.78), 1) * 20%) center;
   }
   .hero-scrim {
     background:

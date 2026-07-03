@@ -67,11 +67,13 @@ docker compose up --build       # production container at http://localhost:8790 
   runway and a rAF-lerped seek maps scroll progress onto `video.currentTime` (film occupies
   0–0.78 of the runway, the rest holds the settled frame) — the served file is a ~6 MB
   **all-intra re-encode** (`ffmpeg -g 1`, crf 26; normal-GOP seeking stutters), the
-  original 3.4 MB mp4 kept as source; the video stays **decorative only** (`aria-hidden`,
-  muted, `playsInline`, never `play()`ed); (2) two poster stills: the start frame is the video
-  poster + scrub background (scroll 0 matches what loads), the final settled frame backs mobile
-  (<720px, no video, no pinning), `prefers-reduced-motion`, and video failure — content never
-  depends on the video; (3) **full scroll choreography from one variable** (second same-day
+  original 3.4 MB mp4 kept as source; **mobile scrubs too** (third same-day revision): phones
+  get a 720p all-intra variant (~3 MB) plus a progress-linked `object-position` pan (30%→50%)
+  that keeps the astronaut in frame under the portrait crop (HUD stays desktop-only); the video
+  stays **decorative only** (`aria-hidden`, muted, `playsInline`, never `play()`ed); (2) two
+  poster stills: the start frame is the video poster + scrub background (scroll 0 matches what
+  loads), the final settled frame backs `prefers-reduced-motion` and video failure — content
+  never depends on the video; (3) **full scroll choreography from one variable** (second same-day
   revision): the component publishes smoothed progress as `--p` on the hero and hero.css derives
   per-segment eased windows (`--t`) driving opacity + `translate` + blur — the page opens on the
   astronaut alone with only a scroll cue, the identity segments ease in one at a time while the
