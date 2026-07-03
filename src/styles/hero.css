@@ -87,11 +87,11 @@
   position: absolute;
   z-index: 2;
   left: 50%;
-  top: 41.5%;
+  top: 40%;
   /* Wide, short frame: the bottom bracket + label group must stay on the
      visor glass, not fall to the helmet rim. */
   width: min(46vw, 58vh);
-  aspect-ratio: 1.32;
+  aspect-ratio: 1.5;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
