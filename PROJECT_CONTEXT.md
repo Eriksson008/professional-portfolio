@@ -89,10 +89,13 @@ docker compose up --build       # production container at http://localhost:8790 
   mobile WebKit, leaving every `whileInView` section invisible until a manual scroll; the glide
   produces real scroll frames so reveals fire along the way, offsets for the 68px nav, focuses
   the target for AT, and is cancelled by wheel/touch input (reduced motion jumps instantly);
-  (4) **palette reduced to pure
+  (4) **OG social preview regenerated** from the settled astronaut end-frame PNG
+  (`public/media/astronaut-video-end.png`): `public/og-image.png` now uses the
+  black/white/silver astronaut art direction with restrained command-interface copy, replacing
+  the older drafting-frame social card; (5) **palette reduced to pure
   black/white/silver glass** — violet/ice accents retired, token names kept so the whole CSS
   system reskinned in place; glass cards standardized (rgba-white 0.045 bg, 1px rgba-white 0.12
-  border, blur(18px), radius 22px); (5) sections renamed to the mission frame — 01 Mission
+  border, blur(18px), radius 22px); (6) sections renamed to the mission frame — 01 Mission
   Summary, 02 Impact Telemetry (glass metric cards), 03 Project Modules (cards settle from a
   subtle rotateX), 04 Systems & Skills (regrouped to 6 groups incl. AI/LLM Systems and merged
   Cloud/DevOps/Security), 05 Career Trajectory, 06 Contact Transmission (black glass panel; the
@@ -271,12 +274,11 @@ site exposes only honest, defensible, public-safe content.
 
 ## Current Next Actions
 
-- **Merge the astronaut hero:** `astronaught-idea` is implemented, lint/build green, and
-  desktop-verified — visually check mobile + reduced-motion, then merge to `main` so it ships
-  via the Pages workflow.
+- **Manually spot-check the astronaut hero:** test on a real phone and with OS reduced-motion on
+  (desktop is verified; mobile/reduced-motion were code-reviewed in the session that built the
+  hero).
 - **Media follow-ups:** add a webm encode next to the mp4 for better compression
-  (`ffmpeg -i astronaut-video.mp4 -c:v libvpx-vp9 -crf 38 -b:v 0 -an astronaut-video.webm`),
-  and regenerate `public/og-image.png` to match the new black/white astronaut art direction.
+  (`ffmpeg -i astronaut-video.mp4 -c:v libvpx-vp9 -crf 38 -b:v 0 -an astronaut-video.webm`).
 - **Finish going live:** make the GitHub repo public and set Settings → Pages → Source =
   "GitHub Actions" (the workflow handles the rest on push to `main`).
 - After first deploy, verify the live site: asset paths, résumé download, and the OG preview
