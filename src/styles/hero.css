@@ -425,7 +425,8 @@
   --p: 0;
 }
 
-/* Identity — rises with the approach. */
+/* Identity — rises with the approach. Blur cost grows with the square of
+   the radius; 6px reads the same as 10px in motion at half the price. */
 .hero-runway.is-scrub .hero-eyebrow,
 .hero-runway.is-scrub .hero-name,
 .hero-runway.is-scrub .hero-sub,
@@ -433,7 +434,18 @@
   animation: none;
   opacity: var(--t);
   translate: 0 calc((1 - var(--t)) * 26px);
-  filter: blur(calc((1 - var(--t)) * 10px));
+  filter: blur(calc((1 - var(--t)) * 6px));
+}
+
+/* Glass buttons are repainted every frame while they translate over the
+   changing film — backdrop-filter there multiplies that cost. A deeper
+   tint stands in for the blur inside the hero only. */
+.hero .btn {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.hero .btn:not(.btn-primary):not(.btn-ghost) {
+  background: rgba(8, 10, 14, 0.6);
 }
 .hero-runway.is-scrub .hero-eyebrow {
   --t: clamp(0, calc((var(--p) - 0.06) / 0.14), 1);

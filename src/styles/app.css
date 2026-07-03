@@ -152,22 +152,25 @@ img {
 }
 
 /* ============================================================
-   Nav — black glass bar
+   Nav — black glass bar.
+   No backdrop-filter here: the bar sits over the scroll-scrubbed
+   film, and re-blurring a changing video every scrolled frame is
+   the most expensive thing a sticky header can do. A slightly
+   deeper tint reads the same over dark content.
    ============================================================ */
 .nav {
   position: sticky;
   top: 0;
   z-index: 100;
   border-bottom: 1px solid transparent;
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(14px);
+  background: rgba(0, 0, 0, 0.5);
   transition:
     border-color 0.25s var(--ease),
     background 0.25s var(--ease);
 }
 .nav.is-scrolled {
   border-bottom-color: var(--line-soft);
-  background: rgba(3, 3, 5, 0.78);
+  background: rgba(3, 3, 5, 0.88);
 }
 .nav-inner {
   display: flex;
