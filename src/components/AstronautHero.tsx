@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { profile } from '../data/profile';
 
-// The scrub encode is all-intra (a keyframe every frame) so seeking is
+// The scrub encodes are all-intra (a keyframe every frame) so seeking is
 // instant at any scroll position; the original GOP encode stutters.
+// Phones get a 720p variant (~3 MB vs ~6 MB).
 const VIDEO_SRC = `${import.meta.env.BASE_URL}media/astronaut-video-scrub.mp4`;
+const VIDEO_SRC_SM = `${import.meta.env.BASE_URL}media/astronaut-video-scrub-sm.mp4`;
 /** Final frame — the settled helmet; what mobile / reduced-motion / failure show. */
 const POSTER_SRC = `${import.meta.env.BASE_URL}media/astronaut-video-poster.jpg`;
 /** First frame — the distant approach; what the scrubbed film opens on. */
@@ -50,16 +52,18 @@ function useDesktopViewport() {
  * (eyebrow → name → sub → CTAs) eases into frame while the astronaut moves,
  * then the visor telemetry assembles piece by piece once the film has ended.
  *
- * The video is purely decorative. Mobile and reduced-motion get the poster
- * still (no pinning, no scrub, everything resolved); if the video errors,
- * the poster is already painted underneath.
+ * The video is purely decorative and scrubs on every viewport — phones get
+ * a lighter 720p encode and a progress-linked object-position pan that keeps
+ * the astronaut in frame under the portrait crop. Reduced-motion gets the
+ * settled poster still (no pinning, no scrub, everything resolved); if the
+ * video errors, the poster is already painted underneath.
  */
 export function AstronautHero() {
   const reduced = useReducedMotion();
   const desktop = useDesktopViewport();
   const [failed, setFailed] = useState(false);
   const [settled, setSettled] = useState(false);
-  const scrub = desktop && !reduced && !failed;
+  const scrub = !reduced && !failed;
 
   const runwayRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -134,7 +138,7 @@ export function AstronautHero() {
           {scrub && (
             <video
               ref={videoRef}
-              src={VIDEO_SRC}
+              src={desktop ? VIDEO_SRC : VIDEO_SRC_SM}
               poster={START_SRC}
               muted
               playsInline

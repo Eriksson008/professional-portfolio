@@ -49,11 +49,11 @@ How it works (`src/components/AstronautHero.tsx` + `src/styles/hero.css`):
 - **Scroll drives the film.** A scroll listener measures progress through the runway and a
   rAF-lerped seek sets `video.currentTime` (never `play()`), so fast flicks stay smooth and the
   frame always settles exactly where the scroll position says. The film occupies the first 78%
-  of the runway; the rest is a hold on the settled frame. The served file
-  (`astronaut-video-scrub.mp4`, ~6 MB, desktop-only) is an **all-intra re-encode** (a keyframe
-  every frame, `ffmpeg -g 1`) — seeking a normal-GOP encode stutters because every scrub
-  position decodes from the last keyframe. The original `astronaut-video.mp4` is kept as the
-  source asset.
+  of the runway; the rest is a hold on the settled frame. The served files are **all-intra
+  re-encodes** (a keyframe every frame, `ffmpeg -g 1`) — seeking a normal-GOP encode stutters
+  because every scrub position decodes from the last keyframe: `astronaut-video-scrub.mp4`
+  (1080p, ~6 MB) on ≥720 px viewports, `astronaut-video-scrub-sm.mp4` (720p, ~3 MB) on phones.
+  The original `astronaut-video.mp4` is kept as the source asset.
 - **Everything is choreographed from one variable.** The component publishes the smoothed
   progress as a CSS custom property (`--p`) on the hero; `hero.css` derives a per-segment eased
   window (`--t`) from it and drives opacity + `translate` + blur — so every segment moves
@@ -62,9 +62,11 @@ How it works (`src/components/AstronautHero.tsx` + `src/styles/hero.css`):
 - **Poster-under-video fallback.** Two stills extracted from the film: the **start frame**
   (`astronaut-video-start.jpg`) is the video poster and scrub-mode background, so scroll
   position 0 matches what loads; the **final frame** (`astronaut-video-poster.jpg`) backs
-  mobile (<720 px, where the `<video>` isn't rendered and the hero doesn't pin),
-  `prefers-reduced-motion`, and video load failure — all of which degrade to the settled still
-  with telemetry shown. No real content depends on the video.
+  `prefers-reduced-motion` and video load failure — both degrade to the settled still,
+  resolved, with no pinning. No real content depends on the video.
+- **Mobile scrubs too.** Phones get the 720p encode and a progress-linked `object-position`
+  pan (30% → 50%) that keeps the astronaut in frame under the portrait crop as he crosses the
+  16:9 frame; the HUD stays desktop-only, so on phones the film + identity carry the sequence.
 - **Opening sequence.** The page opens on the astronaut alone against black with only a scroll
   cue. As the astronaut moves, the identity segments ease into frame bottom-right one at a time
   (eyebrow → name → subheadline → CTAs across progress 0.06–0.46), each rising from below and
