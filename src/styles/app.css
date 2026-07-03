@@ -118,7 +118,6 @@ img {
   font-size: 0.82rem;
   letter-spacing: 0.02em;
   background: var(--panel);
-  backdrop-filter: blur(12px);
   cursor: pointer;
   transition:
     border-color 0.25s var(--ease),
@@ -409,8 +408,6 @@ img {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
   transition:
     border-color 0.35s var(--ease),
@@ -602,8 +599,6 @@ img {
   background: var(--panel-2);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
 }
 .contact-panel .sheet-mark {
@@ -688,8 +683,7 @@ img {
     align-items: flex-start;
     gap: 0;
     padding: 0.5rem var(--gutter) 1.2rem;
-    background: rgba(3, 3, 5, 0.92);
-    backdrop-filter: blur(18px);
+    background: rgba(3, 3, 5, 0.96);
     border-bottom: 1px solid var(--line);
     display: none;
   }
