@@ -502,3 +502,14 @@
   --t: clamp(0, calc((var(--p) - 0.9) / 0.08), 1);
   translate: calc((1 - var(--t)) * 16px) 0;
 }
+
+/* Phones: blur() is the costliest part of the choreography and mobile GPUs
+   feel it — opacity + translate carry the effect there. */
+@media (max-width: 719px) {
+  .hero-runway.is-scrub .hero-eyebrow,
+  .hero-runway.is-scrub .hero-name,
+  .hero-runway.is-scrub .hero-sub,
+  .hero-runway.is-scrub .hero-ctas {
+    filter: none;
+  }
+}
