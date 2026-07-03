@@ -87,9 +87,11 @@
   position: absolute;
   z-index: 2;
   left: 50%;
-  top: 44%;
+  top: 41.5%;
+  /* Wide, short frame: the bottom bracket + label group must stay on the
+     visor glass, not fall to the helmet rim. */
   width: min(46vw, 58vh);
-  aspect-ratio: 1.12;
+  aspect-ratio: 1.32;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -164,15 +166,13 @@
   right: 0;
   animation-delay: 1s;
 }
-/* Bottom labels sit inside the frame — outside, they'd fall below the
-   visor rim onto the suit. */
 .hud-label-bl {
-  bottom: 1.2rem;
+  bottom: -1.6rem;
   left: 0;
   animation-delay: 1.2s;
 }
 .hud-label-br {
-  bottom: 1.2rem;
+  bottom: -1.6rem;
   right: 0;
   animation-delay: 1.4s;
 }
