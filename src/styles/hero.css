@@ -272,17 +272,18 @@
   text-transform: uppercase;
   color: rgba(247, 247, 245, 0.4);
   opacity: 0;
-  animation: hero-fade 1.4s var(--ease) 1.4s forwards;
+  animation: hero-fade 1s var(--ease) 0.4s forwards;
 }
 .hero-scroll::after {
   content: '';
   width: 1px;
   height: 38px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent);
-  animation: scroll-drift 2.6s ease-in-out 1.4s infinite;
+  animation: scroll-drift 2.6s ease-in-out 0.4s infinite;
 }
-/* Once the approach completes the cue has done its job. */
-.hero.is-settled .hero-scroll {
+/* Once the film's approach completes the cue has done its job — but only
+   in scrub mode; static heroes keep the invitation. */
+.hero-runway.is-scrub .hero.is-settled .hero-scroll {
   animation: none;
   opacity: 0;
   transition: opacity 0.8s var(--ease);
@@ -360,13 +361,8 @@
   .hero {
     min-height: 92svh;
   }
-  .hero-hud,
-  .hero-scroll {
+  .hero-hud {
     display: none;
-  }
-  /* The cue is the only affordance for the scrub — keep it when the film runs. */
-  .hero-runway.is-scrub .hero-scroll {
-    display: flex;
   }
   /* Portrait crop: hold the astronaut in frame, panning to center with the
      film (he enters at the left of the 16:9 frame and settles centered). */
@@ -501,4 +497,15 @@
 .hero-runway.is-scrub .hud-label-br {
   --t: clamp(0, calc((var(--p) - 0.9) / 0.08), 1);
   translate: calc((1 - var(--t)) * 16px) 0;
+}
+
+/* Phones: blur() is the costliest part of the choreography and mobile GPUs
+   feel it — opacity + translate carry the effect there. */
+@media (max-width: 719px) {
+  .hero-runway.is-scrub .hero-eyebrow,
+  .hero-runway.is-scrub .hero-name,
+  .hero-runway.is-scrub .hero-sub,
+  .hero-runway.is-scrub .hero-ctas {
+    filter: none;
+  }
 }

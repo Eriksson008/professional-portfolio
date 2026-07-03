@@ -21,6 +21,9 @@ const FILM_END = 0.78;
 /** Scroll progress past which the scroll cue has done its job. */
 const SETTLE_AT = 0.5;
 
+/** One frame of the 24fps film — seeking finer than this is wasted decode. */
+const FRAME = 1 / 24;
+
 /** Mission data mirrored on the visor — all figures verifiable elsewhere on the page. */
 const hudLabels = [
   { pos: 'tl', text: 'Impact · Exceptional ×3' },
@@ -84,6 +87,7 @@ export function AstronautHero() {
     let raf = 0;
     let shown = 0;
     let target = 0;
+    let lastP = '';
 
     const measure = () => {
       const rect = runway.getBoundingClientRect();
@@ -95,11 +99,18 @@ export function AstronautHero() {
       raf = 0;
       const delta = target - shown;
       shown = Math.abs(delta) < 0.001 ? target : shown + delta * 0.2;
-      hero.style.setProperty('--p', shown.toFixed(4));
+      // Skip the style write (and its recalc) when the change is invisible.
+      const p = shown.toFixed(3);
+      if (p !== lastP) {
+        lastP = p;
+        hero.style.setProperty('--p', p);
+      }
+      // Seek only on whole-frame deltas, and never while a seek is in
+      // flight — queueing sub-frame seeks just thrashes the decoder.
       const dur = video.duration;
-      if (Number.isFinite(dur) && dur > 0) {
+      if (Number.isFinite(dur) && dur > 0 && !video.seeking) {
         const t = Math.min(1, shown / FILM_END) * (dur - 0.05);
-        if (Math.abs(t - video.currentTime) > 0.015) video.currentTime = t;
+        if (Math.abs(t - video.currentTime) > FRAME) video.currentTime = t;
       }
       if (shown >= SETTLE_AT) setSettled(true);
       if (shown !== target && !raf) raf = requestAnimationFrame(apply);
@@ -129,6 +140,9 @@ export function AstronautHero() {
     window.addEventListener('resize', onScroll);
     video.addEventListener('loadedmetadata', onScroll);
     video.addEventListener('loadedmetadata', prime);
+    // A skipped-while-seeking frame could leave the film a step behind at
+    // rest — re-check once each seek lands.
+    video.addEventListener('seeked', onScroll);
     prime();
     onScroll();
     return () => {
@@ -137,6 +151,7 @@ export function AstronautHero() {
       window.removeEventListener('resize', onScroll);
       video.removeEventListener('loadedmetadata', onScroll);
       video.removeEventListener('loadedmetadata', prime);
+      video.removeEventListener('seeked', onScroll);
     };
   }, [scrub]);
 

@@ -3,8 +3,12 @@ import type { Variants } from 'framer-motion';
 /** Matches --ease in tokens.css. */
 export const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
-/** Same trigger geometry as the old IntersectionObserver reveal. */
-export const VIEWPORT = { once: true, amount: 0.12, margin: '0px 0px -8% 0px' } as const;
+/**
+ * Reveal once any part of the element crosses 8% above the viewport bottom.
+ * A fractional `amount` is a trap here: a section taller than ~8× the
+ * viewport (Projects on a phone) can never reach it, so it never reveals.
+ */
+export const VIEWPORT = { once: true, amount: 'some', margin: '0px 0px -8% 0px' } as const;
 
 /** Whole-section entrance: fade + rise. */
 export const riseIn: Variants = {
