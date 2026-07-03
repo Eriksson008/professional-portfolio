@@ -22,10 +22,14 @@ export const headerStagger: Variants = {
   show: { transition: { staggerChildren: 0.1, delayChildren: 0.06 } },
 };
 
-/** Header child: rise + sharpen from a subtle blur. */
+/**
+ * Header child: rise into place. Opacity + transform only — animating
+ * filter: blur() from JS re-rasterizes the text every frame on the main
+ * thread, which stutters exactly when sections reveal mid-scroll.
+ */
 export const headerItem: Variants = {
-  hidden: { opacity: 0, y: 14, filter: 'blur(5px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.55, ease: EASE } },
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
 };
 
 /** The sheet rule draws from its left edge. */
@@ -34,14 +38,16 @@ export const ruleDraw: Variants = {
   show: { scaleX: 1, transition: { duration: 0.6, ease: EASE } },
 };
 
-/** Panel "coming online": fade + rise + blur-to-sharp + settle flat. */
+/**
+ * Panel "coming online": fade + rise + settle flat. No blur — see
+ * headerItem; a full card subtree re-rastered per frame is worse still.
+ */
 export const cardRise: Variants = {
-  hidden: { opacity: 0, y: 16, rotateX: 5, filter: 'blur(10px)' },
+  hidden: { opacity: 0, y: 16, rotateX: 5 },
   show: {
     opacity: 1,
     y: 0,
     rotateX: 0,
-    filter: 'blur(0px)',
     transition: { duration: 0.7, ease: EASE },
   },
 };
