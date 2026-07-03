@@ -9,8 +9,8 @@ export function Highlights() {
   return (
     <Section id="highlights" alt>
       <SectionHeader
-        index="03"
-        eyebrow="Career Highlights"
+        index="02"
+        eyebrow="Impact Telemetry"
         title="The work, in numbers I can defend."
         intro="Every figure below is git-verifiable or directly documented — framed honestly, with nothing inflated."
       />

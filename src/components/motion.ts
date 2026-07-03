@@ -30,10 +30,16 @@ export const ruleDraw: Variants = {
   show: { scaleX: 1, transition: { duration: 0.6, ease: EASE } },
 };
 
-/** Card/tile entrance inside a staggered grid. */
+/** Panel "coming online": fade + rise + blur-to-sharp + settle flat. */
 export const cardRise: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+  hidden: { opacity: 0, y: 16, rotateX: 5, filter: 'blur(10px)' },
+  show: {
+    opacity: 1,
+    y: 0,
+    rotateX: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.7, ease: EASE },
+  },
 };
 
 /** Grid orchestration: children cascade in. */

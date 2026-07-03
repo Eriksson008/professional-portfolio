@@ -7,10 +7,10 @@ import { projects } from '../data/projects';
 
 export function Projects() {
   return (
-    <Section id="projects" alt>
+    <Section id="projects">
       <SectionHeader
-        index="04"
-        eyebrow="Selected Projects"
+        index="03"
+        eyebrow="Project Modules"
         title="Enterprise systems I own, and things I build for myself."
         intro="Enterprise work is sanitized — no internal system names, data, or business logic. Personal and lab projects are my own and described in full."
       />

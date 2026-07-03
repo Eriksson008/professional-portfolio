@@ -1,47 +1,52 @@
 /* ============================================================
-   Design tokens — intentionally dark-only.
-   Obsidian base, slate-glass panels, silver text, violet/cyan light.
+   Design tokens — luxury black & white glassmorphism.
+   Near-black surfaces, soft-white text, silver secondary,
+   translucent white-bordered glass. One restrained cool accent.
    ============================================================ */
 :root {
-  /* Surfaces — obsidian with a cold blue undertone, never pure black */
-  --ink: #0a0c12;
-  --ink-2: #0d1017;
+  /* Surfaces — true black through near-black with a cold undertone */
+  --black: #000000;
+  --ink: #030305;
+  --ink-2: #07080c;
 
-  /* Panel foundation — slate glass. --slate is the opaque anchor;
-     panels are translucent layers of it so depth reads through. */
-  --slate: #383e4e;
-  --panel: rgba(56, 62, 78, 0.38);
-  --panel-2: rgba(56, 62, 78, 0.55);
-  --line: rgba(182, 186, 197, 0.16);
-  --line-soft: rgba(182, 186, 197, 0.09);
+  /* Glass — translucent white film over black; borders are white hairlines */
+  --panel: rgba(255, 255, 255, 0.045);
+  --panel-2: rgba(8, 10, 14, 0.62);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-soft: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.22);
 
   /* Text */
-  --text: #eceef4;
+  --text: #f7f7f5;
   --muted: #b6bac5;
-  --faint: #7c8494;
+  --faint: #7c828e;
 
-  /* Silver — muted metallic highlight: labels, hairlines, resting nodes. */
+  /* Silver — labels, hairlines, resting states */
   --silver: #b6bac5;
   --silver-2: #8d93a3;
   --silver-line: rgba(182, 186, 197, 0.26);
   --silver-wash: rgba(182, 186, 197, 0.08);
 
-  /* Primary accent — soft violet: controlled light inside the glass. */
-  --accent: #8f8af4;
-  --accent-bright: #a9a2ff;
-  --accent-deep: #6f66d6;
-  --accent-wash: rgba(143, 138, 244, 0.13);
-  --accent-line: rgba(143, 138, 244, 0.4);
-  --on-accent: #0a0c12;
+  /* Accent — soft white light. Primary actions are white on black. */
+  --accent: #f7f7f5;
+  --accent-bright: #ffffff;
+  --accent-wash: rgba(255, 255, 255, 0.08);
+  --accent-line: rgba(255, 255, 255, 0.22);
+  --on-accent: #060709;
 
-  /* Secondary glow — icy cyan: hover states, traveling light pulses. */
-  --ice: #8fd9f2;
-  --ice-line: rgba(143, 217, 242, 0.45);
-  --ice-wash: rgba(143, 217, 242, 0.1);
+  /* Cool accent — faint cyan-blue, used sparingly (live markers, key figures) */
+  --ice: #8ec5ff;
+  --ice-line: rgba(142, 197, 255, 0.35);
+  --ice-wash: rgba(142, 197, 255, 0.08);
 
-  /* Elevation — deep soft shadows so glass panels lift off the obsidian */
-  --shadow: 0 1px 2px rgba(4, 5, 9, 0.5), 0 14px 40px rgba(4, 5, 9, 0.35);
-  --shadow-lift: 0 2px 6px rgba(4, 5, 9, 0.55), 0 24px 60px rgba(4, 5, 9, 0.45);
+  /* Ambient glow — cool white-blue halo behind glass */
+  --glow: rgba(180, 200, 220, 0.22);
+  --glow-soft: rgba(180, 200, 220, 0.1);
+
+  /* Elevation — deep soft shadows + inner top light so glass lifts off black */
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.55), 0 32px 90px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
   color-scheme: dark;
 
@@ -53,7 +58,9 @@
   /* Layout */
   --wrap: 1140px;
   --gutter: clamp(1.25rem, 4vw, 3rem);
-  --radius: 4px;
+  --radius: 10px;
+  --radius-card: 22px;
+  --radius-pill: 999px;
 
   /* Motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);

@@ -10,13 +10,12 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
-  background-color: var(--ink);
+  background-color: var(--black);
 }
 
 body {
   margin: 0;
-  /* Transparent so the fixed atmosphere layer shows through; html carries the ink. */
-  background-color: transparent;
+  background-color: var(--black);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 17px;
@@ -25,20 +24,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Atmosphere — two ultra-faint light fields drifting in the obsidian.
-   Fixed so the fog holds still while the page scrolls through it. */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(52% 38% at 18% 6%, rgba(143, 138, 244, 0.07), transparent 70%),
-    radial-gradient(46% 34% at 86% 82%, rgba(143, 217, 242, 0.045), transparent 70%);
-}
-
-/* Film grain — imperceptible, but the page stops feeling like flat pixels. */
+/* Film grain — imperceptible, but the black stops feeling like flat pixels. */
 body::after {
   content: '';
   position: fixed;
@@ -46,7 +32,7 @@ body::after {
   z-index: 2000;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  opacity: 0.03;
+  opacity: 0.025;
 }
 
 h1,
@@ -82,12 +68,12 @@ img {
 }
 
 ::selection {
-  background: var(--accent);
+  background: var(--text);
   color: var(--on-accent);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-bright);
+  outline: 2px solid var(--text);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -104,7 +90,7 @@ img {
   left: -999px;
   top: 0;
   z-index: 200;
-  background: var(--accent);
+  background: var(--text);
   color: var(--on-accent);
   padding: 0.6rem 1rem;
   font-family: var(--font-mono);
@@ -116,36 +102,39 @@ img {
 }
 
 /* ============================================================
-   Buttons
+   Buttons — pill glass; primary is soft white on black
    ============================================================ */
 .btn {
   --btn-fg: var(--text);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.7rem 1.15rem;
+  padding: 0.72rem 1.35rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-pill);
   color: var(--btn-fg);
   font-family: var(--font-mono);
   font-size: 0.82rem;
-  letter-spacing: 0.01em;
-  background: transparent;
+  letter-spacing: 0.02em;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
   cursor: pointer;
   transition:
-    border-color 0.2s var(--ease),
-    color 0.2s var(--ease),
-    background 0.2s var(--ease),
-    transform 0.2s var(--ease);
+    border-color 0.25s var(--ease),
+    color 0.25s var(--ease),
+    background 0.25s var(--ease),
+    box-shadow 0.25s var(--ease),
+    transform 0.25s var(--ease);
 }
 .btn:hover {
-  border-color: var(--accent-line);
+  border-color: var(--line-strong);
   color: var(--accent-bright);
+  background: rgba(255, 255, 255, 0.07);
   transform: translateY(-1px);
 }
 .btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--text);
+  border-color: var(--text);
   color: var(--on-accent);
   font-weight: 500;
 }
@@ -153,29 +142,31 @@ img {
   background: var(--accent-bright);
   border-color: var(--accent-bright);
   color: var(--on-accent);
+  box-shadow: 0 0 32px var(--glow);
 }
 .btn-ghost {
   border-color: var(--line-soft);
   color: var(--muted);
+  background: transparent;
 }
 
 /* ============================================================
-   Nav
+   Nav — black glass bar
    ============================================================ */
 .nav {
   position: sticky;
   top: 0;
   z-index: 100;
   border-bottom: 1px solid transparent;
-  background: color-mix(in srgb, var(--ink) 70%, transparent);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(14px);
   transition:
     border-color 0.25s var(--ease),
     background 0.25s var(--ease);
 }
 .nav.is-scrolled {
   border-bottom-color: var(--line-soft);
-  background: color-mix(in srgb, var(--ink) 88%, transparent);
+  background: rgba(3, 3, 5, 0.78);
 }
 .nav-inner {
   display: flex;
@@ -193,8 +184,9 @@ img {
   place-items: center;
   width: 34px;
   height: 34px;
-  border: 1px solid var(--accent-line);
-  color: var(--accent);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--text);
   font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 500;
@@ -213,7 +205,8 @@ img {
 }
 .nav-menu a {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
   color: var(--muted);
   transition: color 0.2s var(--ease);
 }
@@ -228,17 +221,22 @@ img {
   display: block;
   height: 1px;
   margin-top: 4px;
-  background: var(--accent-line);
+  background: var(--line-strong);
 }
 .nav-menu .nav-cta {
-  color: var(--accent-bright);
-  border: 1px solid var(--accent-line);
-  padding: 0.45rem 0.9rem;
-  border-radius: var(--radius);
+  color: var(--text);
+  border: 1px solid var(--line);
+  padding: 0.45rem 1.05rem;
+  border-radius: var(--radius-pill);
+  transition:
+    color 0.2s var(--ease),
+    background 0.2s var(--ease),
+    border-color 0.2s var(--ease);
 }
 .nav-menu .nav-cta:hover {
   color: var(--on-accent);
-  background: var(--accent);
+  background: var(--text);
+  border-color: var(--text);
 }
 .nav-toggle {
   display: none;
@@ -288,20 +286,20 @@ img {
 .sheet-no {
   font-family: var(--font-mono);
   font-size: 0.8rem;
-  color: var(--accent);
+  color: var(--faint);
   letter-spacing: 0.05em;
 }
 .sheet-rule {
   width: 38px;
   height: 1px;
-  background: linear-gradient(90deg, var(--accent-line), var(--silver-line));
+  background: linear-gradient(90deg, var(--line-strong), transparent);
 }
 .sheet-eyebrow {
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--silver-2);
 }
 .section-title {
   font-size: clamp(1.85rem, 3.6vw, 2.7rem);
@@ -322,7 +320,7 @@ img {
 }
 
 /* ============================================================
-   About
+   Mission Summary (About)
    ============================================================ */
 .about-body {
   display: grid;
@@ -336,7 +334,7 @@ img {
 }
 
 /* ============================================================
-   Timeline
+   Career Trajectory (timeline)
    ============================================================ */
 .timeline {
   position: relative;
@@ -356,21 +354,24 @@ img {
   width: 9px;
   height: 9px;
   border: 1px solid var(--faint);
+  border-radius: 50%;
   background: var(--ink);
-  transform: rotate(45deg);
 }
 .tl-item.is-current .tl-marker {
-  border-color: var(--accent);
-  background: var(--accent);
+  border-color: var(--text);
+  background: var(--text);
   box-shadow: 0 0 0 4px var(--accent-wash);
 }
 .tl-period {
   font-family: var(--font-mono);
   font-size: 0.76rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--silver-2);
   margin-bottom: 0.35rem;
+}
+.tl-item.is-current .tl-period {
+  color: var(--ice);
 }
 .tl-content h3 {
   font-size: 1.12rem;
@@ -392,29 +393,43 @@ img {
 }
 
 /* ============================================================
-   Highlights / metrics
+   Impact Telemetry (metrics)
    ============================================================ */
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--silver-line);
-  border: 1px solid var(--silver-line);
+  gap: 1.1rem;
 }
 .metric {
-  background: var(--ink-2);
-  padding: 1.6rem 1.5rem;
+  padding: 1.7rem 1.6rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+  transition:
+    border-color 0.35s var(--ease),
+    transform 0.35s var(--ease);
+}
+.metric:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .metric:hover {
+    transform: none;
+  }
 }
 .metric-value {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-size: clamp(2rem, 4vw, 2.7rem);
   font-weight: 600;
   letter-spacing: -0.02em;
-  /* The standout achievement figures — violet, matching the constellation light. */
-  color: var(--accent-bright);
+  color: var(--text);
 }
 .metric-label {
-  margin-top: 0.3rem;
+  margin-top: 0.35rem;
   font-size: 0.98rem;
   font-weight: 600;
   color: var(--text);
@@ -427,12 +442,14 @@ img {
 }
 
 /* ============================================================
-   Projects
+   Project Modules
    ============================================================ */
 .project-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.35rem;
+  /* Slight depth for the module settle-in animation. */
+  perspective: 1200px;
 }
 /* Card surface lives in premium.css (.glow-panel / .sys-card). */
 .pc-head {
@@ -444,16 +461,16 @@ img {
 .pc-kind {
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 0.25rem 0.55rem;
+  padding: 0.25rem 0.6rem;
   border: 1px solid var(--line);
   color: var(--muted);
-  border-radius: 2px;
+  border-radius: var(--radius-pill);
 }
 .kind-enterprise {
-  border-color: var(--accent-line);
-  color: var(--accent-bright);
+  border-color: var(--line-strong);
+  color: var(--text);
 }
 .pc-conf {
   font-family: var(--font-mono);
@@ -476,7 +493,7 @@ img {
   margin-top: 0.8rem;
   font-family: var(--font-mono);
   font-size: 0.82rem;
-  color: var(--accent);
+  color: var(--silver);
   line-height: 1.5;
 }
 .pc-bullets {
@@ -495,7 +512,7 @@ img {
   content: '+';
   position: absolute;
   left: 0;
-  color: var(--accent);
+  color: var(--faint);
   font-family: var(--font-mono);
 }
 .pc-tags {
@@ -510,23 +527,23 @@ img {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--silver-2);
-  padding: 0.2rem 0.5rem;
-  background: rgba(56, 62, 78, 0.25);
+  padding: 0.22rem 0.55rem;
+  background: var(--panel);
   border: 1px solid var(--line-soft);
-  border-radius: 2px;
+  border-radius: var(--radius-pill);
 }
 .pc-link {
   margin-top: 1.2rem;
   font-family: var(--font-mono);
   font-size: 0.82rem;
-  color: var(--accent);
+  color: var(--silver);
 }
 .pc-link:hover {
   color: var(--accent-bright);
 }
 
 /* ============================================================
-   Skills
+   Systems & Skills
    ============================================================ */
 .skills-grid {
   display: grid;
@@ -535,14 +552,14 @@ img {
 }
 .skill-group h3 {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--silver);
   font-weight: 500;
   padding-bottom: 0.7rem;
   margin-bottom: 0.9rem;
-  border-bottom: 1px solid var(--silver-line);
+  border-bottom: 1px solid var(--line-soft);
 }
 .chip-list {
   display: flex;
@@ -551,42 +568,51 @@ img {
 }
 .chip-list li {
   font-size: 0.85rem;
-  color: var(--text);
-  padding: 0.35rem 0.7rem;
+  color: var(--muted);
+  padding: 0.35rem 0.75rem;
   background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-pill);
+  transition:
+    border-color 0.2s var(--ease),
+    color 0.2s var(--ease);
+}
+.chip-list li:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
 }
 
 /* ============================================================
-   Resume
-   ============================================================ */
-.resume-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-}
-
-/* ============================================================
-   Contact
+   Contact Transmission
    ============================================================ */
 .section-contact {
   padding-block: clamp(4rem, 9vw, 7rem);
-  text-align: center;
   border-bottom: none;
 }
-.contact-inner {
+.contact-panel {
+  padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 5vw, 4rem);
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
 }
-.contact-inner .sheet-mark {
+.contact-panel .sheet-mark {
   justify-content: center;
 }
 .contact-title {
   font-size: clamp(1.9rem, 4.5vw, 3rem);
-  max-width: 16ch;
+  max-width: 18ch;
   margin-top: 0.5rem;
+  background: linear-gradient(180deg, #ffffff 20%, var(--silver) 125%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .contact-intro {
   margin-top: 1.2rem;
@@ -598,7 +624,14 @@ img {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.7rem;
-  margin-top: 2.2rem;
+  margin-top: 2.4rem;
+}
+.contact-note {
+  margin-top: 1.8rem;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  color: var(--faint);
+  max-width: 60ch;
 }
 
 /* ============================================================
@@ -607,7 +640,7 @@ img {
 .site-footer {
   border-top: 1px solid var(--line-soft);
   padding-block: 2.5rem;
-  background: var(--ink-2);
+  background: var(--ink);
 }
 .footer-inner {
   display: flex;
@@ -651,7 +684,8 @@ img {
     align-items: flex-start;
     gap: 0;
     padding: 0.5rem var(--gutter) 1.2rem;
-    background: var(--ink-2);
+    background: rgba(3, 3, 5, 0.92);
+    backdrop-filter: blur(18px);
     border-bottom: 1px solid var(--line);
     display: none;
   }

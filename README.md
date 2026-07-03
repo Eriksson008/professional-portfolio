@@ -16,8 +16,7 @@ business logic.
 | Framework    | React 18 + TypeScript                                                 |
 | Build tool   | Vite 5                                                                 |
 | Styling      | Hand-written CSS with a design-token system                            |
-| Motion       | framer-motion (LazyMotion) for section transitions                     |
-| 3D (optional)| three + React Three Fiber v8 — lazy chunk, capability-gated, WebGL only (no WebGPU) |
+| Motion       | framer-motion (LazyMotion) for section transitions; no WebGL/WebGPU    |
 | Content      | Typed data modules (`src/data/`) as source of truth                    |
 | Container    | Multi-stage Docker build → nginx (Alpine)                              |
 | Tooling      | ESLint (flat config) + Prettier                                        |
@@ -37,83 +36,59 @@ npm run lint         # ESLint
 npm run format       # Prettier
 ```
 
-## "Constellation of Impact" hero
+## Astronaut hero
 
-The landing page opens with the **"Constellation of Impact"** hero (`ConstellationHero`) — an
-award-style interactive system map with a cinematic opening. On load, a ~3s **formation
-overture** plays ("Career Nebula"): the obsidian atmosphere deepens, a few deliberate
-shooting-star trails (`ShootingStarField` — curved Beziers, glow tail + crisp line + icy head,
-one synced dash sweep) sketch across the field, particle dust gathers into a **glass core orb**
-behind the name, and the identity etches in blur-to-sharp while the decode-scramble resolves —
-name, role, tagline, and both CTAs (**View Projects** / **Read Experience**) are all live within
-~2.6s, never gated behind the scroll.
+The landing page opens on a **black-and-white astronaut film scrubbed by scroll**: the hero pins
+under the nav while a 300vh runway maps scroll progress onto the video timeline — the astronaut
+drifts in from the left and settles centered, dark visor to camera, at the reader's own pace.
+The direction is luxury minimalism — Apple + NASA + high-end command interface, not a space
+theme.
 
-The information layer is **real DOM / CSS / SVG**: a tall pinned section (~700vh) accumulates
-real metric, project, skill, and career nodes into one connected constellation as you scroll —
-revealed nodes bloom softly into place and stay on screen (silver), the node(s) currently in
-focus light up violet, and curved SVG light veins (cubic Beziers, drawn progressively via De
-Casteljau subdivision) grow between related nodes; once a vein completes, a small icy-cyan light
-pulse travels along it, and the settled structure breathes very slowly. As the identity fades,
-**seed veins grow out of the hero core** into the first metric nodes — the constellation reads
-as the hero's energy becoming structure — and the identity returns with the settled map at the
-end. A long-period shooting star recurs sparsely (~19s) so the sky stays alive.
+How it works (`src/components/AstronautHero.tsx` + `src/styles/hero.css`):
 
-Behind that sits an **optional WebGL backdrop** (`src/webgl/`, three + React Three Fiber): a
-slowly rotating 3D particle shell (silver with sparse violet, additive blending) that **settles
-inward on load** (dust gathering), a **wireframe glass orb wrapped by a counter-rotating orbital
-dust ring** (`CoreOrb`) behind the identity, and a breathing violet core glow, with a gentle
-camera dolly on scroll and cursor parallax. A CSS-only orb (`HeroCoreFallback` — halo, glass
-core, two precessing orbit rings) is always mounted underneath and drops to a whisper while the
-GL context is live, so the hero's center can never be empty. It is pure atmosphere
-— capability-gated by `src/hooks/useVisualTier.ts` (`full` / `lite` / `off`), loaded lazily in
-its own chunk after first idle, paused off-screen, and wrapped in an error boundary with
-context-lost handling. If WebGL is unavailable (or on small screens, reduced motion, or
-data-saver), the hero renders exactly as before from the DOM/SVG layers — it can never blank.
-**WebGPU is deliberately not used.**
-
-The feel is inspired by igloo.inc's award-winning scroll experience: lerp-smoothed scroll
-progress, cursor-reactive 2.5D parallax on the node groups, a brief monospace decode-scramble
-on metric values and the name, a subtle chromatic-aberration accent, and hover-to-highlight
-connector edges. There is no autoplay sound (deliberate — accessibility and tone).
-
-How it works:
-
-- **Hero data (`src/data/constellation.ts`) is the single source of truth.** Edit `metricNodes`,
-  `projectNodes`, `skillClusters`, and `careerNodes` to change content; `layout` (normalized 0..1
-  positions) to reposition nodes; `connections` to rewire which nodes are linked. Each node/edge
-  has a `revealAt` (0..1) scroll-progress threshold that controls when it appears — once revealed
-  it stays (the map only ever accumulates, nothing disappears).
-- **The component (`src/components/ConstellationHero.tsx`)** maps that data onto absolute-
-  positioned DOM nodes plus one SVG connector layer, driven by two small hooks:
-  `src/hooks/useSmoothProgress.ts` (rAF-throttled scroll progress, lerp-smoothed toward the
-  target) and `src/hooks/usePointer.ts` (normalized cursor position for the parallax depth
-  layers). Both gate themselves off under `prefers-reduced-motion` and on touch/coarse-pointer
-  devices.
-- **Real text, always.** Every value (metric figures, project titles/tags, skill items, career
-  entries) is rendered as real HTML from `constellation.ts`, sourced from the existing
-  `highlights.ts` / `projects.ts` / `skills.ts` / `experience.ts` data — nothing readable is baked
-  into an image.
-- **Palette (dark-only).** Obsidian `#0a0c12` base, slate-glass panels built on `#383e4e` with
-  transparency, silver `#b6bac5` text/labels, soft-violet `#8f8af4` primary accent, icy-cyan
-  `#8fd9f2` secondary glow. There is deliberately **no light theme and no theme toggle** — the
-  site is dark-first and dark-only. Red and brass are fully retired. No imagery, no neon/gaming
-  styling.
-- **Accessibility / fallback.** Under `prefers-reduced-motion` (or no JS), the hero renders a
-  **static, fully resolved constellation** — all node groups plus the CTA shown as a plain
-  vertical layout, no scroll-jacking, no parallax/scramble. The name is a real `<h1>`; CTAs are
-  keyboard-focusable links with visible focus.
-- **Responsive.** Desktop keeps the full 2D constellation; mobile and narrow viewports collapse to
-  a static vertical spine (nodes stacked top-to-bottom with a connecting line), matching the
-  reduced-motion fallback. Trails and the orb are dropped below 600px (a soft static glow backs
-  the identity instead); tablets keep the map with fewer trails.
+- **Scroll drives the film.** A scroll listener measures progress through the runway and a
+  rAF-lerped seek sets `video.currentTime` (never `play()`), so fast flicks stay smooth and the
+  frame always settles exactly where the scroll position says. The film occupies the first 78%
+  of the runway; the rest is a hold on the settled frame. The served file
+  (`astronaut-video-scrub.mp4`, ~6 MB, desktop-only) is an **all-intra re-encode** (a keyframe
+  every frame, `ffmpeg -g 1`) — seeking a normal-GOP encode stutters because every scrub
+  position decodes from the last keyframe. The original `astronaut-video.mp4` is kept as the
+  source asset.
+- **Everything is choreographed from one variable.** The component publishes the smoothed
+  progress as a CSS custom property (`--p`) on the hero; `hero.css` derives a per-segment eased
+  window (`--t`) from it and drives opacity + `translate` + blur — so every segment moves
+  frame-locked with the astronaut, forward and backward.
+- **The video is decorative only** — `aria-hidden`, muted, `playsInline`, no controls.
+- **Poster-under-video fallback.** Two stills extracted from the film: the **start frame**
+  (`astronaut-video-start.jpg`) is the video poster and scrub-mode background, so scroll
+  position 0 matches what loads; the **final frame** (`astronaut-video-poster.jpg`) backs
+  mobile (<720 px, where the `<video>` isn't rendered and the hero doesn't pin),
+  `prefers-reduced-motion`, and video load failure — all of which degrade to the settled still
+  with telemetry shown. No real content depends on the video.
+- **Opening sequence.** The page opens on the astronaut alone against black with only a scroll
+  cue. As the astronaut moves, the identity segments ease into frame bottom-right one at a time
+  (eyebrow → name → subheadline → CTAs across progress 0.06–0.46), each rising from below and
+  sharpening from blur over the bottom + corner scrims. Once the film ends (~0.78), a restrained
+  **visor HUD** assembles in the hold: corner brackets drift inward, then the four monospace
+  telemetry labels (all figures verifiable elsewhere on the page) slide in one segment at a
+  time; the scroll cue retires mid-film. Scrolling back up reverses everything except the cue.
+- **Palette.** Pure black (`#000`–`#07080c`) with warm-white text (`#f7f7f5`), silver secondary
+  (`#b6bac5`), and white-alpha glass surfaces (bg `rgba(255,255,255,0.045)`, 1 px border
+  `rgba(255,255,255,0.12)`, `backdrop-filter: blur(18px)`, radius 22 px). No colorful gradients,
+  no neon; a cool `#8ec5ff` accent exists in tokens for sparing use.
+- **Sections** follow a mission frame: 01 Mission Summary → 02 Impact Telemetry (glass metric
+  cards) → 03 Project Modules (cards settle from a subtle rotateX) → 04 Systems & Skills →
+  05 Career Trajectory → 06 Contact Transmission (black glass panel).
+- **Reduced motion:** the global kill rule plus explicit `animation: none` overrides in
+  `hero.css` (needed because near-zero `animation-duration` does not cancel `animation-delay`) —
+  the hero renders fully resolved and static on the poster.
 - **Testing locally:** `npm run dev` (the printed port may shift to 8791/8792 etc. if 8790 is
-  busy) — check the hero at ~1440px, ~768px, and ~375px widths, and again with
+  busy) — check ~1440 px, ~768 px, and ~375 px widths, and again with
   `prefers-reduced-motion: reduce` enabled in devtools.
 
-Design specs: `docs/superpowers/specs/2026-07-01-constellation-hero-design.md`,
-`docs/superpowers/specs/2026-07-02-webgl-visual-layer-design.md`,
-`docs/superpowers/specs/2026-07-02-dark-only-art-direction-design.md`, and
-`docs/superpowers/specs/2026-07-02-hero-formation-sequence-design.md`.
+There is deliberately **no WebGL/WebGPU** — the earlier three + React Three Fiber constellation
+hero was removed with this redesign, returning the site to a single small JS bundle. framer-motion
+(LazyMotion) still drives the section/card reveals, and `useReducedMotion` renders them static.
 
 ## Docker
 

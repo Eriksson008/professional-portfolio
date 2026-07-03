@@ -2,7 +2,7 @@ import { m } from 'framer-motion';
 import { cardRise, ringPulse } from './motion';
 import type { Highlight } from '../data/highlights';
 
-/** A highlight figure as a constellation node: dot + one-shot reveal ring. */
+/** A highlight figure as a telemetry readout: dot + one-shot reveal ring. */
 export function MetricNode({ value, label, note }: Highlight) {
   return (
     <m.li className="metric" variants={cardRise}>

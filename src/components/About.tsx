@@ -7,7 +7,7 @@ export function About() {
     <Section id="about">
       <SectionHeader
         index="01"
-        eyebrow="About"
+        eyebrow="Mission Summary"
         title="From mechanical engineering to enterprise software ownership."
       />
       <div className="about-body">

@@ -25,10 +25,11 @@ is set to "GitHub Actions".
 
 - React 18 + TypeScript, built with Vite 5
 - Hand-written CSS with a design-token system (`src/styles/tokens.css` + `app.css` +
-  `premium.css` + `constellation-hero.css`) — **dark-only** (no theme toggle) as of 2026-07-02
-- **WebGL layer (optional enhancement):** three + @react-three/fiber v8, lazy-loaded in its own
-  chunk behind a capability gate (`src/hooks/useVisualTier.ts`); framer-motion (LazyMotion) for
-  section transitions. WebGPU deliberately not used.
+  `premium.css` + `hero.css`) — **dark-only** (no theme toggle) as of 2026-07-02, **pure
+  black/white/glass** as of 2026-07-03
+- framer-motion (LazyMotion/domAnimation, `m.*`) for section transitions; **no WebGL/WebGPU**
+  (the three + R3F layer was removed 2026-07-03 with the astronaut-video hero — single ~80 KB gz
+  bundle again)
 - Typed content modules in `src/data/` as the single source of truth
 - Docker: multi-stage node build → nginx (Alpine), serves on port 8790; host exposure
   configurable via `BIND_ADDR` (default `127.0.0.1`, localhost-only) and `PORT` (see `.env.example`)
@@ -56,6 +57,46 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-03 — Astronaut-video hero + "mission" reskin (branch `astronaught-idea`,
+  user-directed brief; supersedes the constellation/WebGL hero line below).** The homepage now
+  opens on a **premium black-and-white astronaut video** (`public/media/astronaut-video.mp4`,
+  8 s / 1080p h264: the astronaut drifts in from the left and settles centered,
+  visor to camera). Direction: luxury minimalism — Apple + NASA + high-end command interface,
+  not a space theme. Key choices: (1) **the film is scrubbed by scroll** (same-day user
+  revision; replaces the initial autoplay-once cut): the hero pins under the nav across a 360vh
+  runway and a rAF-lerped seek maps scroll progress onto `video.currentTime` (film occupies
+  0–0.78 of the runway, the rest holds the settled frame) — the served file is a ~6 MB
+  **all-intra re-encode** (`ffmpeg -g 1`, crf 26; normal-GOP seeking stutters), the
+  original 3.4 MB mp4 kept as source; the video stays **decorative only** (`aria-hidden`,
+  muted, `playsInline`, never `play()`ed); (2) two poster stills: the start frame is the video
+  poster + scrub background (scroll 0 matches what loads), the final settled frame backs mobile
+  (<720px, no video, no pinning), `prefers-reduced-motion`, and video failure — content never
+  depends on the video; (3) **full scroll choreography from one variable** (second same-day
+  revision): the component publishes smoothed progress as `--p` on the hero and hero.css derives
+  per-segment eased windows (`--t`) driving opacity + `translate` + blur — the page opens on the
+  astronaut alone with only a scroll cue, the identity segments ease in one at a time while the
+  astronaut moves (eyebrow → name → sub → CTAs, 0.06–0.46), and after the film ends the **visor
+  HUD assembles in the hold** (brackets drift inward 0.76–0.93, then the four mono telemetry
+  labels — Exceptional ×3, 750+ commits, 120+ stories, Tech Lead — slide in 0.80–0.98); the cue
+  retires mid-film; everything reverses when scrolling back up (`translate` is used so the HUD's
+  mirroring `transform`s stay intact; non-scrub paths keep the load-time animations and render
+  resolved); (4) **palette reduced to pure
+  black/white/silver glass** — violet/ice accents retired, token names kept so the whole CSS
+  system reskinned in place; glass cards standardized (rgba-white 0.045 bg, 1px rgba-white 0.12
+  border, blur(18px), radius 22px); (5) sections renamed to the mission frame — 01 Mission
+  Summary, 02 Impact Telemetry (glass metric cards), 03 Project Modules (cards settle from a
+  subtle rotateX), 04 Systems & Skills (regrouped to 6 groups incl. AI/LLM Systems and merged
+  Cloud/DevOps/Security), 05 Career Trajectory, 06 Contact Transmission (black glass panel; the
+  standalone Résumé section folded into hero + contact CTAs); (6) **the entire WebGL stack was
+  deleted** (three, @react-three/fiber, @types/three, `src/webgl/`, ConstellationHero/Map,
+  ShootingStarField, HeroCoreFallback, SafeVisual, ScrambleText, useVisualTier,
+  useSmoothProgress, usePointer, constellation.ts, constellation-hero.css) — one 241 KB
+  (~80 KB gz) bundle, no lazy chunks. Reduced-motion needs explicit `animation: none` overrides
+  in hero.css because the global near-zero-duration rule doesn't cancel `animation-delay`.
+  Verified in Chrome at desktop width (pinning, settle latch, HUD/glow/cue gating, all
+  sections, no console errors); the actual frame-by-frame scrub and mobile/reduced-motion paths
+  are code-reviewed but not visually verified (session browser window was hidden — Chrome
+  suspends media loading — and refused viewport resize). Lint + build green.
 - **2026-07-02 — Hero formation sequence: "Career Nebula / Marble Constellation"
   (user-directed 14-point brief; builds on the same-day dark-only art direction).** The hero now
   opens with a ~3s **formation overture** instead of a quiet frame: atmosphere deepens in, three
@@ -221,8 +262,12 @@ site exposes only honest, defensible, public-safe content.
 
 ## Current Next Actions
 
-- **Merge the Constellation of Impact hero:** `redesign-scroll-hero` is implemented,
-  browser-verified, and docs are current — merge to `main` so it ships via the Pages workflow.
+- **Merge the astronaut hero:** `astronaught-idea` is implemented, lint/build green, and
+  desktop-verified — visually check mobile + reduced-motion, then merge to `main` so it ships
+  via the Pages workflow.
+- **Media follow-ups:** add a webm encode next to the mp4 for better compression
+  (`ffmpeg -i astronaut-video.mp4 -c:v libvpx-vp9 -crf 38 -b:v 0 -an astronaut-video.webm`),
+  and regenerate `public/og-image.png` to match the new black/white astronaut art direction.
 - **Finish going live:** make the GitHub repo public and set Settings → Pages → Source =
   "GitHub Actions" (the workflow handles the rest on push to `main`).
 - After first deploy, verify the live site: asset paths, résumé download, and the OG preview

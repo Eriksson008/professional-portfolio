@@ -1,20 +1,21 @@
 /* ============================================================
    Premium surface layer — GlowPanel, SystemCard, MetricNode.
-   Slate glass, gradient hairlines, and grain built only from
-   existing tokens and inline SVG (no image assets).
+   Black glass: translucent white film, hairline borders,
+   deep shadow + inset top light. No image assets.
    ============================================================ */
 
 .glow-panel {
   position: relative;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--panel), rgba(56, 62, 78, 0.18));
-  backdrop-filter: blur(8px);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+  backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
   overflow: hidden;
+  transition: border-color 0.3s var(--ease);
 }
 
-/* Gradient hairline along the top edge, warming to violet at center. */
+/* Hairline of light along the top edge. */
 .glow-panel::before {
   content: '';
   position: absolute;
@@ -23,9 +24,9 @@
   background: linear-gradient(
     90deg,
     transparent,
-    var(--silver-line) 30%,
-    var(--accent-line) 50%,
-    var(--silver-line) 70%,
+    var(--line-strong) 30%,
+    rgba(255, 255, 255, 0.35) 50%,
+    var(--line-strong) 70%,
     transparent
   );
   pointer-events: none;
@@ -37,36 +38,36 @@
   position: absolute;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  opacity: 0.04;
+  opacity: 0.03;
   pointer-events: none;
 }
 
-/* ---- SystemCard: a project as a system node ---- */
+/* ---- SystemCard: a project as a mission module ---- */
 .sys-card {
   display: flex;
   flex-direction: column;
-  padding: 1.6rem;
+  padding: 1.7rem;
   transition:
-    border-color 0.25s var(--ease),
-    transform 0.25s var(--ease),
-    box-shadow 0.25s var(--ease);
+    border-color 0.3s var(--ease),
+    transform 0.3s var(--ease),
+    box-shadow 0.3s var(--ease);
 }
 .sys-card:hover {
-  border-color: var(--accent-line);
+  border-color: var(--line-strong);
   transform: translateY(-3px);
   box-shadow: var(--shadow-lift);
 }
 
-/* Corner node — silver at rest, lights violet when the card is engaged. */
+/* Corner status node — faint at rest, live on engagement. */
 .sys-node {
   position: absolute;
-  top: 0.95rem;
-  right: 0.95rem;
-  width: 7px;
-  height: 7px;
+  top: 1.1rem;
+  right: 1.1rem;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--silver-2);
-  opacity: 0.55;
+  opacity: 0.5;
   transition:
     background 0.25s var(--ease),
     box-shadow 0.25s var(--ease),
@@ -79,21 +80,21 @@
   box-shadow: 0 0 0 4px var(--accent-wash);
 }
 
-/* ---- MetricNode: highlight figure as a constellation node ---- */
+/* ---- MetricNode: telemetry panel with a live tick ---- */
 .mn-dot {
   position: relative;
   display: block;
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--accent);
-  margin-bottom: 0.7rem;
+  background: var(--text);
+  margin-bottom: 0.8rem;
 }
 .mn-ring {
   position: absolute;
   inset: -5px;
   border-radius: 50%;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--silver);
 }
 
 @media (prefers-reduced-motion: reduce) {

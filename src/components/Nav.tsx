@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import { profile } from '../data/profile';
 
 const sections = [
-  { id: 'about', label: 'About' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'highlights', label: 'Highlights' },
+  { id: 'about', label: 'Summary' },
+  { id: 'highlights', label: 'Impact' },
   { id: 'projects', label: 'Projects' },
   { id: 'skills', label: 'Skills' },
-  { id: 'resume', label: 'Résumé' },
+  { id: 'experience', label: 'Career' },
 ];
 
 export function Nav() {

@@ -1,12 +1,11 @@
 import { LazyMotion, domAnimation } from 'framer-motion';
 import { Nav } from './components/Nav';
-import { ConstellationHero } from './components/ConstellationHero';
+import { AstronautHero } from './components/AstronautHero';
 import { About } from './components/About';
-import { Experience } from './components/Experience';
 import { Highlights } from './components/Highlights';
 import { Projects } from './components/Projects';
 import { Skills } from './components/Skills';
-import { Resume } from './components/Resume';
+import { Experience } from './components/Experience';
 import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 
@@ -18,13 +17,12 @@ export default function App() {
       </a>
       <Nav />
       <main>
-        <ConstellationHero />
+        <AstronautHero />
         <About />
-        <Experience />
         <Highlights />
         <Projects />
         <Skills />
-        <Resume />
+        <Experience />
         <Contact />
       </main>
       <Footer />

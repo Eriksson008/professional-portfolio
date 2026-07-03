@@ -27,9 +27,9 @@ too**; keep the two in sync when a shared fact changes.
   confidentiality rules.
 - **Check `README.md`** for stack, dev commands, Docker usage, and deployment notes.
 - Keep changes simple — avoid over-engineering. No CSS-in-JS, no UI kit, no stock images, no
-  gimmicky animations. Approved visual libraries (2026-07-02): **three + @react-three/fiber v8**
-  (WebGL layer only — must stay lazy-loaded and gated by `useVisualTier`) and **framer-motion**
-  (via `LazyMotion` + `m.*`). **WebGPU is deliberately not used.** Don't add other frameworks.
+  gimmicky animations. Approved visual library (2026-07-03): **framer-motion** (via `LazyMotion`
+  + `m.*`) only — the three + @react-three/fiber WebGL layer was removed with the astronaut-video
+  hero. **No WebGL/WebGPU.** Don't add other frameworks.
 - Content lives in `src/data/` (typed modules) — it is the single source of truth. Update data
   there, not inline in components.
 - Do **not** add a backend, database, auth, or external services unless explicitly requested.

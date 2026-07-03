@@ -4,10 +4,10 @@ import { skillGroups } from '../data/skills';
 
 export function Skills() {
   return (
-    <Section id="skills">
+    <Section id="skills" alt>
       <SectionHeader
-        index="05"
-        eyebrow="Skills Matrix"
+        index="04"
+        eyebrow="Systems &amp; Skills"
         title="Tools and practices I work in regularly."
       />
       <div className="skills-grid">
