@@ -164,13 +164,15 @@
   right: 0;
   animation-delay: 1s;
 }
+/* Bottom labels sit inside the frame — outside, they'd fall below the
+   visor rim onto the suit. */
 .hud-label-bl {
-  bottom: -1.6rem;
+  bottom: 1.2rem;
   left: 0;
   animation-delay: 1.2s;
 }
 .hud-label-br {
-  bottom: -1.6rem;
+  bottom: 1.2rem;
   right: 0;
   animation-delay: 1.4s;
 }
