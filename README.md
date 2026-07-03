@@ -11,14 +11,15 @@ business logic.
 
 ## Tech stack
 
-| Layer        | Choice                                              |
-| ------------ | --------------------------------------------------- |
-| Framework    | React 18 + TypeScript                               |
-| Build tool   | Vite 5                                              |
-| Styling      | Hand-written CSS with a design-token system         |
-| Content      | Typed data modules (`src/data/`) as source of truth |
-| Container    | Multi-stage Docker build → nginx (Alpine)           |
-| Tooling      | ESLint (flat config) + Prettier                     |
+| Layer        | Choice                                                                |
+| ------------ | --------------------------------------------------------------------- |
+| Framework    | React 18 + TypeScript                                                 |
+| Build tool   | Vite 5                                                                 |
+| Styling      | Hand-written CSS with a design-token system                            |
+| Motion       | framer-motion (LazyMotion) for section transitions; no WebGL/WebGPU    |
+| Content      | Typed data modules (`src/data/`) as source of truth                    |
+| Container    | Multi-stage Docker build → nginx (Alpine)                              |
+| Tooling      | ESLint (flat config) + Prettier                                        |
 
 No backend, no database, no auth — it is a static site by design.
 
@@ -34,6 +35,60 @@ npm run preview      # serve the built dist/ at http://localhost:8790
 npm run lint         # ESLint
 npm run format       # Prettier
 ```
+
+## Astronaut hero
+
+The landing page opens on a **black-and-white astronaut film scrubbed by scroll**: the hero pins
+under the nav while a 300vh runway maps scroll progress onto the video timeline — the astronaut
+drifts in from the left and settles centered, dark visor to camera, at the reader's own pace.
+The direction is luxury minimalism — Apple + NASA + high-end command interface, not a space
+theme.
+
+How it works (`src/components/AstronautHero.tsx` + `src/styles/hero.css`):
+
+- **Scroll drives the film.** A scroll listener measures progress through the runway and a
+  rAF-lerped seek sets `video.currentTime` (never `play()`), so fast flicks stay smooth and the
+  frame always settles exactly where the scroll position says. The film occupies the first 78%
+  of the runway; the rest is a hold on the settled frame. The served file
+  (`astronaut-video-scrub.mp4`, ~6 MB, desktop-only) is an **all-intra re-encode** (a keyframe
+  every frame, `ffmpeg -g 1`) — seeking a normal-GOP encode stutters because every scrub
+  position decodes from the last keyframe. The original `astronaut-video.mp4` is kept as the
+  source asset.
+- **Everything is choreographed from one variable.** The component publishes the smoothed
+  progress as a CSS custom property (`--p`) on the hero; `hero.css` derives a per-segment eased
+  window (`--t`) from it and drives opacity + `translate` + blur — so every segment moves
+  frame-locked with the astronaut, forward and backward.
+- **The video is decorative only** — `aria-hidden`, muted, `playsInline`, no controls.
+- **Poster-under-video fallback.** Two stills extracted from the film: the **start frame**
+  (`astronaut-video-start.jpg`) is the video poster and scrub-mode background, so scroll
+  position 0 matches what loads; the **final frame** (`astronaut-video-poster.jpg`) backs
+  mobile (<720 px, where the `<video>` isn't rendered and the hero doesn't pin),
+  `prefers-reduced-motion`, and video load failure — all of which degrade to the settled still
+  with telemetry shown. No real content depends on the video.
+- **Opening sequence.** The page opens on the astronaut alone against black with only a scroll
+  cue. As the astronaut moves, the identity segments ease into frame bottom-right one at a time
+  (eyebrow → name → subheadline → CTAs across progress 0.06–0.46), each rising from below and
+  sharpening from blur over the bottom + corner scrims. Once the film ends (~0.78), a restrained
+  **visor HUD** assembles in the hold: corner brackets drift inward, then the four monospace
+  telemetry labels (all figures verifiable elsewhere on the page) slide in one segment at a
+  time; the scroll cue retires mid-film. Scrolling back up reverses everything except the cue.
+- **Palette.** Pure black (`#000`–`#07080c`) with warm-white text (`#f7f7f5`), silver secondary
+  (`#b6bac5`), and white-alpha glass surfaces (bg `rgba(255,255,255,0.045)`, 1 px border
+  `rgba(255,255,255,0.12)`, `backdrop-filter: blur(18px)`, radius 22 px). No colorful gradients,
+  no neon; a cool `#8ec5ff` accent exists in tokens for sparing use.
+- **Sections** follow a mission frame: 01 Mission Summary → 02 Impact Telemetry (glass metric
+  cards) → 03 Project Modules (cards settle from a subtle rotateX) → 04 Systems & Skills →
+  05 Career Trajectory → 06 Contact Transmission (black glass panel).
+- **Reduced motion:** the global kill rule plus explicit `animation: none` overrides in
+  `hero.css` (needed because near-zero `animation-duration` does not cancel `animation-delay`) —
+  the hero renders fully resolved and static on the poster.
+- **Testing locally:** `npm run dev` (the printed port may shift to 8791/8792 etc. if 8790 is
+  busy) — check ~1440 px, ~768 px, and ~375 px widths, and again with
+  `prefers-reduced-motion: reduce` enabled in devtools.
+
+There is deliberately **no WebGL/WebGPU** — the earlier three + React Three Fiber constellation
+hero was removed with this redesign, returning the site to a single small JS bundle. framer-motion
+(LazyMotion) still drives the section/card reveals, and `useReducedMotion` renders them static.
 
 ## Docker
 
@@ -105,11 +160,12 @@ professional-portfolio/
 ├── .github/workflows/      # deploy.yml — build + publish to GitHub Pages on push to main
 ├── src/
 │   ├── main.tsx, App.tsx
-│   ├── data/               # profile, experience, skills, projects, highlights (typed content)
-│   ├── components/         # Nav, Hero, About, Experience, Highlights, Projects, Skills, …
-│   ├── hooks/useReveal.ts  # reduced-motion-aware scroll reveal
-│   └── styles/             # tokens.css + app.css (design system)
+│   ├── data/               # profile, experience, skills, projects, highlights + constellation.ts
+│   ├── components/         # Nav, ConstellationHero, About, Experience, Projects, Skills, …
+│   ├── hooks/              # useSmoothProgress.ts, usePointer.ts, useVisualTier.ts (reduced-motion-aware)
+│   └── styles/             # tokens.css + app.css + constellation-hero.css (design system)
 ├── public/                 # resume.pdf, favicon.svg, og-image.png, .nojekyll
+├── assets/                 # prototype/REFERENCE art only (earlier hero concepts); not deployed
 ├── Dockerfile              # multi-stage node build → nginx
 ├── nginx.conf              # listens on ${PORT}; SPA fallback; gzip; security headers
 ├── docker-compose.yml      # BIND_ADDR + PORT configurable host mapping (see .env.example)

@@ -26,8 +26,10 @@ too**; keep the two in sync when a shared fact changes.
   [`../resume-project/CLAUDE.md`](../resume-project/CLAUDE.md) for canonical facts and the
   confidentiality rules.
 - **Check `README.md`** for stack, dev commands, Docker usage, and deployment notes.
-- Keep changes simple — avoid over-engineering. No additional frameworks, no CSS-in-JS, no UI
-  kit, no stock images, no gimmicky animations.
+- Keep changes simple — avoid over-engineering. No CSS-in-JS, no UI kit, no stock images, no
+  gimmicky animations. Approved visual library (2026-07-03): **framer-motion** (via `LazyMotion`
+  + `m.*`) only — the three + @react-three/fiber WebGL layer was removed with the astronaut-video
+  hero. **No WebGL/WebGPU.** Don't add other frameworks.
 - Content lives in `src/data/` (typed modules) — it is the single source of truth. Update data
   there, not inline in components.
 - Do **not** add a backend, database, auth, or external services unless explicitly requested.

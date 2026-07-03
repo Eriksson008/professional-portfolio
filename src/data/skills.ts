@@ -5,7 +5,38 @@ export interface SkillGroup {
 
 export const skillGroups: SkillGroup[] = [
   {
-    name: 'Salesforce',
+    name: 'AI / LLM Systems',
+    items: [
+      'LLM application development',
+      'Tool calling / RAG',
+      'Multi-agent workflows',
+      'Spring AI',
+      'AWS Bedrock',
+      'AI-assisted delivery',
+    ],
+  },
+  {
+    name: 'Cloud, DevOps & Security',
+    items: [
+      'AWS ECS / Fargate',
+      'CloudFormation',
+      'Secrets Manager / SSM',
+      'Application Load Balancer',
+      'Docker',
+      'Jenkins',
+      'GitHub Actions',
+      'CI/CD',
+      'OAuth2 / OIDC',
+      'Azure AD',
+      'JWT / RS256',
+      'Passwordless / OTP',
+      'CIAM',
+      'DAST / pen-test',
+      'IDOR / CORS / path-traversal',
+    ],
+  },
+  {
+    name: 'Salesforce & Enterprise Platforms',
     items: [
       'Apex',
       'Apex Triggers',
@@ -22,70 +53,27 @@ export const skillGroups: SkillGroup[] = [
     ],
   },
   {
-    name: 'Backend',
+    name: 'Frontend',
+    items: ['React', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Lightning Web Components', 'Vite'],
+  },
+  {
+    name: 'Backend & Data',
     items: [
       'Java 21',
       'Spring Boot 3',
-      'Spring AI',
       'Node / Express',
       'REST APIs',
       'Microservices',
       'Integrations',
       'SQL',
-    ],
-  },
-  {
-    name: 'Frontend',
-    items: ['React', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Lightning Web Components', 'Vite'],
-  },
-  {
-    name: 'Cloud & DevOps',
-    items: [
-      'AWS ECS / Fargate',
-      'CloudFormation',
-      'Secrets Manager / SSM',
-      'Application Load Balancer',
-      'Docker',
-      'AWS Bedrock',
-      'Jenkins',
-      'GitHub Actions',
-      'CI/CD',
-    ],
-  },
-  {
-    name: 'Security',
-    items: [
-      'OAuth2 / OIDC',
-      'Azure AD',
-      'JWT / RS256',
-      'Passwordless / OTP',
-      'CIAM',
-      'DAST / pen-test',
-      'IDOR / CORS / path-traversal',
-    ],
-  },
-  {
-    name: 'Data',
-    items: [
       'PostgreSQL / Aurora',
       'DynamoDB',
       'Database Migrations',
-      'SOQL',
       'Elasticsearch / ELK',
     ],
   },
   {
-    name: 'AI Engineering',
-    items: [
-      'LLM application development',
-      'Tool calling / RAG',
-      'Multi-agent workflows',
-      'Spring AI',
-      'AI-assisted delivery',
-    ],
-  },
-  {
-    name: 'Ways of Working',
+    name: 'Delivery & Leadership',
     items: [
       'Git',
       'Jira',

@@ -6,8 +6,8 @@ export function Experience() {
   return (
     <Section id="experience">
       <SectionHeader
-        index="02"
-        eyebrow="Experience & Education"
+        index="05"
+        eyebrow="Career Trajectory"
         title="A steady progression from engineering foundation to senior ownership."
       />
       <ol className="timeline">

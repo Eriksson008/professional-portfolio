@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { useReveal } from '../hooks/useReveal';
+import { m, useReducedMotion } from 'framer-motion';
+import { riseIn, VIEWPORT } from './motion';
 
 interface SectionProps {
   id: string;
@@ -8,14 +9,17 @@ interface SectionProps {
 }
 
 export function Section({ id, alt, children }: SectionProps) {
-  const { ref, shown } = useReveal<HTMLElement>();
+  const reduced = useReducedMotion();
   return (
-    <section
+    <m.section
       id={id}
-      ref={ref}
-      className={`section ${alt ? 'section-alt' : ''} reveal ${shown ? 'is-shown' : ''}`}
+      className={`section ${alt ? 'section-alt' : ''}`}
+      variants={riseIn}
+      initial={reduced ? false : 'hidden'}
+      whileInView="show"
+      viewport={VIEWPORT}
     >
       <div className="wrap">{children}</div>
-    </section>
+    </m.section>
   );
 }

@@ -1,30 +1,52 @@
+/* ============================================================
+   Design tokens — luxury black & white glassmorphism.
+   Near-black surfaces, soft-white text, silver secondary,
+   translucent white-bordered glass. One restrained cool accent.
+   ============================================================ */
 :root {
-  /* Surfaces — deep blue-charcoal "ink", not pure black */
-  --ink: #0b0e13;
-  --ink-2: #0e131a;
-  --panel: #131922;
-  --panel-2: #19212c;
-  --line: #28313d;
-  --line-soft: #1d2530;
+  /* Surfaces — true black through near-black with a cold undertone */
+  --black: #000000;
+  --ink: #030305;
+  --ink-2: #07080c;
+
+  /* Glass — translucent white film over black; borders are white hairlines */
+  --panel: rgba(255, 255, 255, 0.045);
+  --panel-2: rgba(8, 10, 14, 0.62);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-soft: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.22);
 
   /* Text */
-  --text: #e9ecf1;
-  --muted: #98a3b2;
-  --faint: #6b7585;
+  --text: #f7f7f5;
+  --muted: #b6bac5;
+  --faint: #7c828e;
 
-  /* Accent — warm brass / drafting instrument, used with restraint */
-  --brass: #d7a24b;
-  --brass-bright: #ecbb66;
-  --brass-deep: #b9842f;
-  --brass-wash: rgba(215, 162, 75, 0.12);
-  --brass-line: rgba(215, 162, 75, 0.32);
+  /* Silver — labels, hairlines, resting states */
+  --silver: #b6bac5;
+  --silver-2: #8d93a3;
+  --silver-line: rgba(182, 186, 197, 0.26);
+  --silver-wash: rgba(182, 186, 197, 0.08);
 
-  /* Text that sits on a brass fill — stays dark in both themes */
-  --on-brass: #1a1306;
+  /* Accent — soft white light. Primary actions are white on black. */
+  --accent: #f7f7f5;
+  --accent-bright: #ffffff;
+  --accent-wash: rgba(255, 255, 255, 0.08);
+  --accent-line: rgba(255, 255, 255, 0.22);
+  --on-accent: #060709;
 
-  /* Elevation — flat in dark, soft in light */
-  --shadow: none;
-  --shadow-lift: none;
+  /* Cool accent — faint cyan-blue, used sparingly (live markers, key figures) */
+  --ice: #8ec5ff;
+  --ice-line: rgba(142, 197, 255, 0.35);
+  --ice-wash: rgba(142, 197, 255, 0.08);
+
+  /* Ambient glow — cool white-blue halo behind glass */
+  --glow: rgba(180, 200, 220, 0.22);
+  --glow-soft: rgba(180, 200, 220, 0.1);
+
+  /* Elevation — deep soft shadows + inner top light so glass lifts off black */
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.55), 0 32px 90px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
   color-scheme: dark;
 
@@ -36,40 +58,10 @@
   /* Layout */
   --wrap: 1140px;
   --gutter: clamp(1.25rem, 4vw, 3rem);
-  --radius: 4px;
+  --radius: 10px;
+  --radius-card: 22px;
+  --radius-pill: 999px;
 
   /* Motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* ============================================================
-   Light theme — white drafting paper, ink linework, brass.
-   Same design system; only the palette changes.
-   ============================================================ */
-:root[data-theme='light'] {
-  /* Surfaces — warm paper white, not stark */
-  --ink: #ffffff;
-  --ink-2: #f4f3ee;
-  --panel: #ffffff;
-  --panel-2: #faf9f5;
-  --line: #d8d4ca;
-  --line-soft: #e7e3d9;
-
-  /* Text — near-black ink */
-  --text: #171a1f;
-  --muted: #545c68;
-  --faint: #8a929f;
-
-  /* Accent — deepened brass so it stays legible on white */
-  --brass: #a97a1e;
-  --brass-bright: #8c6416;
-  --brass-deep: #785413;
-  --brass-wash: rgba(169, 122, 30, 0.1);
-  --brass-line: rgba(169, 122, 30, 0.38);
-
-  /* Soft, cool shadows give cards depth on paper */
-  --shadow: 0 1px 2px rgba(23, 26, 31, 0.05), 0 10px 30px rgba(23, 26, 31, 0.06);
-  --shadow-lift: 0 2px 6px rgba(23, 26, 31, 0.08), 0 20px 44px rgba(23, 26, 31, 0.1);
-
-  color-scheme: light;
 }
