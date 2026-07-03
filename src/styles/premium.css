@@ -4,12 +4,15 @@
    deep shadow + inset top light. No image assets.
    ============================================================ */
 
+/* No backdrop-filter on in-flow panels: they sit on flat section
+   backgrounds (blurring a flat color is a no-op), yet the browser
+   re-blurs every panel on every scrolled frame — the main source of
+   scroll jank. The translucent film + hairline + grain carry the glass. */
 .glow-panel {
   position: relative;
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   background: var(--panel);
-  backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
   overflow: hidden;
   transition: border-color 0.3s var(--ease);
