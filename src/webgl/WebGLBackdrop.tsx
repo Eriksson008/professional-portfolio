@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'rea
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { ParticleField } from './ParticleField';
+import { CoreOrb } from './CoreOrb';
 import { makeGlowTexture } from './textures';
 import type { HeroMotion } from './types';
 import type { VisualTier } from '../hooks/useVisualTier';
@@ -30,7 +31,7 @@ function Rig({ motionRef }: { motionRef: MutableRefObject<HeroMotion> }) {
   return null;
 }
 
-/** Soft red core glow behind the identity block, breathing very slowly. */
+/** Soft violet core glow behind the identity block, breathing very slowly. */
 function CoreGlow() {
   const sprite = useRef<THREE.Sprite>(null);
   const material = useRef<THREE.SpriteMaterial>(null);
@@ -45,7 +46,7 @@ function CoreGlow() {
       <spriteMaterial
         ref={material}
         map={texture}
-        color="#e5484d"
+        color="#8f8af4"
         transparent
         opacity={0.14}
         depthWrite={false}
@@ -93,6 +94,7 @@ export default function WebGLBackdrop({ motionRef, tier, onLive }: WebGLBackdrop
       >
         <Rig motionRef={motionRef} />
         <CoreGlow />
+        <CoreOrb tier={tier} />
         <ParticleField count={tier === 'full' ? 1600 : 650} />
       </Canvas>
     </div>

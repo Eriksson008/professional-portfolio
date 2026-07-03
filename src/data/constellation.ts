@@ -134,9 +134,11 @@ export const careerNodes: CareerNode[] = [
 
 // Normalized positions. Center band (y ~0.46–0.56) is kept clear for the identity/CTA.
 export const layout: Record<NodeId, Pt> = {
+  // hero core — the orb's center; a path origin only, never rendered as a node
+  core: { x: 0.5, y: 0.47 },
   // metrics — top band
   'm-impact': { x: 0.16, y: 0.12 },
-  'm-commits': { x: 0.38, y: 0.09 },
+  'm-commits': { x: 0.38, y: 0.11 }, /* keep clear of the sticky nav */
   'm-jira': { x: 0.62, y: 0.11 },
   'm-repos': { x: 0.84, y: 0.14 },
   'm-top': { x: 0.26, y: 0.24 },
@@ -164,6 +166,12 @@ export const layout: Record<NodeId, Pt> = {
 };
 
 export const connections: Connection[] = [
+  // hero core → first metrics: as the identity fades, light veins grow out of
+  // where the orb was, so the constellation reads as the hero's energy
+  // becoming structure.
+  { from: 'core', to: 'm-impact', revealAt: 0.13 },
+  { from: 'core', to: 'm-commits', revealAt: 0.15 },
+  { from: 'core', to: 'm-green', revealAt: 0.17 },
   // metrics → projects
   { from: 'm-commits', to: 'p-ai', revealAt: 0.34 },
   { from: 'm-commits', to: 'p-sf', revealAt: 0.37 },

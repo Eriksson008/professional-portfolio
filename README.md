@@ -39,18 +39,32 @@ npm run format       # Prettier
 
 ## "Constellation of Impact" hero
 
-The landing page opens with a scroll-driven **"Constellation of Impact"** hero
-(`ConstellationHero`) — an award-style interactive system map. The information layer is **real
-DOM / CSS / SVG**: a tall pinned section (~700vh) accumulates real metric, project, skill, and
-career nodes into one connected constellation as you scroll — revealed nodes stay on screen
-(silver), the node(s) currently in focus light up red, and SVG connector lines draw between
-related nodes. The centered identity fades out as the constellation takes over the middle of
-the screen, then returns at the end with the CTA card (name + tagline + **View Projects** /
-**Read Experience**).
+The landing page opens with the **"Constellation of Impact"** hero (`ConstellationHero`) — an
+award-style interactive system map with a cinematic opening. On load, a ~3s **formation
+overture** plays ("Career Nebula"): the obsidian atmosphere deepens, a few deliberate
+shooting-star trails (`ShootingStarField` — curved Beziers, glow tail + crisp line + icy head,
+one synced dash sweep) sketch across the field, particle dust gathers into a **glass core orb**
+behind the name, and the identity etches in blur-to-sharp while the decode-scramble resolves —
+name, role, tagline, and both CTAs (**View Projects** / **Read Experience**) are all live within
+~2.6s, never gated behind the scroll.
+
+The information layer is **real DOM / CSS / SVG**: a tall pinned section (~700vh) accumulates
+real metric, project, skill, and career nodes into one connected constellation as you scroll —
+revealed nodes bloom softly into place and stay on screen (silver), the node(s) currently in
+focus light up violet, and curved SVG light veins (cubic Beziers, drawn progressively via De
+Casteljau subdivision) grow between related nodes; once a vein completes, a small icy-cyan light
+pulse travels along it, and the settled structure breathes very slowly. As the identity fades,
+**seed veins grow out of the hero core** into the first metric nodes — the constellation reads
+as the hero's energy becoming structure — and the identity returns with the settled map at the
+end. A long-period shooting star recurs sparsely (~19s) so the sky stays alive.
 
 Behind that sits an **optional WebGL backdrop** (`src/webgl/`, three + React Three Fiber): a
-slowly rotating 3D particle shell (silver with sparse red, additive blending) and a breathing
-red core glow, with a gentle camera dolly on scroll and cursor parallax. It is pure atmosphere
+slowly rotating 3D particle shell (silver with sparse violet, additive blending) that **settles
+inward on load** (dust gathering), a **wireframe glass orb wrapped by a counter-rotating orbital
+dust ring** (`CoreOrb`) behind the identity, and a breathing violet core glow, with a gentle
+camera dolly on scroll and cursor parallax. A CSS-only orb (`HeroCoreFallback` — halo, glass
+core, two precessing orbit rings) is always mounted underneath and drops to a whisper while the
+GL context is live, so the hero's center can never be empty. It is pure atmosphere
 — capability-gated by `src/hooks/useVisualTier.ts` (`full` / `lite` / `off`), loaded lazily in
 its own chunk after first idle, paused off-screen, and wrapped in an error boundary with
 context-lost handling. If WebGL is unavailable (or on small screens, reduced motion, or
@@ -79,21 +93,27 @@ How it works:
   entries) is rendered as real HTML from `constellation.ts`, sourced from the existing
   `highlights.ts` / `projects.ts` / `skills.ts` / `experience.ts` data — nothing readable is baked
   into an image.
-- **Palette.** Black / white / red / silver: graphite background, white primary text, silver for
-  settled/inactive nodes and edges, red for the current focus window and connector highlights. No
-  imagery, no neon/gaming styling.
+- **Palette (dark-only).** Obsidian `#0a0c12` base, slate-glass panels built on `#383e4e` with
+  transparency, silver `#b6bac5` text/labels, soft-violet `#8f8af4` primary accent, icy-cyan
+  `#8fd9f2` secondary glow. There is deliberately **no light theme and no theme toggle** — the
+  site is dark-first and dark-only. Red and brass are fully retired. No imagery, no neon/gaming
+  styling.
 - **Accessibility / fallback.** Under `prefers-reduced-motion` (or no JS), the hero renders a
   **static, fully resolved constellation** — all node groups plus the CTA shown as a plain
   vertical layout, no scroll-jacking, no parallax/scramble. The name is a real `<h1>`; CTAs are
   keyboard-focusable links with visible focus.
 - **Responsive.** Desktop keeps the full 2D constellation; mobile and narrow viewports collapse to
   a static vertical spine (nodes stacked top-to-bottom with a connecting line), matching the
-  reduced-motion fallback.
+  reduced-motion fallback. Trails and the orb are dropped below 600px (a soft static glow backs
+  the identity instead); tablets keep the map with fewer trails.
 - **Testing locally:** `npm run dev` (the printed port may shift to 8791/8792 etc. if 8790 is
   busy) — check the hero at ~1440px, ~768px, and ~375px widths, and again with
   `prefers-reduced-motion: reduce` enabled in devtools.
 
-Design spec: `docs/superpowers/specs/2026-07-01-constellation-hero-design.md`.
+Design specs: `docs/superpowers/specs/2026-07-01-constellation-hero-design.md`,
+`docs/superpowers/specs/2026-07-02-webgl-visual-layer-design.md`,
+`docs/superpowers/specs/2026-07-02-dark-only-art-direction-design.md`, and
+`docs/superpowers/specs/2026-07-02-hero-formation-sequence-design.md`.
 
 ## Docker
 
@@ -167,7 +187,7 @@ professional-portfolio/
 │   ├── main.tsx, App.tsx
 │   ├── data/               # profile, experience, skills, projects, highlights + constellation.ts
 │   ├── components/         # Nav, ConstellationHero, About, Experience, Projects, Skills, …
-│   ├── hooks/              # useReveal.ts, useSmoothProgress.ts, usePointer.ts (reduced-motion-aware)
+│   ├── hooks/              # useSmoothProgress.ts, usePointer.ts, useVisualTier.ts (reduced-motion-aware)
 │   └── styles/             # tokens.css + app.css + constellation-hero.css (design system)
 ├── public/                 # resume.pdf, favicon.svg, og-image.png, .nojekyll
 ├── assets/                 # prototype/REFERENCE art only (earlier hero concepts); not deployed

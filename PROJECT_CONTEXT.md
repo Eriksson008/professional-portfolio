@@ -24,7 +24,8 @@ is set to "GitHub Actions".
 ## Tech Stack
 
 - React 18 + TypeScript, built with Vite 5
-- Hand-written CSS with a design-token system (`src/styles/tokens.css` + `app.css` + `premium.css`)
+- Hand-written CSS with a design-token system (`src/styles/tokens.css` + `app.css` +
+  `premium.css` + `constellation-hero.css`) — **dark-only** (no theme toggle) as of 2026-07-02
 - **WebGL layer (optional enhancement):** three + @react-three/fiber v8, lazy-loaded in its own
   chunk behind a capability gate (`src/hooks/useVisualTier.ts`); framer-motion (LazyMotion) for
   section transitions. WebGPU deliberately not used.
@@ -55,6 +56,59 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-02 — Hero formation sequence: "Career Nebula / Marble Constellation"
+  (user-directed 14-point brief; builds on the same-day dark-only art direction).** The hero now
+  opens with a ~3s **formation overture** instead of a quiet frame: atmosphere deepens in, three
+  staggered **shooting-star trails** sketch across the field (`ShootingStarField` — hand-authored
+  curved Beziers; each trail = glow tail + crisp line + icy head strokes sharing one
+  `pathLength`-normalized dash sweep, so head and tail stay synced in pure CSS; one long-period
+  trail recurs every ~19s), dust gathers into a **hero core orb** behind the name, and the
+  identity **etches in blur-to-sharp** (10px→0) while the decode-scramble resolves (scramble
+  start is delayed 1s to sync with the CSS timeline; skipped on the mobile spine where there is
+  no blur to mask it). **Tagline + CTAs are now part of the opening identity** — visible within
+  ~2.6s, no longer gated behind 88% of the 700vh scroll; the identity bookend still fades them
+  out mid-scroll (now completing by ~0.13 so light never crosses readable text; `visibility:
+  hidden` while faded so invisible CTAs can't be clicked) and returns them with the settled map.
+  **Hero core:** WebGL `CoreOrb` (faint wireframe icosahedron + tilted counter-rotating orbital
+  dust ring, forming over ~3s; the particle shell also settles inward on load) in the existing
+  lazy chunk, over a **CSS-only fallback orb** (`HeroCoreFallback`: halo, glass core, two
+  precessing 1px orbit rings) that is always mounted and drops to a whisper while GL is live —
+  the hero center can never be empty (verified: with WebGL disabled browser-wide the CSS orb +
+  trails + overture carry the design alone). **Hero→constellation seam:** a `core` layout point
+  plus three seed connections (`core → m-impact/m-commits/m-green`, revealAt 0.13–0.17) grow out
+  of where the orb was as the identity fades. Buttons restyled premium (violet gradient + glow /
+  slate glass ghost); nodes got a faint top-light sheen (marble); `m-commits` nudged below the
+  sticky nav. Mobile (<600px): no trails/orb, immediate text, soft static glow behind the
+  identity; reduced-motion: static resolved hero, no overture (new layers explicitly hidden).
+  No new dependencies; WebGPU still deliberately unused; bundles unchanged (main ~84 KB gz,
+  lazy WebGL ~236 KB gz). Design spec:
+  `docs/superpowers/specs/2026-07-02-hero-formation-sequence-design.md`.
+- **2026-07-02 — Dark-only art direction: "light veins in glass" (user-directed; removes the
+  dual theme of 2026-06-30 and retires red).** The site is now intentionally **dark-first and
+  dark-only**: the light theme, nav sun/moon toggle, `useTheme.ts`, the `index.html` boot
+  script, and all theme-swap transitions were deleted (`color-scheme: dark`, fixed
+  `theme-color #0a0c12`). **New palette** (tokens renamed `--red*` → `--accent*`): obsidian
+  `#0a0c12` base, slate-glass panels built on `--slate: #383e4e` with transparency +
+  `backdrop-filter`, silver `#b6bac5` text (`--muted`/`--silver`), soft-violet `#8f8af4`
+  primary accent, icy-cyan `#8fd9f2` secondary glow; **red and brass are fully retired**
+  (favicon recolored; the brief allowed a tiny signature red — declined as it would read as a
+  leftover). **Constellation reworked into flowing light veins:** straight `<line>` edges
+  became cubic Beziers bowing to alternating sides (deterministic per edge), drawn
+  progressively by **De Casteljau subdivision** (keeps the fix for Chrome's screen-space dash
+  bug under `non-scaling-stroke`); each vein is a wide low-opacity violet glow stroke under a
+  crisp 1px line (no SVG filters); completed veins carry a traveling icy-cyan **light pulse**
+  (SMIL `animateMotion`, staggered, every other edge only); nodes **bloom** (opacity + rise +
+  scale 0.92→1 + blur 5px→0) with a violet halo when focused; the glow layer **breathes** on a
+  7s cycle. WebGL backdrop recolored (silver-lavender particles, sparse violet fraction —
+  `redFraction` prop renamed `tintFraction` — violet core glow). Site-wide atmosphere: fixed
+  violet/cyan fog fields + ~3% film grain on `body`; section titles got a silver→white
+  gradient sheen; small low-contrast labels bumped ≥0.75rem. Dead CSS from the retired
+  title-block hero (`.hero*`, `.title-block`, `.tb-*`, `.status-dot`, `.theme-toggle`)
+  removed. Verified in Chrome on desktop (construction sequence, pulses, CTA end state, lower
+  sections, no console errors); mobile/reduced-motion paths are structurally unchanged from
+  the previously verified implementation (colors only). `npm run lint` + `npm run build`
+  green; bundle sizes unchanged (main ~84 KB gz, WebGL chunk lazy ~235 KB gz). Design spec:
+  `docs/superpowers/specs/2026-07-02-dark-only-art-direction-design.md`.
 - **2026-07-02 — WebGL visual layer added (user-directed; supersedes the "no WebGL / no new
   dependencies" restraint of 2026-07-01).** The constellation hero now has an optional 3D
   backdrop — a slowly rotating flattened particle shell (silver + sparse red, additive) with a
@@ -150,13 +204,10 @@ docker compose up --build       # production container at http://localhost:8790 
   should demonstrate the senior full-stack/React/TS/Docker skills it claims; typed data modules
   are more maintainable than one large HTML file. Supersedes the earlier "no framework / no build
   step" rule.
-- **Design direction:** tasteful "drafting / engineering title-block" aesthetic — deep ink base,
-  warm brass accent, Sora + IBM Plex Sans/Mono. The hero title block (modeled on an engineering
-  drawing's title block) is the signature device, nodding to the mechanical-engineering origin.
-  **Dark + light themes** (2026-06-30): dark is the ink base; light is white drafting paper with
-  ink linework and deepened brass. Same design system, only the palette changes via
-  `:root[data-theme]`; nav toggle persists the choice (localStorage) and honors
-  `prefers-color-scheme`, with an inline boot script preventing a flash on load.
+- **Design direction (superseded 2026-07-02, kept for history):** originally a "drafting /
+  engineering title-block" aesthetic with dark + light themes toggled via `:root[data-theme]`.
+  Both the title-block hero and the dual-theme system are gone — see the 2026-07-02 dark-only
+  art-direction decision above (obsidian / slate glass / silver / violet, single dark theme).
 - **Shares the résumé project's rules** — canonical personal details, no invented metrics, and
   the confidentiality mapping live in `../resume-project/CLAUDE.md`. Pull facts from there.
 - **No internal system/project/product codenames.** Case studies stay generic.

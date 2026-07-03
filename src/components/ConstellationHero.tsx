@@ -6,6 +6,8 @@ import { useVisualTier } from '../hooks/useVisualTier';
 import { ConstellationMap } from './ConstellationMap';
 import { ScrambleText } from './ScrambleText';
 import { SafeVisual } from './SafeVisual';
+import { ShootingStarField } from './ShootingStarField';
+import { HeroCoreFallback } from './HeroCoreFallback';
 import { CTA_AT, type NodeId } from '../data/constellation';
 import type { HeroMotion } from '../webgl/types';
 
@@ -14,6 +16,9 @@ const WebGLBackdrop = lazy(() => import('../webgl/WebGLBackdrop'));
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
+/** When the name's blur-to-sharp etch starts in the CSS overture timeline. */
+const ETCH_DELAY_MS = 1000;
+
 export function ConstellationHero() {
   const { ref, progress, interactive } = useSmoothProgress<HTMLElement>();
   const pointer = usePointer();
@@ -21,6 +26,16 @@ export function ConstellationHero() {
   const [hovered, setHovered] = useState<NodeId | null>(null);
   const [glLive, setGlLive] = useState(false);
   const headingId = 'hero-name';
+
+  // Fire the decode-scramble in sync with the CSS etch reveal, so the glyphs
+  // resolve while the name sharpens — etched into glass, not typed. The mobile
+  // spine has no blur reveal to mask the scramble, so it keeps the name static.
+  const [etch, setEtch] = useState(false);
+  useEffect(() => {
+    if (!interactive || window.matchMedia('(max-width: 600px)').matches) return;
+    const id = window.setTimeout(() => setEtch(true), ETCH_DELAY_MS);
+    return () => window.clearTimeout(id);
+  }, [interactive]);
 
   // The WebGL scene reads motion through a ref — no state crosses into the
   // canvas per frame.
@@ -33,21 +48,25 @@ export function ConstellationHero() {
 
   // Static mode (reduced-motion / no-JS): render the resolved map, everything visible.
   const p = interactive ? progress : 1;
-  // Resolve the CTA (and the field-dimming scrim) a touch before the very end so the
-  // final state — settled map + identity + CTA — holds for a beat instead of flashing
-  // by only at the pin-release point.
+  // The field-dimming scrim resolves a touch before the very end so the final
+  // state — settled map + identity — holds for a beat instead of flashing by
+  // only at the pin-release point.
   const ctaReveal = interactive ? clamp01((progress - CTA_AT) / (0.96 - CTA_AT)) : 1;
-  const ctaLive = ctaReveal > 0.4;
 
-  // The centred identity is the opening + closing bookend: full at the start, it
-  // fades out so the constellation owns the middle, then returns with the CTA.
+  // The centred identity (name, role, tagline, CTAs — all live from the
+  // overture) is the opening + closing bookend: full at the start, it fades
+  // out so the constellation owns the middle, then returns with the settled map.
+  // Fade completes by ~0.13, just before the seed veins reach full draw —
+  // light never crosses readable text.
   const identityOpacity = interactive
-    ? Math.max(1 - clamp01((progress - 0.08) / 0.08), ctaReveal)
+    ? Math.max(1 - clamp01((progress - 0.06) / 0.07), ctaReveal)
     : 1;
+  // While faded out, take it out of the accessibility/hit-testing tree so the
+  // invisible CTAs can't be clicked mid-constellation.
+  const identityHidden = interactive && identityOpacity < 0.04;
 
   const sectionStyle = {
     '--scrim': ctaReveal,
-    '--cta': ctaReveal,
     '--px': pointer.x,
     '--py': pointer.y,
   } as CSSProperties;
@@ -75,6 +94,10 @@ export function ConstellationHero() {
           </SafeVisual>
         )}
 
+        {interactive && <ShootingStarField />}
+
+        <HeroCoreFallback quiet={webgl && glLive} />
+
         <div className="c-field">
           <ConstellationMap
             p={p}
@@ -85,12 +108,12 @@ export function ConstellationHero() {
           />
 
           <div
-            className={`c-identity ${ctaLive ? 'is-live' : ''}`}
+            className={`c-identity ${identityHidden ? 'is-hidden' : ''}`}
             style={{ '--ido': identityOpacity } as CSSProperties}
           >
             <p className="c-eyebrow">Constellation of Impact</p>
             <h1 className="c-name" id={headingId}>
-              <ScrambleText text={profile.name} play={interactive} />
+              <ScrambleText text={profile.name} play={interactive && etch} />
             </h1>
             <p className="c-role">Senior Software Engineer · Acting Tech Lead</p>
             <div className="c-cta">
