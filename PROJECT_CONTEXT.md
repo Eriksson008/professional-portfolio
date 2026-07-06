@@ -57,6 +57,24 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-06 — Ask Fredrik v3: D1 question logging + admin endpoint (same branch
+  `ask-fredrik-v1`, user-directed 10-point brief; Workers Free + D1 Free, no AI yet).**
+  Every valid `POST /ask` question is logged to D1 table `ask_fredrik_logs`
+  (`cloudflare/ask-fredrik-worker/schema.sql`) **off the response path** via
+  `ctx.waitUntil` with a guarded try/catch — a D1 failure costs the log row, never the
+  answer (verified by dropping the table live). Columns include question/answer/source,
+  session_id/page from the widget, referrer/user-agent, `latency_ms`, plus
+  `matched_intent`/`model` logged NULL until Workers AI lands (no migration needed then).
+  **Raw IPs are never stored** — only SHA-256(`IP_HASH_SALT` secret + CF-Connecting-IP);
+  salt missing → NULL. `GET /admin/logs` requires `Bearer ADMIN_TOKEN` (secret; unset →
+  503 fail-closed), supports `?limit` 1–100 (default 100), newest-first, and sends **no
+  CORS headers** so browser origins can never read it. All bindings/secrets optional in
+  `Env` — the Worker answers with any subset configured. Local dev: placeholder
+  database_id works (miniflare SQLite); secrets in `.dev.vars` (gitignored). Deploy needs
+  `wrangler d1 create` + paste id + `wrangler secret put` ×2 (README walkthrough).
+  Verified with curl probes: auth (401/503), limits (400s), CORS isolation, deterministic
+  ip_hash, no-secrets degradation, drop-table resilience with captured `console.warn`.
+  Spec: `docs/superpowers/specs/2026-07-06-ask-fredrik-d1-logging-design.md`.
 - **2026-07-06 — Ask Fredrik v2 scaffold: Cloudflare Worker backend (same branch
   `ask-fredrik-v1`, user-directed 13-point brief; Workers Free, no keys, no paid services).**
   `cloudflare/ask-fredrik-worker/` is a **self-contained npm package** (own package.json /
@@ -325,12 +343,13 @@ site exposes only honest, defensible, public-safe content.
   "GitHub Actions" (the workflow handles the rest on push to `main`).
 - After first deploy, verify the live site: asset paths, résumé download, and the OG preview
   (paste the URL into LinkedIn Post Inspector / X card validator).
-- **Ask Fredrik v3 (optional, later):** enable Workers AI in the deployed
-  `cloudflare/ask-fredrik-worker` (3-step upgrade in its README), deploy it
-  (`npx wrangler login && npm run deploy`), then set the repo Actions variable
-  `VITE_ASK_FREDRIK_API_URL` to the Worker's `/ask` URL — the widget upgrades itself,
-  static answers remain the fallback. Don't set the variable before the AI step: the
-  Worker's v2 deterministic fallback is weaker than the static keyword answers.
+- **Ask Fredrik — go live (optional, later):** (1) create the production D1
+  (`npx wrangler d1 create ask-fredrik-db`, paste the id into `wrangler.jsonc`, apply
+  `schema.sql --remote`, `wrangler secret put ADMIN_TOKEN` + `IP_HASH_SALT`); (2) enable
+  Workers AI (3-step upgrade in the Worker README) and `npm run deploy`; (3) set the repo
+  Actions variable `VITE_ASK_FREDRIK_API_URL` to the Worker's `/ask` URL — the widget
+  upgrades itself, static answers remain the fallback. Don't set the variable before the
+  AI step: the Worker's deterministic fallback is weaker than the static keyword answers.
 - Keep the site coherent with the résumé whenever a shared fact changes.
 - Keep tone conservative and enterprise-friendly; metrics git-verifiable only.
 

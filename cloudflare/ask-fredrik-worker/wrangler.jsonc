@@ -5,9 +5,20 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ask-fredrik-worker",
   "main": "src/index.ts",
-  "compatibility_date": "2026-06-01"
+  "compatibility_date": "2026-06-01",
+
+  // D1 question log (D1 has a free tier). Local dev works with the placeholder
+  // id; before deploying, run `npx wrangler d1 create ask-fredrik-db` and paste
+  // the database_id it prints. See "D1 logging" in README.md.
+  "d1_databases": [
+    {
+      "binding": "ASK_FREDRIK_DB",
+      "database_name": "ask-fredrik-db",
+      "database_id": "REPLACE_WITH_YOUR_DATABASE_ID"
+    }
+  ]
 
   // v2 — Workers AI (has a free daily allocation on Workers Free).
-  // Uncomment the binding, then follow "Upgrading to Workers AI" in README.md:
+  // Add a comma above, uncomment, then follow "Upgrading to Workers AI" in README.md:
   // "ai": { "binding": "AI" }
 }
