@@ -15,6 +15,14 @@ export interface AskFredrikResult {
  */
 const apiUrl: string | undefined = import.meta.env.VITE_ASK_FREDRIK_API_URL;
 
+/**
+ * One anonymous id per page load so the backend can group a conversation's
+ * questions without any user identity attached. Optional in the API contract;
+ * omitted (undefined) where crypto.randomUUID is unavailable.
+ */
+const sessionId: string | undefined =
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : undefined;
+
 /** Lowercase, strip punctuation/diacritic quotes, collapse whitespace. */
 function normalize(question: string): string {
   return question
@@ -63,7 +71,7 @@ export async function askFredrik(question: string): Promise<AskFredrikResult> {
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, sessionId, page: window.location.pathname }),
       });
       if (res.ok) {
         const data = (await res.json()) as { answer?: unknown };

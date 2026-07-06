@@ -1,0 +1,5 @@
+# Wrangler local state + build cache
+.wrangler/
+
+# Local-only Worker env vars (none needed in v1, but never commit them)
+.dev.vars

@@ -57,6 +57,24 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-06 — Ask Fredrik v2 scaffold: Cloudflare Worker backend (same branch
+  `ask-fredrik-v1`, user-directed 13-point brief; Workers Free, no keys, no paid services).**
+  `cloudflare/ask-fredrik-worker/` is a **self-contained npm package** (own package.json /
+  tsconfig / `wrangler.jsonc`, wrangler 4) so the Pages build never touches it; root eslint
+  still lints it. `POST /ask` accepts `{question, sessionId?, page?}`, validates (required
+  string, trimmed, non-empty, ≤500 chars) and returns `{answer, source: 'fallback'}` — one
+  **deterministic answer composed from an approved-public-facts context object** (same rules
+  as `fredrikContext.ts`); no AI call yet, but the seam + README carry the exact 3-step
+  Workers-AI upgrade (free daily allocation). CORS allowlist: `https://eriksson008.github.io`
+  exact + anchored `localhost`/`127.0.0.1` any-port patterns (suffix-spoof origins verified
+  rejected); disallowed origins get no ACAO header. Frontend: `askFredrik()` now POSTs
+  `{question, sessionId (one anonymous `crypto.randomUUID()` per page load), page}`;
+  `deploy.yml` passes the repo Actions variable `VITE_ASK_FREDRIK_API_URL` into the build
+  (unset → static answers, safe no-op). **Deliberately not enabled in the Pages build yet** —
+  the static keyword answers beat the Worker's single fallback until Workers AI lands.
+  Verified with curl probes (validation, methods, CORS) + headless-Chrome end-to-end (widget →
+  wrangler dev → Worker answer rendered; Worker killed → silent static fallback, zero page
+  errors). Spec: `docs/superpowers/specs/2026-07-06-ask-fredrik-worker-v2-design.md`.
 - **2026-07-06 — "Ask Fredrik" recruiter concierge v1 (branch `ask-fredrik-v1`, user-directed
   10-point brief; frontend-only, free, no keys).** A floating black-glass chat widget
   (bottom-right pill → non-modal dialog) that answers recruiter questions from a **curated
@@ -307,9 +325,12 @@ site exposes only honest, defensible, public-safe content.
   "GitHub Actions" (the workflow handles the rest on push to `main`).
 - After first deploy, verify the live site: asset paths, résumé download, and the OG preview
   (paste the URL into LinkedIn Post Inspector / X card validator).
-- **Ask Fredrik v2 (optional, later):** stand up a free-tier answer API (e.g. Cloudflare
-  Worker + LLM over the same curated context), then set `VITE_ASK_FREDRIK_API_URL` in the
-  Pages build — the widget upgrades itself, static answers remain the fallback.
+- **Ask Fredrik v3 (optional, later):** enable Workers AI in the deployed
+  `cloudflare/ask-fredrik-worker` (3-step upgrade in its README), deploy it
+  (`npx wrangler login && npm run deploy`), then set the repo Actions variable
+  `VITE_ASK_FREDRIK_API_URL` to the Worker's `/ask` URL — the widget upgrades itself,
+  static answers remain the fallback. Don't set the variable before the AI step: the
+  Worker's v2 deterministic fallback is weaker than the static keyword answers.
 - Keep the site coherent with the résumé whenever a shared fact changes.
 - Keep tone conservative and enterprise-friendly; metrics git-verifiable only.
 

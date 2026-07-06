@@ -1,0 +1,13 @@
+// Wrangler configuration for the Ask Fredrik Worker.
+// Everything here runs on the Cloudflare Workers Free plan — no paid
+// features, no secrets, no API keys.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ask-fredrik-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-01"
+
+  // v2 — Workers AI (has a free daily allocation on Workers Free).
+  // Uncomment the binding, then follow "Upgrading to Workers AI" in README.md:
+  // "ai": { "binding": "AI" }
+}
