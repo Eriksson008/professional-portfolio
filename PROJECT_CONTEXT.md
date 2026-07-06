@@ -343,10 +343,13 @@ site exposes only honest, defensible, public-safe content.
   "GitHub Actions" (the workflow handles the rest on push to `main`).
 - After first deploy, verify the live site: asset paths, résumé download, and the OG preview
   (paste the URL into LinkedIn Post Inspector / X card validator).
-- **Ask Fredrik — go live (optional, later):** (1) create the production D1
-  (`npx wrangler d1 create ask-fredrik-db`, paste the id into `wrangler.jsonc`, apply
-  `schema.sql --remote`, `wrangler secret put ADMIN_TOKEN` + `IP_HASH_SALT`); (2) enable
-  Workers AI (3-step upgrade in the Worker README) and `npm run deploy`; (3) set the repo
+- **Ask Fredrik — go live:** (1) ~~create the production D1~~ **done 2026-07-06**
+  (`ask-fredrik-db`, id `20967ca0-…`, region ENAM, schema applied `--remote` and
+  verified); (2) **verify the Cloudflare account email** (dash.cloudflare.com — Workers
+  API rejects creating the Worker/secrets until then, code 10034); (3) set secrets:
+  `wrangler secret put ADMIN_TOKEN` + `IP_HASH_SALT` (generate with
+  `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`); (4) enable
+  Workers AI (3-step upgrade in the Worker README) and `npm run deploy`; (5) set the repo
   Actions variable `VITE_ASK_FREDRIK_API_URL` to the Worker's `/ask` URL — the widget
   upgrades itself, static answers remain the fallback. Don't set the variable before the
   AI step: the Worker's deterministic fallback is weaker than the static keyword answers.

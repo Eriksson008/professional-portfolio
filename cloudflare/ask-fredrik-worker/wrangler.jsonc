@@ -7,14 +7,14 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-06-01",
 
-  // D1 question log (D1 has a free tier). Local dev works with the placeholder
-  // id; before deploying, run `npx wrangler d1 create ask-fredrik-db` and paste
-  // the database_id it prints. See "D1 logging" in README.md.
+  // D1 question log (D1 has a free tier). Created 2026-07-06 with
+  // `npx wrangler d1 create ask-fredrik-db` (region ENAM). The id is not a
+  // secret — it's unusable without account credentials. See README.md.
   "d1_databases": [
     {
       "binding": "ASK_FREDRIK_DB",
       "database_name": "ask-fredrik-db",
-      "database_id": "REPLACE_WITH_YOUR_DATABASE_ID"
+      "database_id": "20967ca0-cf71-4498-afed-a44368a31000"
     }
   ]
 
