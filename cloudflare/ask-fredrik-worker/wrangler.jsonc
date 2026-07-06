@@ -16,9 +16,23 @@
       "database_name": "ask-fredrik-db",
       "database_id": "20967ca0-cf71-4498-afed-a44368a31000"
     }
-  ]
+  ],
 
-  // v2 — Workers AI (has a free daily allocation on Workers Free).
-  // Add a comma above, uncomment, then follow "Upgrading to Workers AI" in README.md:
-  // "ai": { "binding": "AI" }
+  // Workers AI (free daily allocation on Workers Free). The binding alone
+  // does nothing — AI runs only when ASK_FREDRIK_AI_ENABLED below is "true".
+  "ai": { "binding": "AI" },
+
+  // Non-secret tuning vars. All optional: the Worker applies these same
+  // defaults in code when a var is unset or unparseable. Flip
+  // ASK_FREDRIK_AI_ENABLED to "true" (then `npm run deploy`) to go live
+  // with AI answers; anything else keeps AI off and unmatched questions
+  // get the curated fallback. See "Workers AI" in README.md.
+  "vars": {
+    "ASK_FREDRIK_AI_ENABLED": "false",
+    "ASK_FREDRIK_MODEL": "@cf/meta/llama-3.1-8b-instruct",
+    "ASK_FREDRIK_AI_TIMEOUT_MS": "6000",
+    "ASK_FREDRIK_MAX_OUTPUT_TOKENS": "250",
+    "ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS": "60",
+    "ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS": "10"
+  }
 }

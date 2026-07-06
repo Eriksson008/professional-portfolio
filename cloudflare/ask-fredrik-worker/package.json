@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+    "dev:noai": "wrangler dev --config wrangler.dev-noai.jsonc",
     "deploy": "wrangler deploy",
     "check": "tsc --noEmit"
   },

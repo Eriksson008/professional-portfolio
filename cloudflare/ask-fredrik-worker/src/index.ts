@@ -1,71 +1,84 @@
 /**
  * Ask Fredrik — Cloudflare Worker backend.
  *
- * POST /ask         { question, sessionId?, page? }  →  { answer, source }
+ * POST /ask         { question, sessionId?, page? }  →  { answer, source, matchedIntent? }
  * GET  /admin/logs  Bearer ADMIN_TOKEN               →  { count, logs }
  *
- * v1 (this code) validates the request and returns a deterministic fallback
- * answer built from the approved public context below — it does not call any
- * AI model yet. Valid questions are logged to D1 (best-effort, off the
- * response path) so recruiter questions can be reviewed via /admin/logs.
- * The code is shaped so Workers AI can slot in later (see "Upgrading to
- * Workers AI" in the README).
+ * Answer pipeline for a valid question, in order:
+ *   1. rate limit   → source "rate_limited"  (in-memory, best-effort)
+ *   2. sensitive    → source "blocked"       (salary/private/confidential)
+ *   3. curated      → source "static"        (keyword matcher, logs matched_intent)
+ *   4. Workers AI   → source "ai"            (only if enabled + bound; guarded)
+ *   5. fallback     → source "fallback"      (deterministic curated answer)
  *
- * Runs entirely on the Workers/D1 Free plans. No API keys in code — the two
- * secrets (ADMIN_TOKEN, IP_HASH_SALT) live in Worker secrets, and every
- * feature degrades gracefully when its binding or secret is absent.
+ * Every valid question is logged to D1 (best-effort, off the response path).
+ * Runs entirely on the Workers/D1/Workers-AI Free plans. No API keys in code
+ * — the two secrets (ADMIN_TOKEN, IP_HASH_SALT) live in Worker secrets, and
+ * every feature degrades gracefully when its binding, var, or secret is
+ * absent: no AI binding or ASK_FREDRIK_AI_ENABLED != "true" simply means
+ * step 4 is skipped.
  */
+
+import {
+  BLOCKED_ANSWER,
+  FALLBACK_ANSWER,
+  RATE_LIMITED_ANSWER,
+  SYSTEM_PROMPT,
+} from './fredrik-context';
+import { isSensitiveQuestion, matchIntent } from './matcher';
+
+/** Minimal structural type for the Workers AI binding — keeps the Worker
+ *  compiling and running whether or not the binding is configured. */
+interface AiBinding {
+  run(model: string, inputs: Record<string, unknown>): Promise<unknown>;
+}
 
 export interface Env {
   /** D1 question log. Optional: without the binding the Worker still answers,
    *  it just doesn't log. */
   ASK_FREDRIK_DB?: D1Database;
+  /** Workers AI binding. Optional: without it, unmatched questions get the
+   *  curated fallback answer. */
+  AI?: AiBinding;
   /** Secret: bearer token for GET /admin/logs. Missing → endpoint returns 503. */
   ADMIN_TOKEN?: string;
   /** Secret: salt for hashing the connecting IP. Missing → ip_hash is not stored.
    *  Raw IPs are never stored either way. */
   IP_HASH_SALT?: string;
+
+  // Non-secret tuning vars (wrangler.jsonc "vars"). All optional — safe
+  // defaults apply when unset or unparseable.
+  /** "true" enables Workers AI for unmatched questions. Anything else: off. */
+  ASK_FREDRIK_AI_ENABLED?: string;
+  /** Workers AI model id. Default: a small free instruct model. */
+  ASK_FREDRIK_MODEL?: string;
+  /** AI call timeout in ms. Default 6000. */
+  ASK_FREDRIK_AI_TIMEOUT_MS?: string;
+  /** Max tokens the model may generate. Default 250. */
+  ASK_FREDRIK_MAX_OUTPUT_TOKENS?: string;
+  /** Rate-limit window in seconds. Default 60. */
+  ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS?: string;
+  /** Max valid /ask requests per window per client. Default 10. */
+  ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS?: string;
 }
 
-/**
- * Approved, portfolio-safe public context — the only facts this Worker
- * is ever allowed to speak from. Mirrors src/data/fredrikContext.ts in
- * the frontend: public facts and git-verifiable metrics only, no
- * internal system or project codenames.
- */
-const APPROVED_CONTEXT = {
-  name: 'Fredrik Eriksson',
-  role: 'Senior Software Engineer / Acting Tech Lead',
-  focusAreas: [
-    'Enterprise AI',
-    'secure client portals',
-    'production support',
-    'technical leadership',
-  ],
-  stack: ['React', 'Spring Boot', 'AWS', 'Salesforce', 'CI/CD (Copado, Jenkins)'],
-  trackRecord: [
-    '3 consecutive years of Exceptional Impact performance ratings',
-    '750+ commits',
-    '120+ Jira stories delivered',
-  ],
-} as const;
+type AskSource = 'ai' | 'fallback' | 'static' | 'blocked' | 'rate_limited';
 
-/**
- * v1 answer: deterministic, composed once from the approved context.
- * When Workers AI is enabled this becomes the safety net for model
- * failures rather than the primary answer.
- */
-const FALLBACK_ANSWER =
-  `${APPROVED_CONTEXT.name} is a ${APPROVED_CONTEXT.role} focused on ` +
-  `${APPROVED_CONTEXT.focusAreas.join(', ')}. ` +
-  `His core stack is ${APPROVED_CONTEXT.stack.join(', ')}. ` +
-  `Track record: ${APPROVED_CONTEXT.trackRecord.join('; ')}. ` +
-  `For question-specific answers, the portfolio's built-in assistant covers ` +
-  `his strongest projects, technical stack, leadership experience, and role fit.`;
+const DEFAULT_AI_MODEL = '@cf/meta/llama-3.1-8b-instruct';
+const DEFAULT_AI_TIMEOUT_MS = 6000;
+const DEFAULT_MAX_OUTPUT_TOKENS = 250;
+const DEFAULT_RATE_LIMIT_WINDOW_SECONDS = 60;
+const DEFAULT_RATE_LIMIT_MAX_REQUESTS = 10;
 
 const MAX_QUESTION_LENGTH = 500;
 const DEFAULT_LOG_LIMIT = 100;
 const MAX_LOG_LIMIT = 100;
+
+/** Integer env var with a fallback and sane bounds (unset/garbage → fallback). */
+function envInt(value: string | undefined, fallback: number, min: number, max: number): number {
+  const parsed = Number.parseInt(value ?? '', 10);
+  return Number.isInteger(parsed) && parsed >= min && parsed <= max ? parsed : fallback;
+}
 
 /**
  * CORS allowlist for /ask: local development (any localhost/127.0.0.1 port —
@@ -99,7 +112,7 @@ function json(body: unknown, status: number, origin: string | null, extra?: Head
 }
 
 /** Salted SHA-256 of the connecting IP, hex-encoded. Returns null (nothing
- *  stored) when the salt secret or the IP header is absent. */
+ *  stored) when the salt or the IP header is absent. */
 async function hashIp(request: Request, salt: string | undefined): Promise<string | null> {
   if (!salt) return null;
   const ip = request.headers.get('CF-Connecting-IP');
@@ -108,15 +121,95 @@ async function hashIp(request: Request, salt: string | undefined): Promise<strin
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+/**
+ * In-memory sliding-window rate limiter — basic abuse protection, not
+ * enterprise-grade bot protection. State is per Worker isolate and vanishes
+ * on eviction, so it's best-effort by design: free, zero-latency, and good
+ * enough to stop one client burning the Workers AI daily allocation. Clients
+ * are keyed by sessionId and by a salted IP hash (using IP_HASH_SALT when
+ * set, otherwise a random per-isolate salt) — raw IPs are never stored, in
+ * memory or anywhere else. Only /ask is limited; /admin/logs is untouched.
+ */
+const RATE_BUCKETS = new Map<string, number[]>();
+
+// Lazily created inside a handler — the Workers runtime forbids generating
+// random values in global scope.
+let ephemeralRateSalt: string | null = null;
+function getEphemeralRateSalt(): string {
+  ephemeralRateSalt ??= crypto.randomUUID();
+  return ephemeralRateSalt;
+}
+
+function isRateLimited(keys: string[], windowMs: number, maxRequests: number, now: number): boolean {
+  let limited = false;
+  for (const key of keys) {
+    const recent = (RATE_BUCKETS.get(key) ?? []).filter((t) => now - t < windowMs);
+    if (recent.length >= maxRequests) limited = true;
+    recent.push(now);
+    RATE_BUCKETS.set(key, recent);
+  }
+  // Bound memory: drop buckets whose entries have all aged out.
+  if (RATE_BUCKETS.size > 1000) {
+    for (const [key, stamps] of RATE_BUCKETS) {
+      if (stamps.every((t) => now - t >= windowMs)) RATE_BUCKETS.delete(key);
+    }
+  }
+  return limited;
+}
+
+/**
+ * Guarded Workers AI call: strict system prompt + approved context + the
+ * question — nothing else (no logs, tokens, hashes, or metadata). Timeout,
+ * empty/invalid responses, quota errors, and thrown errors all resolve to
+ * null so the caller falls back. No retries, no streaming.
+ */
+async function callWorkersAi(env: Env, question: string): Promise<{ answer: string; model: string } | null> {
+  const ai = env.AI;
+  if (!ai) return null;
+  const model = env.ASK_FREDRIK_MODEL || DEFAULT_AI_MODEL;
+  const timeoutMs = envInt(env.ASK_FREDRIK_AI_TIMEOUT_MS, DEFAULT_AI_TIMEOUT_MS, 500, 30000);
+  const maxTokens = envInt(env.ASK_FREDRIK_MAX_OUTPUT_TOKENS, DEFAULT_MAX_OUTPUT_TOKENS, 16, 1024);
+  try {
+    const result = await Promise.race([
+      ai.run(model, {
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: question },
+        ],
+        max_tokens: maxTokens,
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`Workers AI timed out after ${timeoutMs}ms`)), timeoutMs)
+      ),
+    ]);
+    const answer = extractAiText(result);
+    return answer ? { answer, model } : null;
+  } catch (err) {
+    console.warn('Workers AI call failed:', err);
+    return null;
+  }
+}
+
+/** Pull the generated text out of a Workers AI result; empty string if the
+ *  shape is unexpected. Text-generation models return { response: string }. */
+function extractAiText(result: unknown): string {
+  if (typeof result === 'string') return result.trim();
+  if (typeof result === 'object' && result !== null && 'response' in result) {
+    const response = (result as { response: unknown }).response;
+    if (typeof response === 'string') return response.trim();
+  }
+  return '';
+}
+
 interface LogEntry {
   question: string;
   answer: string;
-  source: string;
-  /** Which curated intent/answer matched — null until intent matching or AI exists. */
+  source: AskSource;
+  /** Curated intent that matched, or "sensitive" for blocked questions. */
   matchedIntent: string | null;
   sessionId: string | null;
   page: string | null;
-  /** AI model that produced the answer — null until Workers AI exists. */
+  /** AI model that produced the answer — null unless source is "ai". */
   model: string | null;
   latencyMs: number;
 }
@@ -198,32 +291,80 @@ async function handleAsk(
     );
   }
 
-  // v2 (Workers AI): replace the constant below with a guarded
-  // `env.AI.run(...)` call using APPROVED_CONTEXT as the system prompt,
-  // keeping FALLBACK_ANSWER as the catch-all — see README.md.
-  const answer = FALLBACK_ANSWER;
-  const source = 'fallback';
+  const sessionId = optionalString(body.sessionId, 100);
+  const page = optionalString(body.page, 300);
 
-  // Log after the response is sent — never on the answer's critical path.
-  ctx.waitUntil(
-    logQuestion(env, request, {
-      question,
-      answer,
-      source,
-      matchedIntent: null,
-      sessionId: optionalString(body.sessionId, 100),
-      page: optionalString(body.page, 300),
-      model: null,
-      latencyMs: Date.now() - startedAt,
-    })
+  /** Log (off the response path) and answer in one step. Always HTTP 200 —
+   *  the widget renders the answer whatever the source. */
+  const respond = (
+    answer: string,
+    source: AskSource,
+    matchedIntent: string | null,
+    model: string | null
+  ): Response => {
+    ctx.waitUntil(
+      logQuestion(env, request, {
+        question,
+        answer,
+        source,
+        matchedIntent,
+        sessionId,
+        page,
+        model,
+        latencyMs: Date.now() - startedAt,
+      })
+    );
+    return json(
+      matchedIntent !== null ? { answer, source, matchedIntent } : { answer, source },
+      200,
+      origin
+    );
+  };
+
+  // 1. Rate limit (valid questions only — validation errors don't count).
+  const windowMs =
+    envInt(env.ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS, DEFAULT_RATE_LIMIT_WINDOW_SECONDS, 1, 3600) *
+    1000;
+  const maxRequests = envInt(
+    env.ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS,
+    DEFAULT_RATE_LIMIT_MAX_REQUESTS,
+    1,
+    1000
   );
+  const rateKeys: string[] = [];
+  if (sessionId) rateKeys.push(`s:${sessionId}`);
+  const rateIpHash = await hashIp(request, env.IP_HASH_SALT ?? getEphemeralRateSalt());
+  if (rateIpHash) rateKeys.push(`i:${rateIpHash}`);
+  if (isRateLimited(rateKeys, windowMs, maxRequests, startedAt)) {
+    return respond(RATE_LIMITED_ANSWER, 'rate_limited', null, null);
+  }
 
-  return json({ answer, source }, 200, origin);
+  // 2. Sensitive topics never reach the model.
+  if (isSensitiveQuestion(question)) {
+    return respond(BLOCKED_ANSWER, 'blocked', 'sensitive', null);
+  }
+
+  // 3. Common recruiter questions get curated answers — free and instant.
+  const match = matchIntent(question);
+  if (match) {
+    return respond(match.answer, 'static', match.intent, null);
+  }
+
+  // 4. Workers AI, only when explicitly enabled and bound.
+  if ((env.ASK_FREDRIK_AI_ENABLED ?? '').toLowerCase() === 'true') {
+    const ai = await callWorkersAi(env, question);
+    if (ai) {
+      return respond(ai.answer, 'ai', null, ai.model);
+    }
+  }
+
+  // 5. Curated fallback — AI disabled, missing, timed out, or failed.
+  return respond(FALLBACK_ANSWER, 'fallback', null, null);
 }
 
 async function handleAdminLogs(request: Request, env: Env, url: URL): Promise<Response> {
   // No CORS headers anywhere in this handler: browser pages on other origins
-  // can never read these responses.
+  // can never read these responses. The /ask rate limiter does not apply here.
   if (!env.ADMIN_TOKEN) {
     return json({ error: 'Admin endpoint is not configured.' }, 503, null);
   }

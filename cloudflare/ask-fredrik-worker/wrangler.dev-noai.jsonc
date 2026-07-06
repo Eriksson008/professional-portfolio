@@ -1,0 +1,25 @@
+// Local-dev config WITHOUT the Workers AI binding (`npm run dev:noai`).
+// The AI binding makes `wrangler dev` open a remote proxy session, which
+// requires a registered workers.dev subdomain — use this config until the
+// subdomain exists, or whenever you want dev with zero AI usage. Keep the
+// D1/vars blocks in sync with wrangler.jsonc.
+{
+  "name": "ask-fredrik-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-01",
+  "d1_databases": [
+    {
+      "binding": "ASK_FREDRIK_DB",
+      "database_name": "ask-fredrik-db",
+      "database_id": "20967ca0-cf71-4498-afed-a44368a31000"
+    }
+  ],
+  "vars": {
+    "ASK_FREDRIK_AI_ENABLED": "false",
+    "ASK_FREDRIK_MODEL": "@cf/meta/llama-3.1-8b-instruct",
+    "ASK_FREDRIK_AI_TIMEOUT_MS": "6000",
+    "ASK_FREDRIK_MAX_OUTPUT_TOKENS": "250",
+    "ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS": "60",
+    "ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS": "10"
+  }
+}
