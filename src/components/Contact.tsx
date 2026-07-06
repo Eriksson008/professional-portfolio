@@ -20,7 +20,7 @@ export function Contact() {
             <span className="sheet-rule" aria-hidden="true" />
             <span className="sheet-eyebrow">Contact Transmission</span>
           </p>
-          <h2 className="contact-title">Let’s talk about senior engineering roles.</h2>
+          <h2 className="contact-title">Let's talk about senior engineering roles.</h2>
           <p className="contact-intro">
             Open to Senior Software Engineer, Salesforce Engineer, Backend, Full-Stack, Cloud /
             Application Engineer, and Tech Lead-track opportunities.
@@ -41,11 +41,18 @@ export function Contact() {
               GitHub
             </a>
             <a className="btn btn-ghost" href={profile.links.resume} target="_blank" rel="noopener">
-              Download Résumé
+              Download R&eacute;sum&eacute;
             </a>
           </div>
           <p className="contact-note">
-            The résumé is a one-page PDF that mirrors this site — same facts, same numbers.
+            The resume.pdf file is a one-page PDF that mirrors this site: same facts, same
+            numbers.
+          </p>
+          <p className="contact-repo">
+            Source:{' '}
+            <a href={profile.links.portfolioGithub} target="_blank" rel="noopener">
+              Professional Portfolio on GitHub
+            </a>
           </p>
         </div>
       </div>
