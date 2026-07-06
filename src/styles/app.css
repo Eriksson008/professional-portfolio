@@ -632,6 +632,21 @@ img {
   color: var(--faint);
   max-width: 60ch;
 }
+.contact-repo {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  color: var(--faint);
+}
+.contact-repo a {
+  color: var(--silver);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 0.25em;
+}
+.contact-repo a:hover {
+  color: var(--accent-bright);
+}
 
 /* ============================================================
    Footer

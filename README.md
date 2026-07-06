@@ -167,6 +167,8 @@ professional-portfolio/
 │   ├── hooks/              # useSmoothProgress.ts, usePointer.ts, useVisualTier.ts (reduced-motion-aware)
 │   └── styles/             # tokens.css + app.css + constellation-hero.css (design system)
 ├── public/                 # resume.pdf, favicon.svg, og-image.png, .nojekyll
+├── cloudflare/
+│   └── ask-fredrik-worker/ # optional Workers Free backend for the Ask Fredrik widget (own README)
 ├── assets/                 # prototype/REFERENCE art only (earlier hero concepts); not deployed
 ├── Dockerfile              # multi-stage node build → nginx
 ├── nginx.conf              # listens on ${PORT}; SPA fallback; gzip; security headers

@@ -9,6 +9,7 @@ export const profile = {
     email: 'eriksson.fredrik08@gmail.com',
     linkedin: 'https://www.linkedin.com/in/eriksson-fredrik',
     github: 'https://github.com/Eriksson008',
+    portfolioGithub: 'https://github.com/Eriksson008/professional-portfolio',
     // Base-aware so it resolves under the Pages project path and at "/" in Docker.
     resume: `${import.meta.env.BASE_URL}resume.pdf`,
   },

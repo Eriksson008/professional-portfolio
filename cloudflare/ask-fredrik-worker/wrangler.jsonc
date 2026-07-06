@@ -1,0 +1,37 @@
+// Wrangler configuration for the Ask Fredrik Worker.
+// Everything here runs on the Cloudflare Workers Free plan — no paid
+// features, no secrets, no API keys.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ask-fredrik-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-01",
+
+  // D1 question log (D1 has a free tier). Created 2026-07-06 with
+  // `npx wrangler d1 create ask-fredrik-db` (region ENAM). The id is not a
+  // secret — it's unusable without account credentials. See README.md.
+  "d1_databases": [
+    {
+      "binding": "ASK_FREDRIK_DB",
+      "database_name": "ask-fredrik-db",
+      "database_id": "20967ca0-cf71-4498-afed-a44368a31000"
+    }
+  ],
+
+  // Workers AI (free daily allocation on Workers Free). The binding alone
+  // does nothing — AI runs only when ASK_FREDRIK_AI_ENABLED below is "true".
+  "ai": { "binding": "AI" },
+
+  // Non-secret tuning vars. All optional: the Worker applies these same
+  // defaults in code when a var is unset or unparseable. Only the literal
+  // string "true" enables AI ("false" or unset = curated answers only, no
+  // model calls). Enabled 2026-07-06 at first deploy. See README.md.
+  "vars": {
+    "ASK_FREDRIK_AI_ENABLED": "true",
+    "ASK_FREDRIK_MODEL": "@cf/meta/llama-3.1-8b-instruct-fp8",
+    "ASK_FREDRIK_AI_TIMEOUT_MS": "10000",
+    "ASK_FREDRIK_MAX_OUTPUT_TOKENS": "250",
+    "ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS": "60",
+    "ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS": "10"
+  }
+}

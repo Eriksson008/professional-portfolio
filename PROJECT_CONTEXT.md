@@ -57,6 +57,71 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-06 - Contact section now links directly to the portfolio source repo.**
+  The Contact Transmission section keeps the public-safe one-page `resume.pdf` CTA and now adds
+  an explicit `Eriksson008/professional-portfolio` GitHub source link beneath the resume note,
+  driven from `src/data/profile.ts` so the URL stays centralized with the other profile links.
+
+- **2026-07-06 — Ask Fredrik v3: D1 question logging + admin endpoint (same branch
+  `ask-fredrik-v1`, user-directed 10-point brief; Workers Free + D1 Free, no AI yet).**
+  Every valid `POST /ask` question is logged to D1 table `ask_fredrik_logs`
+  (`cloudflare/ask-fredrik-worker/schema.sql`) **off the response path** via
+  `ctx.waitUntil` with a guarded try/catch — a D1 failure costs the log row, never the
+  answer (verified by dropping the table live). Columns include question/answer/source,
+  session_id/page from the widget, referrer/user-agent, `latency_ms`, plus
+  `matched_intent`/`model` logged NULL until Workers AI lands (no migration needed then).
+  **Raw IPs are never stored** — only SHA-256(`IP_HASH_SALT` secret + CF-Connecting-IP);
+  salt missing → NULL. `GET /admin/logs` requires `Bearer ADMIN_TOKEN` (secret; unset →
+  503 fail-closed), supports `?limit` 1–100 (default 100), newest-first, and sends **no
+  CORS headers** so browser origins can never read it. All bindings/secrets optional in
+  `Env` — the Worker answers with any subset configured. Local dev: placeholder
+  database_id works (miniflare SQLite); secrets in `.dev.vars` (gitignored). Deploy needs
+  `wrangler d1 create` + paste id + `wrangler secret put` ×2 (README walkthrough).
+  Verified with curl probes: auth (401/503), limits (400s), CORS isolation, deterministic
+  ip_hash, no-secrets degradation, drop-table resilience with captured `console.warn`.
+  Spec: `docs/superpowers/specs/2026-07-06-ask-fredrik-d1-logging-design.md`.
+- **2026-07-06 — Ask Fredrik v2 scaffold: Cloudflare Worker backend (same branch
+  `ask-fredrik-v1`, user-directed 13-point brief; Workers Free, no keys, no paid services).**
+  `cloudflare/ask-fredrik-worker/` is a **self-contained npm package** (own package.json /
+  tsconfig / `wrangler.jsonc`, wrangler 4) so the Pages build never touches it; root eslint
+  still lints it. `POST /ask` accepts `{question, sessionId?, page?}`, validates (required
+  string, trimmed, non-empty, ≤500 chars) and returns `{answer, source: 'fallback'}` — one
+  **deterministic answer composed from an approved-public-facts context object** (same rules
+  as `fredrikContext.ts`); no AI call yet, but the seam + README carry the exact 3-step
+  Workers-AI upgrade (free daily allocation). CORS allowlist: `https://eriksson008.github.io`
+  exact + anchored `localhost`/`127.0.0.1` any-port patterns (suffix-spoof origins verified
+  rejected); disallowed origins get no ACAO header. Frontend: `askFredrik()` now POSTs
+  `{question, sessionId (one anonymous `crypto.randomUUID()` per page load), page}`;
+  `deploy.yml` passes the repo Actions variable `VITE_ASK_FREDRIK_API_URL` into the build
+  (unset → static answers, safe no-op). **Deliberately not enabled in the Pages build yet** —
+  the static keyword answers beat the Worker's single fallback until Workers AI lands.
+  Verified with curl probes (validation, methods, CORS) + headless-Chrome end-to-end (widget →
+  wrangler dev → Worker answer rendered; Worker killed → silent static fallback, zero page
+  errors). Spec: `docs/superpowers/specs/2026-07-06-ask-fredrik-worker-v2-design.md`.
+- **2026-07-06 — "Ask Fredrik" recruiter concierge v1 (branch `ask-fredrik-v1`, user-directed
+  10-point brief; frontend-only, free, no keys).** A floating black-glass chat widget
+  (bottom-right pill → non-modal dialog) that answers recruiter questions from a **curated
+  static knowledge base** — no LLM, no backend, GitHub Pages-safe. Architecture:
+  `src/data/fredrikContext.ts` (greeting, disclosure, unknown-question fallback, and curated
+  answers — five suggested-question chips plus keyword-only topics for leadership/AI/experience/
+  security/contact; résumé rules apply: public facts and git-verifiable metrics only),
+  `src/lib/askFredrik.ts` (`askFredrik(question)`: keyword-scored static matcher by default;
+  if `VITE_ASK_FREDRIK_API_URL` is set at build time it tries POST `{question}` → `{answer}`
+  first and falls back to static on any failure — the future Cloudflare/LLM upgrade path with
+  zero component changes; env var typed in `vite-env.d.ts`, documented commented-out in
+  `.env.example`), and `src/components/AskFredrik.tsx` + `src/styles/ask-fredrik.css`. Key UX
+  decisions: the launcher stays hidden until ~0.55 viewport of scroll so the astronaut opening
+  frame stays clean (re-hides at top unless open); asked chips are removed; a 550 ms
+  "considered pause" + typing dots pace the static answers; permanent disclosure line
+  ("Questions may be logged… do not submit sensitive information" — v1 logs nothing);
+  Escape closes and returns focus to the launcher, `role="log"` + `aria-live` conversation,
+  non-modal so the page stays usable; ≤560px it becomes a bottom sheet capped at
+  `100dvh − 10.5rem` so it never rides over the nav. The panel is the one deliberate
+  `backdrop-filter` user (fixed overlay over live content). Verified end-to-end with headless
+  Chrome (puppeteer-core) at desktop + mobile widths: reveal gating, chips, curated/fallback/
+  keyword answers, whitespace-submit inert, focus management, zero console errors. Lint +
+  build green; bundle unchanged (~84 KB gz). Design spec:
+  `docs/superpowers/specs/2026-07-06-ask-fredrik-v1-design.md`.
 - **2026-07-03 — Astronaut-video hero + "mission" reskin (branch `astronaught-idea`,
   user-directed brief; supersedes the constellation/WebGL hero line below).** The homepage now
   opens on a **premium black-and-white astronaut video** (`public/media/astronaut-video.mp4`,
@@ -283,6 +348,17 @@ site exposes only honest, defensible, public-safe content.
   "GitHub Actions" (the workflow handles the rest on push to `main`).
 - After first deploy, verify the live site: asset paths, résumé download, and the OG preview
   (paste the URL into LinkedIn Post Inspector / X card validator).
+- **Ask Fredrik — go live:** (1) ~~create the production D1~~ **done 2026-07-06**
+  (`ask-fredrik-db`, id `20967ca0-…`, region ENAM, schema applied `--remote` and
+  verified); (2) ~~verify the Cloudflare account email~~ **done 2026-07-06**;
+  (3) ~~set secrets~~ **done 2026-07-06** — `ADMIN_TOKEN` + `IP_HASH_SALT` uploaded to
+  the (draft, not yet deployed) `ask-fredrik-worker`; the admin token value is with the
+  user, only its hash lives at Cloudflare (rotate anytime with `wrangler secret put`);
+  (4) enable Workers AI (3-step upgrade in the Worker README) and `npm run deploy`;
+  (5) set the repo Actions variable `VITE_ASK_FREDRIK_API_URL` to the Worker's `/ask`
+  URL — the widget upgrades itself, static answers remain the fallback. Don't set the
+  variable before the AI step: the Worker's deterministic fallback is weaker than the
+  static keyword answers.
 - Keep the site coherent with the résumé whenever a shared fact changes.
 - Keep tone conservative and enterprise-friendly; metrics git-verifiable only.
 

@@ -38,6 +38,10 @@ jobs:
         run: npm run build
         env:
           VITE_BASE: /professional-portfolio/
+          # Optional Ask Fredrik backend (cloudflare/ask-fredrik-worker): set the
+          # repo Actions *variable* VITE_ASK_FREDRIK_API_URL to the Worker's /ask
+          # URL to enable it; unset/empty keeps the free static answers.
+          VITE_ASK_FREDRIK_API_URL: ${{ vars.VITE_ASK_FREDRIK_API_URL }}
 
       - uses: actions/configure-pages@v6
 
