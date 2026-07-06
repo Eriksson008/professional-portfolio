@@ -345,14 +345,15 @@ site exposes only honest, defensible, public-safe content.
   (paste the URL into LinkedIn Post Inspector / X card validator).
 - **Ask Fredrik — go live:** (1) ~~create the production D1~~ **done 2026-07-06**
   (`ask-fredrik-db`, id `20967ca0-…`, region ENAM, schema applied `--remote` and
-  verified); (2) **verify the Cloudflare account email** (dash.cloudflare.com — Workers
-  API rejects creating the Worker/secrets until then, code 10034); (3) set secrets:
-  `wrangler secret put ADMIN_TOKEN` + `IP_HASH_SALT` (generate with
-  `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`); (4) enable
-  Workers AI (3-step upgrade in the Worker README) and `npm run deploy`; (5) set the repo
-  Actions variable `VITE_ASK_FREDRIK_API_URL` to the Worker's `/ask` URL — the widget
-  upgrades itself, static answers remain the fallback. Don't set the variable before the
-  AI step: the Worker's deterministic fallback is weaker than the static keyword answers.
+  verified); (2) ~~verify the Cloudflare account email~~ **done 2026-07-06**;
+  (3) ~~set secrets~~ **done 2026-07-06** — `ADMIN_TOKEN` + `IP_HASH_SALT` uploaded to
+  the (draft, not yet deployed) `ask-fredrik-worker`; the admin token value is with the
+  user, only its hash lives at Cloudflare (rotate anytime with `wrangler secret put`);
+  (4) enable Workers AI (3-step upgrade in the Worker README) and `npm run deploy`;
+  (5) set the repo Actions variable `VITE_ASK_FREDRIK_API_URL` to the Worker's `/ask`
+  URL — the widget upgrades itself, static answers remain the fallback. Don't set the
+  variable before the AI step: the Worker's deterministic fallback is weaker than the
+  static keyword answers.
 - Keep the site coherent with the résumé whenever a shared fact changes.
 - Keep tone conservative and enterprise-friendly; metrics git-verifiable only.
 
