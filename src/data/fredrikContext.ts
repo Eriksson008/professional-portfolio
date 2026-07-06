@@ -82,7 +82,7 @@ export const curatedAnswers: CuratedAnswer[] = [
       'typescript',
     ],
     answer:
-      'Frontend: React and TypeScript (plus Lightning Web Components). Backend: Java / Spring Boot and Node. Cloud: AWS — ECS/Fargate, Bedrock, load balancing, and OIDC/Azure AD auth. Platform: enterprise Salesforce (Apex, LWC, OmniStudio). Delivery: CI/CD with Copado, Jenkins, and GitHub Actions, Docker, PostgreSQL/Aurora, and Elasticsearch/ELK. He also builds enterprise AI applications — LLM integrations, retrieval, and multi-agent workflows.',
+      'Frontend: React and TypeScript (plus Lightning Web Components). Backend: Java / Spring Boot and Node. Cloud: AWS — ECS/Fargate, Bedrock, load balancing, and OIDC/Azure AD auth. Platform: enterprise Salesforce (Apex, LWC, OmniStudio). Delivery: CI/CD with Copado, Jenkins, and GitHub Actions, Docker, PostgreSQL/Aurora, and Elasticsearch/ELK. He also builds enterprise AI applications and uses Codex and Claude Code for AI-assisted review, documentation, and multi-agent workflows.',
   },
   {
     id: 'why-interview',
@@ -104,7 +104,7 @@ export const curatedAnswers: CuratedAnswer[] = [
     question: '',
     keywords: ['ai', 'llm', 'bedrock', 'machine learning', 'genai', 'agent', 'copilot'],
     answer:
-      'Fredrik builds enterprise AI applications. He was the single largest contributor to an internal AI client-assist assistant — a React frontend with a Spring AI / Spring Boot backend integrating an AWS Bedrock model, deployed on ECS/Fargate behind OIDC/Azure AD auth. He also builds multi-agent AI workflows for code review, documentation, and knowledge transfer, and uses AI-assisted delivery across all of his repositories.',
+      'Fredrik builds enterprise AI applications. He was the single largest contributor to an internal AI client-assist assistant — a React frontend with a Spring AI / Spring Boot backend integrating an AWS Bedrock model, deployed on ECS/Fargate behind OIDC/Azure AD auth. He also uses Codex and Claude Code for AI-assisted code review, documentation, knowledge transfer, and multi-agent delivery workflows across his repositories.',
   },
   {
     id: 'experience',

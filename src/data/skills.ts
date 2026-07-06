@@ -10,6 +10,7 @@ export const skillGroups: SkillGroup[] = [
       'LLM application development',
       'Tool calling / RAG',
       'Multi-agent workflows',
+      'Codex / Claude Code',
       'Spring AI',
       'AWS Bedrock',
       'AI-assisted delivery',
