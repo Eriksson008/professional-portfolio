@@ -114,7 +114,7 @@ This repo uses `wrangler.jsonc`; the TOML equivalents are shown for reference.
 "ai": { "binding": "AI" },
 "vars": {
   "ASK_FREDRIK_AI_ENABLED": "false",                      // flip to "true" to enable AI
-  "ASK_FREDRIK_MODEL": "@cf/meta/llama-3.1-8b-instruct",
+  "ASK_FREDRIK_MODEL": "@cf/meta/llama-3.1-8b-instruct-fp8",
   "ASK_FREDRIK_AI_TIMEOUT_MS": "6000",
   "ASK_FREDRIK_MAX_OUTPUT_TOKENS": "250",
   "ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS": "60",
@@ -129,7 +129,7 @@ binding = "AI"
 
 [vars]
 ASK_FREDRIK_AI_ENABLED = "true"
-ASK_FREDRIK_MODEL = "@cf/meta/llama-3.1-8b-instruct"
+ASK_FREDRIK_MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8"
 ASK_FREDRIK_AI_TIMEOUT_MS = "6000"
 ASK_FREDRIK_MAX_OUTPUT_TOKENS = "250"
 ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS = "60"
@@ -138,7 +138,7 @@ ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS = "10"
 
 All vars are optional — the Worker applies the same defaults in code when one is unset or
 unparseable. `ASK_FREDRIK_AI_ENABLED` defaults to **off**; only the literal string `"true"`
-enables AI. If `@cf/meta/llama-3.1-8b-instruct` is ever retired, set `ASK_FREDRIK_MODEL` to
+enables AI. If `@cf/meta/llama-3.1-8b-instruct-fp8` is ever retired, set `ASK_FREDRIK_MODEL` to
 any currently available small **instruct/text-generation** model from the
 [Workers AI model catalog](https://developers.cloudflare.com/workers-ai/models/) (pick one
 whose page shows the `messages` chat input) — no code change needed.

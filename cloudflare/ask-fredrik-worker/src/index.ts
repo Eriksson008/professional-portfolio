@@ -64,7 +64,7 @@ export interface Env {
 
 type AskSource = 'ai' | 'fallback' | 'static' | 'blocked' | 'rate_limited';
 
-const DEFAULT_AI_MODEL = '@cf/meta/llama-3.1-8b-instruct';
+const DEFAULT_AI_MODEL = '@cf/meta/llama-3.1-8b-instruct-fp8';
 const DEFAULT_AI_TIMEOUT_MS = 6000;
 const DEFAULT_MAX_OUTPUT_TOKENS = 250;
 const DEFAULT_RATE_LIMIT_WINDOW_SECONDS = 60;

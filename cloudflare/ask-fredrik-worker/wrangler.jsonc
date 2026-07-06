@@ -23,14 +23,13 @@
   "ai": { "binding": "AI" },
 
   // Non-secret tuning vars. All optional: the Worker applies these same
-  // defaults in code when a var is unset or unparseable. Flip
-  // ASK_FREDRIK_AI_ENABLED to "true" (then `npm run deploy`) to go live
-  // with AI answers; anything else keeps AI off and unmatched questions
-  // get the curated fallback. See "Workers AI" in README.md.
+  // defaults in code when a var is unset or unparseable. Only the literal
+  // string "true" enables AI ("false" or unset = curated answers only, no
+  // model calls). Enabled 2026-07-06 at first deploy. See README.md.
   "vars": {
-    "ASK_FREDRIK_AI_ENABLED": "false",
-    "ASK_FREDRIK_MODEL": "@cf/meta/llama-3.1-8b-instruct",
-    "ASK_FREDRIK_AI_TIMEOUT_MS": "6000",
+    "ASK_FREDRIK_AI_ENABLED": "true",
+    "ASK_FREDRIK_MODEL": "@cf/meta/llama-3.1-8b-instruct-fp8",
+    "ASK_FREDRIK_AI_TIMEOUT_MS": "10000",
     "ASK_FREDRIK_MAX_OUTPUT_TOKENS": "250",
     "ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS": "60",
     "ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS": "10"
