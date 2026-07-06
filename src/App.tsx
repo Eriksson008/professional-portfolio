@@ -9,6 +9,7 @@ import { Skills } from './components/Skills';
 import { Experience } from './components/Experience';
 import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
+import { AskFredrik } from './components/AskFredrik';
 
 export default function App() {
   useAnchorGlide();
@@ -28,6 +29,7 @@ export default function App() {
         <Contact />
       </main>
       <Footer />
+      <AskFredrik />
     </LazyMotion>
   );
 }

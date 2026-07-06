@@ -57,6 +57,30 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-06 — "Ask Fredrik" recruiter concierge v1 (branch `ask-fredrik-v1`, user-directed
+  10-point brief; frontend-only, free, no keys).** A floating black-glass chat widget
+  (bottom-right pill → non-modal dialog) that answers recruiter questions from a **curated
+  static knowledge base** — no LLM, no backend, GitHub Pages-safe. Architecture:
+  `src/data/fredrikContext.ts` (greeting, disclosure, unknown-question fallback, and curated
+  answers — five suggested-question chips plus keyword-only topics for leadership/AI/experience/
+  security/contact; résumé rules apply: public facts and git-verifiable metrics only),
+  `src/lib/askFredrik.ts` (`askFredrik(question)`: keyword-scored static matcher by default;
+  if `VITE_ASK_FREDRIK_API_URL` is set at build time it tries POST `{question}` → `{answer}`
+  first and falls back to static on any failure — the future Cloudflare/LLM upgrade path with
+  zero component changes; env var typed in `vite-env.d.ts`, documented commented-out in
+  `.env.example`), and `src/components/AskFredrik.tsx` + `src/styles/ask-fredrik.css`. Key UX
+  decisions: the launcher stays hidden until ~0.55 viewport of scroll so the astronaut opening
+  frame stays clean (re-hides at top unless open); asked chips are removed; a 550 ms
+  "considered pause" + typing dots pace the static answers; permanent disclosure line
+  ("Questions may be logged… do not submit sensitive information" — v1 logs nothing);
+  Escape closes and returns focus to the launcher, `role="log"` + `aria-live` conversation,
+  non-modal so the page stays usable; ≤560px it becomes a bottom sheet capped at
+  `100dvh − 10.5rem` so it never rides over the nav. The panel is the one deliberate
+  `backdrop-filter` user (fixed overlay over live content). Verified end-to-end with headless
+  Chrome (puppeteer-core) at desktop + mobile widths: reveal gating, chips, curated/fallback/
+  keyword answers, whitespace-submit inert, focus management, zero console errors. Lint +
+  build green; bundle unchanged (~84 KB gz). Design spec:
+  `docs/superpowers/specs/2026-07-06-ask-fredrik-v1-design.md`.
 - **2026-07-03 — Astronaut-video hero + "mission" reskin (branch `astronaught-idea`,
   user-directed brief; supersedes the constellation/WebGL hero line below).** The homepage now
   opens on a **premium black-and-white astronaut video** (`public/media/astronaut-video.mp4`,
@@ -283,6 +307,9 @@ site exposes only honest, defensible, public-safe content.
   "GitHub Actions" (the workflow handles the rest on push to `main`).
 - After first deploy, verify the live site: asset paths, résumé download, and the OG preview
   (paste the URL into LinkedIn Post Inspector / X card validator).
+- **Ask Fredrik v2 (optional, later):** stand up a free-tier answer API (e.g. Cloudflare
+  Worker + LLM over the same curated context), then set `VITE_ASK_FREDRIK_API_URL` in the
+  Pages build — the widget upgrades itself, static answers remain the fallback.
 - Keep the site coherent with the résumé whenever a shared fact changes.
 - Keep tone conservative and enterprise-friendly; metrics git-verifiable only.
 
