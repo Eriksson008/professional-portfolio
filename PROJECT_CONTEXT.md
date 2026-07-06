@@ -57,10 +57,19 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
-- **2026-07-06 - Contact section now links directly to the portfolio source repo.**
-  The Contact Transmission section keeps the public-safe one-page `resume.pdf` CTA and now adds
-  an explicit `Eriksson008/professional-portfolio` GitHub source link beneath the resume note,
-  driven from `src/data/profile.ts` so the URL stays centralized with the other profile links.
+- **2026-07-06 - Resume and portfolio now name Codex / Claude Code as AI-assisted engineering tools.**
+  The public one-page `public/resume.pdf` was regenerated from the sibling
+  `../resume-project/resume-building/output/resume-onepage.html` after adding a compact
+  AI-assisted delivery phrase and `Codex, Claude Code, AI-assisted code review/documentation`
+  to the maintained resume package. The portfolio skills data and Ask Fredrik static answers now
+  name the same tools. Guardrail: no AI/Claude efficiency percentages or unsupported productivity
+  metrics were added.
+
+- **2026-07-06 - Resume PDF links directly to the live portfolio.**
+  The maintained resume package and regenerated `public/resume.pdf` include
+  `eriksson008.github.io/professional-portfolio/` in the contact header as a clickable
+  live portfolio link for recruiters. The Contact Transmission section still includes
+  `Eriksson008/professional-portfolio` as a source-repo work-sample link beneath the resume note.
 
 - **2026-07-06 — Ask Fredrik v3: D1 question logging + admin endpoint (same branch
   `ask-fredrik-v1`, user-directed 10-point brief; Workers Free + D1 Free, no AI yet).**
