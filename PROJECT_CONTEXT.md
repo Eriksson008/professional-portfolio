@@ -454,9 +454,13 @@ site exposes only honest, defensible, public-safe content.
   latency all logged to D1, non-null `ip_hash` at the edge, admin auth, CORS preflight
   for the Pages origin, spoof origins rejected;
   (7) ~~set the repo Actions variable~~ **done 2026-07-06** — `VITE_ASK_FREDRIK_API_URL`
-  = the Worker's `/ask` URL (via `gh variable set`). **Remaining:** merge
-  `ask-fredrik-v1` → `main` — the widget only exists on the branch, so the live Pages
-  site doesn't call the Worker until the merge deploys it.
+  = the Worker's `/ask` URL (via `gh variable set`); (8) ~~merge `ask-fredrik-v1` →
+  `main`~~ **done 2026-07-06** — merged (one PROJECT_CONTEXT conflict, resolved by
+  dropping main's duplicate entries) and deployed via the Pages workflow (run green).
+  Live-site verified: new CSS hash served, all three finale media files answer range
+  requests (206), and the deployed bundle contains both the finale scrub sources and
+  the Worker URL — **Ask Fredrik and the astronaut finale are now live** at
+  https://eriksson008.github.io/professional-portfolio/.
 - Keep the site coherent with the résumé whenever a shared fact changes.
 - Keep tone conservative and enterprise-friendly; metrics git-verifiable only.
 
