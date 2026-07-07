@@ -127,7 +127,7 @@ export const SKILLS: SkillKnowledge[] = [
     relatedProjects: ['Professional Portfolio'],
     allowedAnswer:
       'Yes — this portfolio’s assistant uses Cloudflare Workers AI. Fredrik built the guarded ' +
-      'integration himself: a strict approved-context system prompt, timeouts, output caps, and ' +
+      'integration himself: a strictly scoped approved context, timeouts, output caps, and ' +
       'deterministic curated fallbacks so the widget never errors out. It’s project-level ' +
       'experience that complements his enterprise AI work on AWS Bedrock.',
   },

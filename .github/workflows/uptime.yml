@@ -1,0 +1,29 @@
+name: Uptime check
+
+# Pings the live site and the Ask Fredrik Worker every 6 hours. A failed run
+# means one of them is down or misbehaving — GitHub emails the repo owner on
+# workflow failure by default. Read-only, no checkout, no secrets.
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  uptime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Live site responds
+        run: |
+          curl -fsS --max-time 20 --retry 3 --retry-delay 15 \
+            https://eriksson008.github.io/professional-portfolio/ \
+            | grep -qi '<title>' || { echo 'Site response did not look like the portfolio HTML'; exit 1; }
+
+      - name: Ask Fredrik Worker healthy
+        run: |
+          body=$(curl -fsS --max-time 20 --retry 3 --retry-delay 15 \
+            https://ask-fredrik-worker.eriksson-fredrik08.workers.dev/)
+          echo "$body"
+          echo "$body" | grep -q '"status":"ok"' || { echo 'Worker health check did not return status ok'; exit 1; }

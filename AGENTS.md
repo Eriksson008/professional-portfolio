@@ -72,13 +72,23 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
 
 ## TODO / open decisions
 
-- [ ] **Finish going live (manual, in GitHub UI):** make the repo **public**, then Settings →
-  Pages → Source = **"GitHub Actions"**. The `deploy.yml` workflow then builds + publishes on
-  every push to `main`. Live at https://eriksson008.github.io/professional-portfolio/.
-- [ ] **After first deploy, sanity-check the live site:** asset paths, résumé download, and the
-  OG social preview (LinkedIn Post Inspector / X card validator).
+- [ ] **Validate the OG social preview** on the live site (LinkedIn Post Inspector / X card
+  validator) and confirm the résumé download link.
+- [ ] **Add the free Cloudflare WAF rate rule for `/ask`** (dashboard: zone → Security → WAF →
+  Rate limiting rules) — hard quota protection; the Worker's in-memory limiter is per-isolate
+  best-effort only.
+- [ ] **Consider Cloudflare Web Analytics** on the live site (free, cookieless, one script tag)
+  for visitor-level insight to complement the D1 question log.
 
 ### Done
+- [x] **Live on GitHub Pages — 2026-07-06.** Repo public, Pages source = GitHub Actions,
+  `deploy.yml` publishes on every push to `main`; live-site verified (asset hashes, finale
+  media range requests, Ask Fredrik Worker URL in the bundle). Live at
+  https://eriksson008.github.io/professional-portfolio/.
+- [x] **Ask Fredrik assistant live end-to-end — 2026-07-06/07.** Cloudflare Worker
+  (`cloudflare/ask-fredrik-worker`) with curated public-safe knowledge base, sensitive filter,
+  rate limiting, D1 FIFO logging, Workers AI + prompt-leak guard; CI (`worker-tests.yml`) and
+  uptime checks (`uptime.yml`) in place.
 - [x] **GitHub Pages deployment configured (user approved going public) — 2026-06-30.** Actions
   workflow `deploy.yml`; env-driven Vite base (`/professional-portfolio/` on Pages, `/`
   elsewhere); SEO/OpenGraph/JSON-LD metadata + `public/og-image.png`; typography/spacing polish.
