@@ -57,6 +57,29 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-06 — Ask Fredrik v5: curated public-safe knowledge base (branch
+  `ask-fredrik-knowledge-v5`, user-directed brief).** The Worker can now answer
+  confidently about approved skills/projects (e.g. Tailscale) instead of deflecting to
+  the résumé. New typed data modules in `cloudflare/ask-fredrik-worker/src/data/`:
+  `fredrik-skills.ts` (~24 skills with aliases + honest confidence levels
+  professional/project/personal/learning + exact `allowedAnswer`), `fredrik-projects.ts`
+  (public + private-at-concept-level projects with explicit `boundaries`;
+  Homebase/AFR Gateway/Second Brain never expose private data), `fredrik-qa.ts` (curated
+  intents, + `production_support`). Pipeline unchanged (rate limit → sensitive → curated
+  → AI → fallback); stage 3 is now `resolveLocalAnswer()`: curated exact → skill/project
+  alias match (longest wins, logged as `skill:tailscale` / `project:homebase`) → curated
+  keywords → **deterministic not-confirmed answer** for "experience with X?" questions
+  about unlisted tech (never model-guessed, never hallucinated). AI system prompt is now
+  `buildFredrikSystemPrompt()`: rules (only approved context, never infer/invent/reveal
+  private info, confidence semantics) + compact line-based KB serialization. **Hard
+  boundary: no second-brain/private-notes/RAG connection — static TypeScript only.**
+  Zero-dependency tests (`npm test`, 281 checks, plain Node ≥22.18 type stripping — this
+  required explicit `.ts` import extensions + `allowImportingTsExtensions`) exercise the
+  exact production `resolveLocalAnswer()` + public-safety data invariants. Verified
+  end-to-end via `dev:noai` curl. Frontend static fallback deliberately untouched (drift
+  risk accepted since v4). Spec:
+  `docs/superpowers/specs/2026-07-06-ask-fredrik-knowledge-base-design.md`.
+
 - **2026-07-06 — Finale now pins while scroll drives the reveal (same day, user feedback
   with screen recording).** The first scrub cut revealed the astronaut "in passing" — the
   section kept scrolling while the film lit, so the lit scene was only fully visible at the

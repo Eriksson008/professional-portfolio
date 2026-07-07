@@ -7,7 +7,9 @@
  * Answer pipeline for a valid question, in order:
  *   1. rate limit   → source "rate_limited"  (in-memory, best-effort)
  *   2. sensitive    → source "blocked"       (salary/private/confidential)
- *   3. curated      → source "static"        (keyword matcher, logs matched_intent)
+ *   3. curated      → source "static"        (curated Q&A, skill/project
+ *                     knowledge base, and the conservative not-confirmed
+ *                     answer — see resolveLocalAnswer in matcher.ts)
  *   4. Workers AI   → source "ai"            (only if enabled + bound; guarded)
  *   5. fallback     → source "fallback"      (deterministic curated answer)
  *
@@ -19,13 +21,8 @@
  * step 4 is skipped.
  */
 
-import {
-  BLOCKED_ANSWER,
-  FALLBACK_ANSWER,
-  RATE_LIMITED_ANSWER,
-  SYSTEM_PROMPT,
-} from './fredrik-context';
-import { isSensitiveQuestion, matchIntent } from './matcher';
+import { FALLBACK_ANSWER, RATE_LIMITED_ANSWER, SYSTEM_PROMPT } from './fredrik-context.ts';
+import { resolveLocalAnswer } from './matcher.ts';
 
 /** Minimal structural type for the Workers AI binding — keeps the Worker
  *  compiling and running whether or not the binding is configured. */
@@ -339,15 +336,15 @@ async function handleAsk(
     return respond(RATE_LIMITED_ANSWER, 'rate_limited', null, null);
   }
 
-  // 2. Sensitive topics never reach the model.
-  if (isSensitiveQuestion(question)) {
-    return respond(BLOCKED_ANSWER, 'blocked', 'sensitive', null);
+  // 2–3. Deterministic local resolution: the sensitive filter, curated Q&A,
+  // the skill/project knowledge base, and the conservative not-confirmed
+  // answer — free, instant, and never reaches the model.
+  const local = resolveLocalAnswer(question);
+  if (local.kind === 'blocked') {
+    return respond(local.answer, 'blocked', 'sensitive', null);
   }
-
-  // 3. Common recruiter questions get curated answers — free and instant.
-  const match = matchIntent(question);
-  if (match) {
-    return respond(match.answer, 'static', match.intent, null);
+  if (local.kind === 'match') {
+    return respond(local.answer, 'static', local.intent, null);
   }
 
   // 4. Workers AI, only when explicitly enabled and bound.

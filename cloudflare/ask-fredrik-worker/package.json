@@ -8,7 +8,8 @@
     "dev": "wrangler dev",
     "dev:noai": "wrangler dev --config wrangler.dev-noai.jsonc",
     "deploy": "wrangler deploy",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "test": "node src/tests/knowledge.test.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250109.0",
