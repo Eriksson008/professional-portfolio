@@ -79,6 +79,11 @@ docker compose up --build       # production container at http://localhost:8790 
   end-to-end via `dev:noai` curl. Frontend static fallback deliberately untouched (drift
   risk accepted since v4). Spec:
   `docs/superpowers/specs/2026-07-06-ask-fredrik-knowledge-base-design.md`.
+  Same-branch follow-ups: Workers Logs observability enabled in `wrangler.jsonc`
+  (dashboard invocation logs, ~3-day retention on Free), and **FIFO retention for the D1
+  question log** — insert + trim in one transactional batch keeps the newest
+  `ASK_FREDRIK_LOG_MAX_ROWS` rows (default 1000, "0" = keep forever); verified locally
+  (cap 3, 6 inserts → newest 3 survive). D1 is the durable "what are users asking" record.
 
 - **2026-07-06 — Finale now pins while scroll drives the reveal (same day, user feedback
   with screen recording).** The first scrub cut revealed the astronaut "in passing" — the
