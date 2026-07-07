@@ -57,6 +57,29 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-07 — Finale phase choreography: staged cinematic ending driven by one smoothed
+  progress variable (user-directed brief).** The finale's text no longer uses framer-motion
+  `whileInView` — the component's rAF lerp loop (glide factor 0.14; scroll moves the target,
+  the shown value keeps easing after scroll stops) now publishes smoothed progress as `--fp`
+  on `.finale`, and `finale.css` derives per-element phase windows from it (the hero's
+  `--p`/`--t` convention): eyebrow 0.02–0.16 → headline 0.10–0.30 → body 0.18–0.38 → roles
+  0.26–0.44 → film scrub 0.18–0.78 (media fades in 0.06–0.30 while its frames are still
+  black, so text lands before the visual brightens) → CTAs 0.60–0.75 → note/repo → held lit
+  composition 0.88–1.0. Runway trimmed 230vh → 200vh (the brief's 120–160vh ignored sticky
+  mechanics — it would leave only 60vh of animated runway). DOM order flipped to
+  panel-then-media: phones now get **content first, film band beneath** (film progress there
+  is measured from the media band's own viewport travel, separate smoothed track from the
+  text's section travel); desktop columns rebalanced (1fr/0.95fr), film hung slightly low +
+  left-edge scrim toward the text column. `--fp` unset defaults every ramp to 1, so
+  reduced-motion / video-failure / no-JS all render the settled scene; new
+  `.finale-panel:focus-within` snap makes keyboard focus force the panel visible (links are
+  focusable while faded). Verified in-browser at the automation window's locked 500×750
+  (in-flow phases, glide settling, focus snap, settled default); the film itself and pinned
+  desktop mode were **not** visually verifiable there — this Chrome never loads `<video>`
+  (confirmed identical on the unchanged live site → environmental) and refuses resize; the
+  scrub math is the unchanged previously-verified path. Lint + build green. Spec:
+  `docs/superpowers/specs/2026-07-07-finale-phase-choreography-design.md`.
+
 - **2026-07-07 — Prompt-leak guard, uptime checks, TODO cleanup (branch
   `ask-fredrik-guard-uptime`).** The guarded Workers AI call now discards any answer that
   echoes the system prompt / serialized KB (`containsPromptLeak` markers: section headers,

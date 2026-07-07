@@ -1,14 +1,23 @@
 /* ============================================================
    Finale — the closing scene.
-   The reveal film is scrubbed by scroll. On tall-enough desktop
-   viewports the scene pins (sticky under a 230vh runway, like
-   the hero) while the astronaut lights out of black; elsewhere
-   it stays in-flow. The film is shown whole (16:9, never
-   cover-cropped) because the subject drifts across the frame
-   during the reveal. Desktop: CTA column left, film right,
-   bleeding to the viewport edge; its edges are true black, so
-   it dissolves into the section. Phones keep the film as a 16:9
-   band with the content stacked beneath it.
+   The reveal plays out in phases along one smoothed scroll
+   progress: the component writes it to --fp (0→1) and every
+   staged element below derives its own ramp from it, so eyebrow
+   → headline/body → astronaut light-play → CTAs land in order
+   and the lit composition holds for the last stretch. --fp
+   defaults to 1, so reduced motion, video failure, and no-JS
+   all render the fully settled scene.
+
+   On tall-enough desktop viewports the scene pins (sticky under
+   a 200vh runway) while the phases play; elsewhere it stays
+   in-flow and the same ramps follow the section's travel. The
+   film is shown whole (16:9, never cover-cropped) because the
+   subject drifts across the frame during the reveal. Desktop:
+   CTA column left, film right, bled to the viewport edge and
+   hung slightly low — emerging from the dark; its edges are
+   true black, so it dissolves into the section. Phones put the
+   content first and the film as a full-width band beneath it,
+   so the contact actions are never behind a viewport of video.
    ============================================================ */
 .finale {
   position: relative;
@@ -21,9 +30,49 @@
   overflow: hidden;
 }
 
+/* --- Phase ramps ---
+   Each staged element maps --fp onto its own 0→1 ramp (--t) and
+   renders it as a quiet fade + 12px rise. Opacity + transform
+   only; the easing lives in the JS glide, so no transitions. --- */
+.finale-panel > * {
+  opacity: var(--t, 1);
+  transform: translateY(calc((1 - var(--t, 1)) * 12px));
+}
+.finale-panel .sheet-mark {
+  --t: clamp(0, calc((var(--fp, 1) - 0.02) / 0.14), 1);
+}
+.finale-title {
+  --t: clamp(0, calc((var(--fp, 1) - 0.1) / 0.2), 1);
+}
+.finale-body {
+  --t: clamp(0, calc((var(--fp, 1) - 0.18) / 0.2), 1);
+}
+.finale-roles {
+  --t: clamp(0, calc((var(--fp, 1) - 0.26) / 0.18), 1);
+}
+.finale-actions {
+  --t: clamp(0, calc((var(--fp, 1) - 0.6) / 0.15), 1);
+}
+.finale-note {
+  --t: clamp(0, calc((var(--fp, 1) - 0.7) / 0.14), 1);
+}
+.finale-repo {
+  --t: clamp(0, calc((var(--fp, 1) - 0.74) / 0.14), 1);
+}
+/* Links are focusable while still faded out — snap the whole panel
+   visible the moment keyboard focus lands anywhere inside it. */
+.finale-panel:focus-within > * {
+  --t: 1;
+}
+
 .finale-media {
   position: relative;
   aspect-ratio: 16 / 9;
+  /* Fade up from near-invisible while the film's own first frames are
+     still black, and settle upward — a touch of parallax drift. */
+  --t: clamp(0, calc((var(--fp, 1) - 0.06) / 0.24), 1);
+  opacity: var(--t);
+  transform: translateY(calc((1 - var(--fp, 1)) * 28px));
 }
 .finale-media video,
 .finale-media img {
@@ -103,26 +152,31 @@
   }
   .finale-inner {
     display: grid;
-    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
     align-items: center;
     gap: clamp(2rem, 4vw, 3.5rem);
     width: 100%;
   }
   .finale-media {
-    order: 2;
-    /* Bleed past the wrap to the right viewport edge (never positive). */
+    /* Bleed past the wrap to the right viewport edge (never positive),
+       and hang slightly below center — emerging, not centered. */
     margin-right: min(0px, calc((var(--wrap) - 100vw) / 2));
+    margin-top: clamp(1.5rem, 5vh, 3.5rem);
+  }
+  .finale-scrim {
+    /* Dissolve the film's left edge toward the text column. */
+    background: linear-gradient(90deg, var(--black) 0%, rgba(0, 0, 0, 0) 22%);
   }
 }
 
-/* --- Pin: tall-enough desktop viewports get the hero's runway ---
-   The scene holds still while scroll lights the astronaut; the JS
+/* --- Pin: tall-enough desktop viewports get a 200vh runway ---
+   The scene holds still while scroll plays the phases; the JS
    detects this mode from the section's own height, so the height
    gate below is the single switch. Short windows (where the pinned
    scene couldn't fit) keep the in-flow behavior above. --- */
 @media (min-width: 880px) and (min-height: 720px) {
   .finale {
-    height: 230vh;
+    height: 200vh;
   }
   .finale-sticky {
     position: sticky;
@@ -133,20 +187,24 @@
   }
 }
 
-/* --- Mobile: film keeps its own frame, content stacks below --- */
+/* --- Mobile: content first, film band beneath as the quiet exit --- */
 @media (max-width: 879px) {
   .finale-scrim {
-    /* Settle the film's lower edge into the black the content sits on. */
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 72%, var(--black) 100%);
+    /* Feather the band into the black above (content) and below (footer). */
+    background: linear-gradient(
+      180deg,
+      var(--black) 0%,
+      rgba(0, 0, 0, 0) 26%,
+      rgba(0, 0, 0, 0) 74%,
+      var(--black) 100%
+    );
   }
   .finale-inner {
-    padding-block: 0 4rem;
+    padding-block: 4.5rem 0;
   }
   .finale-media {
     /* Escape the wrap gutters so the film band runs edge to edge. */
     margin-inline: calc(var(--gutter) * -1);
-  }
-  .finale-panel {
-    padding-top: 2.4rem;
+    margin-top: 2.5rem;
   }
 }
