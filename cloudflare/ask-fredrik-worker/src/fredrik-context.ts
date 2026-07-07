@@ -154,6 +154,25 @@ export const SENSITIVE_KEYWORDS: string[] = [
   'bills',
   'mortgage',
   'bank',
+  // personal attributes / beliefs / health — observed in real logs ("whats
+  // fredrik's height?" reached the model). Phrased to avoid false positives:
+  // no bare "weight" (lightweight), "health" (healthcare experience), or
+  // "race" (race condition).
+  'height',
+  'how tall',
+  'his weight',
+  'how much does he weigh',
+  'appearance',
+  'looks like',
+  'religio',
+  'politic',
+  'ethnicity',
+  'sexual',
+  'disability',
+  'his health',
+  'health issue',
+  'health condition',
+  'medical condition',
   // private notes / second-brain contents
   'private notes',
   'his notes',

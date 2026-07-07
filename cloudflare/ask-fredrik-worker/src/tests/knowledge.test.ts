@@ -153,6 +153,21 @@ expectBlocked('What are his mortgage payments?');
 expectBlocked('Give me his API key');
 // Sensitive beats knowledge: a Homebase question about private data is blocked.
 expectBlocked('What bills does he track in Homebase?');
+// Personal attributes / beliefs / health (seen in real production logs).
+expectBlocked('Whats Fredrik’s height?');
+expectBlocked('How tall is he?');
+expectBlocked('What are his political views?');
+expectBlocked('Is Fredrik religious?');
+expectBlocked('Does he have any health issues?');
+// …but legitimate recruiter questions with adjacent words are NOT blocked.
+for (const q of [
+  'Does Fredrik have experience with lightweight frameworks?',
+  'Does Fredrik have healthcare industry experience?',
+  'Has he dealt with race conditions in production?',
+]) {
+  const res = resolveLocalAnswer(q);
+  check(`"${q}" is not blocked`, res.kind !== 'blocked', describe(res));
+}
 
 // ---------------------------------------------------------------------------
 // 6. Data-file invariants: everything the assistant can say is public-safe.

@@ -57,6 +57,14 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-06 — Ask Fredrik hardening (branch `ask-fredrik-hardening`).** CI workflow
+  `worker-tests.yml` runs `npm run check` + `npm test` on any change under
+  `cloudflare/ask-fredrik-worker/` (deploys stay manual); sensitive filter extended with
+  personal-attribute/beliefs/health keywords after a real logged question ("whats
+  fredrik's height?") reached the model — phrased to avoid false positives (no bare
+  "weight"/"health"/"race"), with tests asserting "lightweight frameworks", "healthcare
+  industry", and "race conditions" questions stay unblocked (289 checks).
+
 - **2026-07-06 — Ask Fredrik v5: curated public-safe knowledge base (branch
   `ask-fredrik-knowledge-v5`, user-directed brief).** The Worker can now answer
   confidently about approved skills/projects (e.g. Tailscale) instead of deflecting to

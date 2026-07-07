@@ -1,0 +1,45 @@
+name: Ask Fredrik Worker tests
+
+# Type-checks and runs the knowledge-base/pipeline tests for the Cloudflare
+# Worker whenever it changes. Deploying the Worker stays manual
+# (`npm run deploy` in cloudflare/ask-fredrik-worker) — this only guards
+# against a bad knowledge-base or pipeline edit landing on main untested.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/ask-fredrik-worker/**'
+      - '.github/workflows/worker-tests.yml'
+  pull_request:
+    paths:
+      - 'cloudflare/ask-fredrik-worker/**'
+      - '.github/workflows/worker-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloudflare/ask-fredrik-worker
+    steps:
+      - uses: actions/checkout@v7
+
+      # Node 24: npm test relies on native TypeScript type stripping (≥22.18).
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: cloudflare/ask-fredrik-worker/package-lock.json
+
+      - run: npm ci
+
+      - name: Type-check
+        run: npm run check
+
+      - name: Knowledge-base & pipeline tests
+        run: npm test
