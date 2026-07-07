@@ -199,7 +199,8 @@ This repo uses `wrangler.jsonc`; the TOML equivalents are shown for reference.
   "ASK_FREDRIK_AI_TIMEOUT_MS": "6000",
   "ASK_FREDRIK_MAX_OUTPUT_TOKENS": "250",
   "ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS": "60",
-  "ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS": "10"
+  "ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS": "10",
+  "ASK_FREDRIK_LOG_MAX_ROWS": "1000"          // FIFO log retention; "0" = keep forever
 }
 ```
 
@@ -252,6 +253,12 @@ is a `console.warn`, never a user-facing error.
 **Privacy:** questions may be logged — the widget tells users not to submit sensitive
 information. Raw IP addresses are **never** stored; only a salted SHA-256 hash, and only
 when `IP_HASH_SALT` is set.
+
+**Retention (FIFO):** the log is a rolling window, not an archive. After each insert the
+Worker trims the table to the newest `ASK_FREDRIK_LOG_MAX_ROWS` rows (default **1000**;
+set `"0"` to keep everything). The insert and trim run in one transactional D1 batch, off
+the response path. Dashboard-side Workers Logs (observability) are separate and
+short-lived — roughly 3 days on the Free plan; D1 is the durable record.
 
 Database `ask-fredrik-db` was created 2026-07-06 and the schema applied (`schema.sql`).
 For a fresh setup: `npx wrangler d1 create ask-fredrik-db`, paste the id into

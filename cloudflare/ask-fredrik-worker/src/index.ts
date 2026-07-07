@@ -57,6 +57,9 @@ export interface Env {
   ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS?: string;
   /** Max valid /ask requests per window per client. Default 10. */
   ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS?: string;
+  /** FIFO retention for the D1 log: newest N rows are kept, older rows are
+   *  trimmed after each insert. Default 1000. "0" disables trimming. */
+  ASK_FREDRIK_LOG_MAX_ROWS?: string;
 }
 
 type AskSource = 'ai' | 'fallback' | 'static' | 'blocked' | 'rate_limited';
@@ -66,6 +69,7 @@ const DEFAULT_AI_TIMEOUT_MS = 6000;
 const DEFAULT_MAX_OUTPUT_TOKENS = 250;
 const DEFAULT_RATE_LIMIT_WINDOW_SECONDS = 60;
 const DEFAULT_RATE_LIMIT_MAX_REQUESTS = 10;
+const DEFAULT_LOG_MAX_ROWS = 1000;
 
 const MAX_QUESTION_LENGTH = 500;
 const DEFAULT_LOG_LIMIT = 100;
@@ -211,14 +215,17 @@ interface LogEntry {
   latencyMs: number;
 }
 
-/** Best-effort insert, run via ctx.waitUntil off the response path. Any
- *  failure is warned and swallowed — logging must never break an answer. */
+/** Best-effort insert + FIFO trim, run via ctx.waitUntil off the response
+ *  path. The trim keeps only the newest ASK_FREDRIK_LOG_MAX_ROWS rows
+ *  (default 1000, "0" disables), so the log is a rolling window rather than
+ *  an ever-growing archive. Both statements run in one transactional batch.
+ *  Any failure is warned and swallowed — logging must never break an answer. */
 async function logQuestion(env: Env, request: Request, entry: LogEntry): Promise<void> {
   const db = env.ASK_FREDRIK_DB;
   if (!db) return;
   try {
     const ipHash = await hashIp(request, env.IP_HASH_SALT);
-    await db
+    const insert = db
       .prepare(
         `INSERT INTO ask_fredrik_logs
            (id, created_at, question, answer, source, matched_intent,
@@ -239,8 +246,27 @@ async function logQuestion(env: Env, request: Request, entry: LogEntry): Promise
         ipHash,
         entry.model,
         entry.latencyMs
-      )
-      .run();
+      );
+
+    const maxRows = envInt(env.ASK_FREDRIK_LOG_MAX_ROWS, DEFAULT_LOG_MAX_ROWS, 0, 100000);
+    const statements = [insert];
+    if (maxRows > 0) {
+      // Cheap on a capped table: created_at is indexed and the table never
+      // holds more than maxRows + a handful of rows.
+      statements.push(
+        db
+          .prepare(
+            `DELETE FROM ask_fredrik_logs
+             WHERE id NOT IN (
+               SELECT id FROM ask_fredrik_logs
+               ORDER BY created_at DESC, id DESC
+               LIMIT ?1
+             )`
+          )
+          .bind(maxRows)
+      );
+    }
+    await db.batch(statements);
   } catch (err) {
     console.warn('ask_fredrik_logs insert failed:', err);
   }
