@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { profile } from '../data/profile';
+import { useDesktopViewport } from './useDesktopViewport';
 
 // The scrub encodes are all-intra (a keyframe every frame) so seeking is
 // instant at any scroll position; the original GOP encode stutters.
@@ -31,19 +32,6 @@ const hudLabels = [
   { pos: 'bl', text: 'Stories · 120+' },
   { pos: 'br', text: 'Role · Tech Lead' },
 ] as const;
-
-function useDesktopViewport() {
-  const [desktop, setDesktop] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 720px)').matches
-  );
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 720px)');
-    const onChange = (e: MediaQueryListEvent) => setDesktop(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-  return desktop;
-}
 
 /**
  * Cinematic hero: the film is scrubbed by scroll. The hero pins under the

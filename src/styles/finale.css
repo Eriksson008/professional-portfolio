@@ -1,0 +1,126 @@
+/* ============================================================
+   Finale — the closing scene.
+   The reveal film plays once and holds its lit final frame. It
+   is shown whole (16:9, never cover-cropped) because the subject
+   drifts across the frame during the reveal. Desktop: CTA column
+   left, film right, bleeding to the viewport edge; its edges are
+   true black, so it dissolves into the section. Phones keep the
+   film as a 16:9 band with the content stacked beneath it.
+   ============================================================ */
+.finale {
+  position: relative;
+  background: var(--black);
+  overflow: hidden;
+}
+
+.finale-media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+.finale-media video,
+.finale-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.finale-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.finale-title {
+  font-size: clamp(1.9rem, 4vw, 2.9rem);
+  letter-spacing: -0.02em;
+  max-width: 20ch;
+  background: linear-gradient(180deg, #ffffff 20%, var(--silver) 125%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.finale-body {
+  margin-top: 1.2rem;
+  color: var(--muted);
+  font-size: 1.04rem;
+  max-width: 46ch;
+}
+
+.finale-roles {
+  margin-top: 0.9rem;
+  color: var(--faint);
+  font-size: 0.9rem;
+  max-width: 48ch;
+}
+
+.finale-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 2.2rem;
+}
+
+.finale-note,
+.finale-repo {
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  color: var(--faint);
+  max-width: 60ch;
+}
+.finale-note {
+  margin-top: 1.8rem;
+}
+.finale-repo {
+  margin-top: 0.75rem;
+}
+.finale-repo a {
+  color: var(--silver);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 0.25em;
+}
+.finale-repo a:hover {
+  color: var(--accent-bright);
+}
+
+/* --- Desktop: text left, film right, bled to the viewport edge --- */
+@media (min-width: 880px) {
+  .finale {
+    display: flex;
+    align-items: center;
+    min-height: min(92vh, 880px);
+    padding-block: clamp(4.5rem, 9vw, 7rem);
+  }
+  .finale-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    align-items: center;
+    gap: clamp(2rem, 4vw, 3.5rem);
+    width: 100%;
+  }
+  .finale-media {
+    order: 2;
+    /* Bleed past the wrap to the right viewport edge (never positive). */
+    margin-right: min(0px, calc((var(--wrap) - 100vw) / 2));
+  }
+}
+
+/* --- Mobile: film keeps its own frame, content stacks below --- */
+@media (max-width: 879px) {
+  .finale-scrim {
+    /* Settle the film's lower edge into the black the content sits on. */
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 72%, var(--black) 100%);
+  }
+  .finale-inner {
+    padding-block: 0 4rem;
+  }
+  .finale-media {
+    /* Escape the wrap gutters so the film band runs edge to edge. */
+    margin-inline: calc(var(--gutter) * -1);
+  }
+  .finale-panel {
+    padding-top: 2.4rem;
+  }
+}
