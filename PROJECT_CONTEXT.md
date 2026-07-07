@@ -71,6 +71,11 @@ docker compose up --build       # production container at http://localhost:8790 
   unaffected. Verified by injecting the pinned rules in the automation window (which refused
   to resize to desktop): stickyTop stays 0 across the whole runway, film progress maps 0 →
   0 s / 0.5 → 5.0 s / 0.8 → 8.0 s then holds, and the sticky releases at runway end.
+  Follow-up hardening (same day): `.af-panel` got `overscroll-behavior: contain` so wheel
+  over the open chat's header/chips/input can't fall through and scrub the page (the log
+  already contained; the panel's `overflow: hidden` makes it a scroll container, so contain
+  applies). Verified open-at-finale: panel + log both computed `contain`, page scroll stays
+  non-modal (scene scrubs behind the fixed panel by design).
 
 - **2026-07-06 — Astronaut finale: scroll-scrubbed cinematic contact section (branch
   `ask-fredrik-v1`, user-directed brief; replaces the Contact Transmission glass panel).**
