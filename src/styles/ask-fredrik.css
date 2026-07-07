@@ -75,7 +75,12 @@
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   box-shadow: var(--shadow-lift);
+  /* overflow:hidden makes the panel a scroll container, so contain works
+     here too: wheel over the header/chips/input can't fall through and
+     scroll (or scrub) the page behind the open panel. The log has its
+     own contain for the same reason. */
   overflow: hidden;
+  overscroll-behavior: contain;
   animation: af-pop 0.4s var(--ease);
 }
 @keyframes af-pop {

@@ -7,7 +7,7 @@ import { Highlights } from './components/Highlights';
 import { Projects } from './components/Projects';
 import { Skills } from './components/Skills';
 import { Experience } from './components/Experience';
-import { Contact } from './components/Contact';
+import { AstronautFinale } from './components/AstronautFinale';
 import { Footer } from './components/Footer';
 import { AskFredrik } from './components/AskFredrik';
 
@@ -26,7 +26,7 @@ export default function App() {
         <Projects />
         <Skills />
         <Experience />
-        <Contact />
+        <AstronautFinale />
       </main>
       <Footer />
       <AskFredrik />

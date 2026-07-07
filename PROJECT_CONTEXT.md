@@ -25,8 +25,8 @@ is set to "GitHub Actions".
 
 - React 18 + TypeScript, built with Vite 5
 - Hand-written CSS with a design-token system (`src/styles/tokens.css` + `app.css` +
-  `premium.css` + `hero.css`) — **dark-only** (no theme toggle) as of 2026-07-02, **pure
-  black/white/glass** as of 2026-07-03
+  `premium.css` + `hero.css` + `finale.css` + `ask-fredrik.css`) — **dark-only** (no theme
+  toggle) as of 2026-07-02, **pure black/white/glass** as of 2026-07-03
 - framer-motion (LazyMotion/domAnimation, `m.*`) for section transitions; **no WebGL/WebGPU**
   (the three + R3F layer was removed 2026-07-03 with the astronaut-video hero — single ~80 KB gz
   bundle again)
@@ -57,6 +57,63 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-06 — Finale now pins while scroll drives the reveal (same day, user feedback
+  with screen recording).** The first scrub cut revealed the astronaut "in passing" — the
+  section kept scrolling while the film lit, so the lit scene was only fully visible at the
+  footer. Fix: on desktop viewports that fit the scene (`min-width: 880px` + `min-height:
+  720px`) the section is now a **230vh runway with a sticky inner** (the hero's pattern): text
+  and film hold still on screen while scroll scrubs the light up (film completes at 80% of the
+  runway, then a lit hold, then it unpins toward the footer). Phones and short windows keep
+  the in-flow travel-based scrub; `measure()` auto-detects the active mode from the section's
+  rendered height (runway > 0.5·vh → pinned formula), so the CSS media query is the single
+  switch. `overflow: hidden` moved from the section to the sticky element (an overflow-hidden
+  ancestor defeats `position: sticky`); the Ask Fredrik widget is `position: fixed` and
+  unaffected. Verified by injecting the pinned rules in the automation window (which refused
+  to resize to desktop): stickyTop stays 0 across the whole runway, film progress maps 0 →
+  0 s / 0.5 → 5.0 s / 0.8 → 8.0 s then holds, and the sticky releases at runway end.
+  Follow-up hardening (same day): `.af-panel` got `overscroll-behavior: contain` so wheel
+  over the open chat's header/chips/input can't fall through and scrub the page (the log
+  already contained; the panel's `overflow: hidden` makes it a scroll container, so contain
+  applies). Verified open-at-finale: panel + log both computed `contain`, page scroll stays
+  non-modal (scene scrubs behind the fixed panel by design).
+
+- **2026-07-06 — Astronaut finale: scroll-scrubbed cinematic contact section (branch
+  `ask-fredrik-v1`, user-directed brief; replaces the Contact Transmission glass panel).**
+  Section 06 is now `src/components/AstronautFinale.tsx` + `src/styles/finale.css`
+  (Contact.tsx deleted, its links/notes all preserved): an 8 s black-and-white **light-reveal
+  film scrubbed by scroll, bookending the hero's signature mechanic** — as the section rises
+  into view the astronaut is lit out of black frame-locked to the reader's pace (rAF-lerped
+  seek, whole-frame deltas only, muted play→pause priming for mobile seek painting), holding
+  the lit final frame once the section top reaches 18% of the viewport; scrolling back
+  re-darkens it. **Deliberately no pinning** (unlike the hero) — the contact CTAs must stay
+  directly reachable, so progress maps onto the section's viewport travel, not a scroll-jacked
+  runway. Design evolution in one session: loop → play-once-and-hold → scroll-scrub (the loop
+  snapped back to black every 8 s, and frame-stepping showed the subject drifts left→center
+  through the reveal, breaking every fixed text-over-video placement). The film is therefore
+  shown **whole (16:9, never cover-cropped)**: desktop = CTA column left + film right, bled to
+  the right viewport edge via negative margin (`min(0px, calc((var(--wrap) - 100vw) / 2))`);
+  mobile = full-width 16:9 band above the stacked content. Copy: eyebrow "Open to meaningful
+  engineering work", headline "Let's build something precise, intelligent, and polished.",
+  new product-sense body line + the existing roles line, buttons Contact Me (mailto) / View
+  Résumé / GitHub / LinkedIn (all aria-labeled), email + résumé-mirror note + source-repo line
+  kept. Lazy: `preload="metadata"` until an IntersectionObserver sees the section within two
+  viewports (rootMargin 200%), then `auto` + prime; decorative only (`aria-hidden`, muted,
+  `playsInline`, no controls, never play()ed for playback). Reduced-motion and `onError` both
+  render the lit poster (`astronaut-finale-poster.jpg`, 59 KB) with all content static and
+  visible. **Assets:** user-provided 720p source (`astronaut-final-version.mp4`, Desktop) →
+  ffmpeg-static pipeline: `delogo` removed the KlingAI watermark (user has permission),
+  `gradfun` deband, lanczos upscale to 1920×1080, light `unsharp`, crf 17 → source asset
+  `astronaut-finale-1080p.mp4` (~3 MB); served files are **all-intra scrub re-encodes**
+  (`-g 1`, like the hero's): `astronaut-finale-scrub.mp4` (1080p ~3.8 MB, ≥720 px) and
+  `astronaut-finale-scrub-sm.mp4` (720p ~2.1 MB, phones); `useDesktopViewport` extracted to
+  its own module (shared with the hero) to pick the encode. Exact commands in README
+  ("Astronaut finale" section). Verified in Chrome at desktop + narrow widths: progress math
+  exact (section top at 40% vh → p 0.732 → t 5.85 s), all-intra seek lands in ~9 ms, mid-reveal
+  frame paints, sm encode selected below 720 px; the rAF lerp loop itself is the hero's
+  production-proven code path (this session's automation window was occluded — Chrome doesn't
+  fire rAF on hidden pages — so the loop was verified by driving its math directly). Lint +
+  build green (~84.8 KB gz).
+
 - **2026-07-06 - Resume and portfolio now name Codex / Claude Code as AI-assisted engineering tools.**
   The public one-page `public/resume.pdf` was regenerated from the sibling
   `../resume-project/resume-building/output/resume-onepage.html` after adding a compact
@@ -71,6 +128,27 @@ docker compose up --build       # production container at http://localhost:8790 
   live portfolio link for recruiters. The Contact Transmission section still includes
   `Eriksson008/professional-portfolio` as a source-repo work-sample link beneath the resume note.
 
+- **2026-07-06 — Ask Fredrik v4: Workers AI + Worker-side matcher + rate limiting (same
+  branch `ask-fredrik-v1`, user-directed 14-point brief; still Cloudflare Free, not
+  deployed).** `/ask` now answers through a five-stage pipeline — rate limit → sensitive
+  filter → curated matcher → Workers AI → curated fallback — returning
+  `{answer, source: ai|fallback|static|blocked|rate_limited, matchedIntent?}` (always
+  HTTP 200; every stage logs to D1 with real `matched_intent`/`model`/`latency_ms`).
+  The frontend's keyword matcher was **ported into the Worker** (10 intents:
+  strengths, role_fit, strongest_projects, technical_stack, why_interview, leadership,
+  ai_experience, cloud_experience, salesforce_experience, contact_resume) so suggested
+  questions never cost AI usage; sensitive topics (salary/private/confidential/
+  credentials) are blocked **before** the model; a per-isolate in-memory sliding window
+  (10 req/60 s, keyed by sessionId + salted IP hash, raw IPs never stored) is basic
+  abuse protection (WAF rate rule named as the hard upgrade). Workers AI is
+  **off-by-default** (`ASK_FREDRIK_AI_ENABLED: "false"` var; model/timeout/max-tokens
+  all vars with safe in-code defaults, default model `@cf/meta/llama-3.1-8b-instruct`);
+  the AI call is timeout-raced, sends only the strict system prompt (approved context
+  in `src/fredrik-context.ts`) + question, and any failure falls back gracefully — the
+  Worker runs with **no AI binding at all** (verified). Gotcha caught at runtime: the
+  Workers runtime forbids `crypto.randomUUID()` in global scope. Local dev without the
+  registered workers.dev subdomain: `npm run dev:noai` (AI binding omitted). Spec:
+  `docs/superpowers/specs/2026-07-06-ask-fredrik-workers-ai-design.md`.
 - **2026-07-06 — Ask Fredrik v3: D1 question logging + admin endpoint (same branch
   `ask-fredrik-v1`, user-directed 10-point brief; Workers Free + D1 Free, no AI yet).**
   Every valid `POST /ask` question is logged to D1 table `ask_fredrik_logs`
@@ -363,11 +441,22 @@ site exposes only honest, defensible, public-safe content.
   (3) ~~set secrets~~ **done 2026-07-06** — `ADMIN_TOKEN` + `IP_HASH_SALT` uploaded to
   the (draft, not yet deployed) `ask-fredrik-worker`; the admin token value is with the
   user, only its hash lives at Cloudflare (rotate anytime with `wrangler secret put`);
-  (4) enable Workers AI (3-step upgrade in the Worker README) and `npm run deploy`;
-  (5) set the repo Actions variable `VITE_ASK_FREDRIK_API_URL` to the Worker's `/ask`
-  URL — the widget upgrades itself, static answers remain the fallback. Don't set the
-  variable before the AI step: the Worker's deterministic fallback is weaker than the
-  static keyword answers.
+  (4) ~~implement Workers AI + matcher + rate limiting~~ **done 2026-07-06 (v4)** —
+  code-complete and runtime-verified except the live AI call itself;
+  (5) ~~register the workers.dev subdomain~~ **done 2026-07-06** (user, Cloudflare dash);
+  (6) ~~enable AI + deploy~~ **done 2026-07-06** — live at
+  `https://ask-fredrik-worker.eriksson-fredrik08.workers.dev` with
+  `ASK_FREDRIK_AI_ENABLED="true"`. First deploy surfaced two production-only fixes:
+  the original default model was **deprecated by Cloudflare** (error 5028) → switched to
+  `@cf/meta/llama-3.1-8b-instruct-fp8` (config var, no code change), and cold-start AI
+  calls exceeded 6 s → `ASK_FREDRIK_AI_TIMEOUT_MS` raised to `"10000"` (warm calls run
+  1.4–4 s). Verified in production: static/blocked/ai/fallback sources + model +
+  latency all logged to D1, non-null `ip_hash` at the edge, admin auth, CORS preflight
+  for the Pages origin, spoof origins rejected;
+  (7) ~~set the repo Actions variable~~ **done 2026-07-06** — `VITE_ASK_FREDRIK_API_URL`
+  = the Worker's `/ask` URL (via `gh variable set`). **Remaining:** merge
+  `ask-fredrik-v1` → `main` — the widget only exists on the branch, so the live Pages
+  site doesn't call the Worker until the merge deploys it.
 - Keep the site coherent with the résumé whenever a shared fact changes.
 - Keep tone conservative and enterprise-friendly; metrics git-verifiable only.
 

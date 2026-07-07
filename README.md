@@ -92,6 +92,48 @@ There is deliberately **no WebGL/WebGPU** — the earlier three + React Three Fi
 hero was removed with this redesign, returning the site to a single small JS bundle. framer-motion
 (LazyMotion) still drives the section/card reveals, and `useReducedMotion` renders them static.
 
+## Astronaut finale (contact)
+
+The site closes the way it opens: section 06 (`src/components/AstronautFinale.tsx` +
+`src/styles/finale.css`) is a cinematic contact scene whose 8 s black-and-white **light-reveal
+film is scrubbed by scroll**, mirroring the hero's mechanic. On desktop viewports tall enough
+to fit the scene (≥880×720) it **pins like the hero**: the section is a 230vh runway whose
+sticky inner holds the CTA column and film still on screen while scrolling lights the
+astronaut out of black (film completes at 80% of the runway, the rest is a lit hold before it
+unpins toward the footer; scrolling back re-darkens it). Everywhere else — phones, short
+windows — the section stays **in-flow** and progress maps onto its travel through the viewport
+(reveal completes when the section top reaches 18% of the viewport); `measure()` picks the
+formula from the section's own rendered height, so the CSS media query is the single switch
+and JS can never disagree with it. The pin doesn't touch the Ask Fredrik widget (`position:
+fixed`, higher stacking context), and `overflow: hidden` lives on the sticky element rather
+than the section, since an overflow-hidden ancestor would defeat `position: sticky`. The
+subject drifts across the frame during the reveal, so the film is shown whole (16:9, never
+cover-cropped): CTA column on the left, film bleeding to the right viewport edge on desktop;
+a full-width 16:9 band above the stacked content on phones.
+
+- **Scrub discipline** (same as the hero): a scroll listener + rAF-lerped seek sets
+  `video.currentTime` (never `play()`ed for playback); seeks land only on whole-frame deltas
+  and never while one is in flight; the decode pipeline is primed with one muted play → pause
+  so mobile browsers paint seeks. Decorative only: `aria-hidden`, muted, `playsInline`, no
+  controls.
+- **Lazy.** The film sits at the page's end, so it loads `preload="metadata"` until an
+  IntersectionObserver sees the section within two viewports, then flips to `auto` + primes.
+- **Fallbacks.** `prefers-reduced-motion` and load failure both render the lit final-frame
+  still (`astronaut-finale-poster.jpg`); the CTA content never depends on the film.
+- **Encodes.** Served files are **all-intra re-encodes** (a keyframe every frame, `ffmpeg
+  -g 1`) like the hero's — seeking a normal-GOP encode stutters: `astronaut-finale-scrub.mp4`
+  (1080p, ~3.8 MB, crf 26) on ≥720 px viewports, `astronaut-finale-scrub-sm.mp4` (720p,
+  ~2.1 MB, crf 27) on phones. Their source, `astronaut-finale-1080p.mp4` (~3 MB, kept as the
+  source asset), is a 1080p lanczos upscale of the original 720p clip, cleaned and re-encoded
+  with ffmpeg:
+  `-vf "delogo=…,gradfun=1.2:16,scale=1920:1080:flags=lanczos,unsharp=5:5:0.25:5:5:0"
+  -c:v libx264 -crf 17 -preset slow -pix_fmt yuv420p -movflags +faststart -an` —
+  `gradfun` debands the dark gradients, `faststart` fronts the moov atom for streaming, `-an`
+  strips the (silent) audio track. If the source is ever replaced, regenerate both scrub
+  encodes (`-c:v libx264 -g 1 -crf 26|27 -preset slow -pix_fmt yuv420p -movflags +faststart
+  -an`, sm adds `-vf scale=1280:720:flags=lanczos`) and the poster from the last frame
+  (`ffmpeg -sseof -0.1 -i <file> -frames:v 1 -q:v 3`).
+
 ## Docker
 
 The container serves the production build via nginx on **port 8790** by default, published to
