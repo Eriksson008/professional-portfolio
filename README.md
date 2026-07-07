@@ -96,14 +96,20 @@ hero was removed with this redesign, returning the site to a single small JS bun
 
 The site closes the way it opens: section 06 (`src/components/AstronautFinale.tsx` +
 `src/styles/finale.css`) is a cinematic contact scene whose 8 s black-and-white **light-reveal
-film is scrubbed by scroll**, mirroring the hero's mechanic — as the section rises into view,
-the astronaut is lit out of black frame-locked to the reader's own pace, holding the lit final
-frame once the section is in place (scrolling back re-darkens it). Unlike the hero there is
-**no pinning**: the contact content must stay directly reachable, so progress maps onto the
-section's travel through the viewport (reveal completes when the section top reaches 18% of
-the viewport). The subject drifts across the frame during the reveal, so the film is shown
-whole (16:9, never cover-cropped): CTA column on the left, film bleeding to the right viewport
-edge on desktop; a full-width 16:9 band above the stacked content on phones.
+film is scrubbed by scroll**, mirroring the hero's mechanic. On desktop viewports tall enough
+to fit the scene (≥880×720) it **pins like the hero**: the section is a 230vh runway whose
+sticky inner holds the CTA column and film still on screen while scrolling lights the
+astronaut out of black (film completes at 80% of the runway, the rest is a lit hold before it
+unpins toward the footer; scrolling back re-darkens it). Everywhere else — phones, short
+windows — the section stays **in-flow** and progress maps onto its travel through the viewport
+(reveal completes when the section top reaches 18% of the viewport); `measure()` picks the
+formula from the section's own rendered height, so the CSS media query is the single switch
+and JS can never disagree with it. The pin doesn't touch the Ask Fredrik widget (`position:
+fixed`, higher stacking context), and `overflow: hidden` lives on the sticky element rather
+than the section, since an overflow-hidden ancestor would defeat `position: sticky`. The
+subject drifts across the frame during the reveal, so the film is shown whole (16:9, never
+cover-cropped): CTA column on the left, film bleeding to the right viewport edge on desktop;
+a full-width 16:9 band above the stacked content on phones.
 
 - **Scrub discipline** (same as the hero): a scroll listener + rAF-lerped seek sets
   `video.currentTime` (never `play()`ed for playback); seeks land only on whole-frame deltas

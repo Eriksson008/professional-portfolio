@@ -57,6 +57,21 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-06 — Finale now pins while scroll drives the reveal (same day, user feedback
+  with screen recording).** The first scrub cut revealed the astronaut "in passing" — the
+  section kept scrolling while the film lit, so the lit scene was only fully visible at the
+  footer. Fix: on desktop viewports that fit the scene (`min-width: 880px` + `min-height:
+  720px`) the section is now a **230vh runway with a sticky inner** (the hero's pattern): text
+  and film hold still on screen while scroll scrubs the light up (film completes at 80% of the
+  runway, then a lit hold, then it unpins toward the footer). Phones and short windows keep
+  the in-flow travel-based scrub; `measure()` auto-detects the active mode from the section's
+  rendered height (runway > 0.5·vh → pinned formula), so the CSS media query is the single
+  switch. `overflow: hidden` moved from the section to the sticky element (an overflow-hidden
+  ancestor defeats `position: sticky`); the Ask Fredrik widget is `position: fixed` and
+  unaffected. Verified by injecting the pinned rules in the automation window (which refused
+  to resize to desktop): stickyTop stays 0 across the whole runway, film progress maps 0 →
+  0 s / 0.5 → 5.0 s / 0.8 → 8.0 s then holds, and the sticky releases at runway end.
+
 - **2026-07-06 — Astronaut finale: scroll-scrubbed cinematic contact section (branch
   `ask-fredrik-v1`, user-directed brief; replaces the Contact Transmission glass panel).**
   Section 06 is now `src/components/AstronautFinale.tsx` + `src/styles/finale.css`

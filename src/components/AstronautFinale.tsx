@@ -15,20 +15,30 @@ const POSTER_SRC = `${import.meta.env.BASE_URL}media/astronaut-finale-poster.jpg
 const FRAME = 1 / 24;
 
 /**
- * The reveal completes when the section top has risen to this fraction of
- * the viewport — the film is fully lit while the section is still on screen.
+ * Pinned mode: the film completes at this fraction of the runway; the
+ * remainder is a hold where the lit scene stays put before unpinning.
+ */
+const FILM_END = 0.8;
+
+/**
+ * In-flow mode: the reveal completes when the section top has risen to
+ * this fraction of the viewport.
  */
 const REVEAL_END = 0.18;
 
 /**
  * Closing scene: the contact section (sheet 06) staged as a cinematic
  * ending that mirrors the hero's mechanic — the light-reveal film is
- * scrubbed by scroll. As the section rises into view the astronaut is
- * lit out of black, frame-locked to the reader's own pace, and holds
- * its lit final frame once the section is in place (scrolling back
- * re-darkens it, like the hero). No pinning: the contact content must
- * stay directly reachable, so progress maps onto the section's travel
- * through the viewport instead of a scroll-jacked runway.
+ * scrubbed by scroll. On desktop the scene **pins** (sticky under a
+ * 230vh runway, like the hero): the CTA column and film hold still on
+ * screen while scrolling lights the astronaut out of black, holds the
+ * lit frame for the last stretch of the runway, then unpins toward the
+ * footer. Scrolling back re-darkens it. The pin is CSS-gated to
+ * viewports tall enough to fit the scene (see finale.css); everywhere
+ * else — phones, short windows — the section stays in-flow and progress
+ * maps onto its travel through the viewport instead. measure() detects
+ * which mode is active from the section's own height, so JS and CSS
+ * can't disagree.
  *
  * The subject drifts across the frame during the reveal, so the film is
  * shown whole (16:9, never cover-cropped) as its own object: CTA column
@@ -63,8 +73,16 @@ export function AstronautFinale() {
     const measure = () => {
       const rect = section.getBoundingClientRect();
       const vh = window.innerHeight;
-      const range = vh * (1 - REVEAL_END);
-      target = range > 0 ? Math.min(1, Math.max(0, (vh - rect.top) / range)) : 1;
+      const runway = rect.height - vh;
+      if (runway > vh * 0.5) {
+        // Pinned: progress through the runway, film done by FILM_END.
+        const p = Math.min(1, Math.max(0, -rect.top / runway));
+        target = Math.min(1, p / FILM_END);
+      } else {
+        // In-flow: progress = the section's travel into the viewport.
+        const range = vh * (1 - REVEAL_END);
+        target = range > 0 ? Math.min(1, Math.max(0, (vh - rect.top) / range)) : 1;
+      }
     };
 
     const apply = () => {
@@ -139,94 +157,96 @@ export function AstronautFinale() {
 
   return (
     <section id="contact" className="finale" ref={sectionRef} aria-label="Contact">
-      <div className="wrap finale-inner">
-        <div className="finale-media" aria-hidden="true">
-          {scrub ? (
-            <video
-              ref={videoRef}
-              src={desktop ? VIDEO_SRC : VIDEO_SRC_SM}
-              muted
-              playsInline
-              preload="metadata"
-              tabIndex={-1}
-              onError={() => setFailed(true)}
-            />
-          ) : (
-            <img src={POSTER_SRC} alt="" loading="lazy" />
-          )}
-          <div className="finale-scrim" />
-        </div>
+      <div className="finale-sticky">
+        <div className="wrap finale-inner">
+          <div className="finale-media" aria-hidden="true">
+            {scrub ? (
+              <video
+                ref={videoRef}
+                src={desktop ? VIDEO_SRC : VIDEO_SRC_SM}
+                muted
+                playsInline
+                preload="metadata"
+                tabIndex={-1}
+                onError={() => setFailed(true)}
+              />
+            ) : (
+              <img src={POSTER_SRC} alt="" loading="lazy" />
+            )}
+            <div className="finale-scrim" />
+          </div>
 
-        <m.div
-          className="finale-panel"
-          variants={headerStagger}
-          initial={reduced ? false : 'hidden'}
-          whileInView="show"
-          viewport={VIEWPORT}
-        >
-          <m.p className="sheet-mark" variants={headerItem}>
-            <span className="sheet-no">06</span>
-            <span className="sheet-rule" aria-hidden="true" />
-            <span className="sheet-eyebrow">Open to meaningful engineering work</span>
-          </m.p>
-          <m.h2 className="finale-title" variants={headerItem}>
-            Let&rsquo;s build something precise, intelligent, and polished.
-          </m.h2>
-          <m.p className="finale-body" variants={headerItem}>
-            I bring product sense, full-stack engineering, AI systems experience, and production
-            discipline to teams building tools that need to feel effortless.
-          </m.p>
-          <m.p className="finale-roles" variants={headerItem}>
-            Open to Senior Software Engineer, Salesforce Engineer, Backend, Full-Stack, Cloud /
-            Application Engineer, and Tech Lead-track opportunities.
-          </m.p>
-          <m.div className="finale-actions" variants={headerItem}>
-            <a
-              className="btn btn-primary"
-              href={`mailto:${profile.links.email}`}
-              aria-label={`Email ${profile.name}`}
-            >
-              Contact Me
-            </a>
-            <a
-              className="btn btn-ghost"
-              href={profile.links.resume}
-              target="_blank"
-              rel="noopener"
-              aria-label="View résumé (PDF)"
-            >
-              View R&eacute;sum&eacute;
-            </a>
-            <a
-              className="btn btn-ghost"
-              href={profile.links.github}
-              target="_blank"
-              rel="noopener"
-              aria-label={`${profile.name} on GitHub`}
-            >
-              GitHub
-            </a>
-            <a
-              className="btn btn-ghost"
-              href={profile.links.linkedin}
-              target="_blank"
-              rel="noopener"
-              aria-label={`${profile.name} on LinkedIn`}
-            >
-              LinkedIn
-            </a>
+          <m.div
+            className="finale-panel"
+            variants={headerStagger}
+            initial={reduced ? false : 'hidden'}
+            whileInView="show"
+            viewport={VIEWPORT}
+          >
+            <m.p className="sheet-mark" variants={headerItem}>
+              <span className="sheet-no">06</span>
+              <span className="sheet-rule" aria-hidden="true" />
+              <span className="sheet-eyebrow">Open to meaningful engineering work</span>
+            </m.p>
+            <m.h2 className="finale-title" variants={headerItem}>
+              Let&rsquo;s build something precise, intelligent, and polished.
+            </m.h2>
+            <m.p className="finale-body" variants={headerItem}>
+              I bring product sense, full-stack engineering, AI systems experience, and production
+              discipline to teams building tools that need to feel effortless.
+            </m.p>
+            <m.p className="finale-roles" variants={headerItem}>
+              Open to Senior Software Engineer, Salesforce Engineer, Backend, Full-Stack, Cloud /
+              Application Engineer, and Tech Lead-track opportunities.
+            </m.p>
+            <m.div className="finale-actions" variants={headerItem}>
+              <a
+                className="btn btn-primary"
+                href={`mailto:${profile.links.email}`}
+                aria-label={`Email ${profile.name}`}
+              >
+                Contact Me
+              </a>
+              <a
+                className="btn btn-ghost"
+                href={profile.links.resume}
+                target="_blank"
+                rel="noopener"
+                aria-label="View résumé (PDF)"
+              >
+                View R&eacute;sum&eacute;
+              </a>
+              <a
+                className="btn btn-ghost"
+                href={profile.links.github}
+                target="_blank"
+                rel="noopener"
+                aria-label={`${profile.name} on GitHub`}
+              >
+                GitHub
+              </a>
+              <a
+                className="btn btn-ghost"
+                href={profile.links.linkedin}
+                target="_blank"
+                rel="noopener"
+                aria-label={`${profile.name} on LinkedIn`}
+              >
+                LinkedIn
+              </a>
+            </m.div>
+            <m.p className="finale-note" variants={headerItem}>
+              {profile.links.email} &middot; The r&eacute;sum&eacute; is a one-page PDF that mirrors
+              this site: same facts, same numbers.
+            </m.p>
+            <m.p className="finale-repo" variants={headerItem}>
+              Source:{' '}
+              <a href={profile.links.portfolioGithub} target="_blank" rel="noopener">
+                Professional Portfolio on GitHub
+              </a>
+            </m.p>
           </m.div>
-          <m.p className="finale-note" variants={headerItem}>
-            {profile.links.email} &middot; The r&eacute;sum&eacute; is a one-page PDF that mirrors
-            this site: same facts, same numbers.
-          </m.p>
-          <m.p className="finale-repo" variants={headerItem}>
-            Source:{' '}
-            <a href={profile.links.portfolioGithub} target="_blank" rel="noopener">
-              Professional Portfolio on GitHub
-            </a>
-          </m.p>
-        </m.div>
+        </div>
       </div>
     </section>
   );

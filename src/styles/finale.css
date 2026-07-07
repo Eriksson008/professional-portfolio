@@ -1,15 +1,23 @@
 /* ============================================================
    Finale — the closing scene.
-   The reveal film plays once and holds its lit final frame. It
-   is shown whole (16:9, never cover-cropped) because the subject
-   drifts across the frame during the reveal. Desktop: CTA column
-   left, film right, bleeding to the viewport edge; its edges are
-   true black, so it dissolves into the section. Phones keep the
-   film as a 16:9 band with the content stacked beneath it.
+   The reveal film is scrubbed by scroll. On tall-enough desktop
+   viewports the scene pins (sticky under a 230vh runway, like
+   the hero) while the astronaut lights out of black; elsewhere
+   it stays in-flow. The film is shown whole (16:9, never
+   cover-cropped) because the subject drifts across the frame
+   during the reveal. Desktop: CTA column left, film right,
+   bleeding to the viewport edge; its edges are true black, so
+   it dissolves into the section. Phones keep the film as a 16:9
+   band with the content stacked beneath it.
    ============================================================ */
 .finale {
   position: relative;
   background: var(--black);
+}
+
+/* Clips the right-edge bleed. Lives on the sticky element, not the
+   section — an overflow-hidden ancestor would defeat position: sticky. */
+.finale-sticky {
   overflow: hidden;
 }
 
@@ -87,7 +95,7 @@
 
 /* --- Desktop: text left, film right, bled to the viewport edge --- */
 @media (min-width: 880px) {
-  .finale {
+  .finale-sticky {
     display: flex;
     align-items: center;
     min-height: min(92vh, 880px);
@@ -104,6 +112,24 @@
     order: 2;
     /* Bleed past the wrap to the right viewport edge (never positive). */
     margin-right: min(0px, calc((var(--wrap) - 100vw) / 2));
+  }
+}
+
+/* --- Pin: tall-enough desktop viewports get the hero's runway ---
+   The scene holds still while scroll lights the astronaut; the JS
+   detects this mode from the section's own height, so the height
+   gate below is the single switch. Short windows (where the pinned
+   scene couldn't fit) keep the in-flow behavior above. --- */
+@media (min-width: 880px) and (min-height: 720px) {
+  .finale {
+    height: 230vh;
+  }
+  .finale-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    min-height: 0;
+    padding-block: 0;
   }
 }
 
