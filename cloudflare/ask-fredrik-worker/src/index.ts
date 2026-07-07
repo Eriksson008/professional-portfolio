@@ -7,7 +7,9 @@
  * Answer pipeline for a valid question, in order:
  *   1. rate limit   → source "rate_limited"  (in-memory, best-effort)
  *   2. sensitive    → source "blocked"       (salary/private/confidential)
- *   3. curated      → source "static"        (keyword matcher, logs matched_intent)
+ *   3. curated      → source "static"        (curated Q&A, skill/project
+ *                     knowledge base, and the conservative not-confirmed
+ *                     answer — see resolveLocalAnswer in matcher.ts)
  *   4. Workers AI   → source "ai"            (only if enabled + bound; guarded)
  *   5. fallback     → source "fallback"      (deterministic curated answer)
  *
@@ -19,13 +21,8 @@
  * step 4 is skipped.
  */
 
-import {
-  BLOCKED_ANSWER,
-  FALLBACK_ANSWER,
-  RATE_LIMITED_ANSWER,
-  SYSTEM_PROMPT,
-} from './fredrik-context';
-import { isSensitiveQuestion, matchIntent } from './matcher';
+import { FALLBACK_ANSWER, RATE_LIMITED_ANSWER, SYSTEM_PROMPT } from './fredrik-context.ts';
+import { resolveLocalAnswer } from './matcher.ts';
 
 /** Minimal structural type for the Workers AI binding — keeps the Worker
  *  compiling and running whether or not the binding is configured. */
@@ -60,6 +57,9 @@ export interface Env {
   ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS?: string;
   /** Max valid /ask requests per window per client. Default 10. */
   ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS?: string;
+  /** FIFO retention for the D1 log: newest N rows are kept, older rows are
+   *  trimmed after each insert. Default 1000. "0" disables trimming. */
+  ASK_FREDRIK_LOG_MAX_ROWS?: string;
 }
 
 type AskSource = 'ai' | 'fallback' | 'static' | 'blocked' | 'rate_limited';
@@ -69,6 +69,7 @@ const DEFAULT_AI_TIMEOUT_MS = 6000;
 const DEFAULT_MAX_OUTPUT_TOKENS = 250;
 const DEFAULT_RATE_LIMIT_WINDOW_SECONDS = 60;
 const DEFAULT_RATE_LIMIT_MAX_REQUESTS = 10;
+const DEFAULT_LOG_MAX_ROWS = 1000;
 
 const MAX_QUESTION_LENGTH = 500;
 const DEFAULT_LOG_LIMIT = 100;
@@ -214,14 +215,17 @@ interface LogEntry {
   latencyMs: number;
 }
 
-/** Best-effort insert, run via ctx.waitUntil off the response path. Any
- *  failure is warned and swallowed — logging must never break an answer. */
+/** Best-effort insert + FIFO trim, run via ctx.waitUntil off the response
+ *  path. The trim keeps only the newest ASK_FREDRIK_LOG_MAX_ROWS rows
+ *  (default 1000, "0" disables), so the log is a rolling window rather than
+ *  an ever-growing archive. Both statements run in one transactional batch.
+ *  Any failure is warned and swallowed — logging must never break an answer. */
 async function logQuestion(env: Env, request: Request, entry: LogEntry): Promise<void> {
   const db = env.ASK_FREDRIK_DB;
   if (!db) return;
   try {
     const ipHash = await hashIp(request, env.IP_HASH_SALT);
-    await db
+    const insert = db
       .prepare(
         `INSERT INTO ask_fredrik_logs
            (id, created_at, question, answer, source, matched_intent,
@@ -242,8 +246,27 @@ async function logQuestion(env: Env, request: Request, entry: LogEntry): Promise
         ipHash,
         entry.model,
         entry.latencyMs
-      )
-      .run();
+      );
+
+    const maxRows = envInt(env.ASK_FREDRIK_LOG_MAX_ROWS, DEFAULT_LOG_MAX_ROWS, 0, 100000);
+    const statements = [insert];
+    if (maxRows > 0) {
+      // Cheap on a capped table: created_at is indexed and the table never
+      // holds more than maxRows + a handful of rows.
+      statements.push(
+        db
+          .prepare(
+            `DELETE FROM ask_fredrik_logs
+             WHERE id NOT IN (
+               SELECT id FROM ask_fredrik_logs
+               ORDER BY created_at DESC, id DESC
+               LIMIT ?1
+             )`
+          )
+          .bind(maxRows)
+      );
+    }
+    await db.batch(statements);
   } catch (err) {
     console.warn('ask_fredrik_logs insert failed:', err);
   }
@@ -339,15 +362,15 @@ async function handleAsk(
     return respond(RATE_LIMITED_ANSWER, 'rate_limited', null, null);
   }
 
-  // 2. Sensitive topics never reach the model.
-  if (isSensitiveQuestion(question)) {
-    return respond(BLOCKED_ANSWER, 'blocked', 'sensitive', null);
+  // 2–3. Deterministic local resolution: the sensitive filter, curated Q&A,
+  // the skill/project knowledge base, and the conservative not-confirmed
+  // answer — free, instant, and never reaches the model.
+  const local = resolveLocalAnswer(question);
+  if (local.kind === 'blocked') {
+    return respond(local.answer, 'blocked', 'sensitive', null);
   }
-
-  // 3. Common recruiter questions get curated answers — free and instant.
-  const match = matchIntent(question);
-  if (match) {
-    return respond(match.answer, 'static', match.intent, null);
+  if (local.kind === 'match') {
+    return respond(local.answer, 'static', local.intent, null);
   }
 
   // 4. Workers AI, only when explicitly enabled and bound.

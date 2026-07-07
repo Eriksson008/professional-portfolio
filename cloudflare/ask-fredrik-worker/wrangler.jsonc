@@ -22,6 +22,15 @@
   // does nothing — AI runs only when ASK_FREDRIK_AI_ENABLED below is "true".
   "ai": { "binding": "AI" },
 
+  // Workers Logs in the Cloudflare dashboard (Workers & Pages →
+  // ask-fredrik-worker → Logs): invocation logs + console.warn output (AI
+  // failures, D1 insert failures). Included on the Free plan. User questions
+  // themselves are already logged to D1 — this adds operational visibility.
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+
   // Non-secret tuning vars. All optional: the Worker applies these same
   // defaults in code when a var is unset or unparseable. Only the literal
   // string "true" enables AI ("false" or unset = curated answers only, no
@@ -32,6 +41,7 @@
     "ASK_FREDRIK_AI_TIMEOUT_MS": "10000",
     "ASK_FREDRIK_MAX_OUTPUT_TOKENS": "250",
     "ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS": "60",
-    "ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS": "10"
+    "ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS": "10",
+    "ASK_FREDRIK_LOG_MAX_ROWS": "1000"
   }
 }

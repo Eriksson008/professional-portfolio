@@ -3,6 +3,9 @@
     "target": "ES2022",
     "module": "ES2022",
     "moduleResolution": "Bundler",
+    // Imports carry explicit .ts extensions so the test script can run on
+    // plain Node (native type stripping) with zero extra dependencies.
+    "allowImportingTsExtensions": true,
     "lib": ["ES2022"],
     "types": ["@cloudflare/workers-types"],
     "strict": true,

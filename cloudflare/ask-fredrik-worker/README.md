@@ -9,7 +9,7 @@ matches, in this order:
 |---|-------|----------|------|
 | 1 | Rate limiter | `rate_limited` | Client exceeded the per-window request budget |
 | 2 | Sensitive filter | `blocked` | Salary/private/confidential/credentials topics |
-| 3 | Curated matcher | `static` | Common recruiter questions (keyword-matched) |
+| 3 | Curated matcher | `static` | Curated Q&A, the skill/project knowledge base, and the conservative not-confirmed answer |
 | 4 | Workers AI | `ai` | Enabled + bound, and nothing above matched |
 | 5 | Curated fallback | `fallback` | AI disabled, missing, timed out, or failed |
 
@@ -60,20 +60,39 @@ read by a browser page on another origin.
 
 - `src/index.ts` — routing, validation, CORS, the answer pipeline, rate limiting, the
   guarded Workers AI call, D1 logging, and the admin endpoint.
-- `src/fredrik-context.ts` — the **entire knowledge base**: approved public context (the
-  only facts AI may speak from), curated intent answers, sensitive-keyword list, canned
-  blocked/rate-limited/fallback answers, and the AI system prompt. Same rules as the résumé:
-  public facts only, no internal codenames, git-verifiable metrics only.
-- `src/matcher.ts` — normalization + keyword matching for the sensitive filter and the
-  curated intents. Deliberately simple substring scoring, no NLP.
+- `src/data/fredrik-skills.ts` — approved public-safe **skills**: typed entries with
+  aliases, an explicit confidence level (`professional` / `project` / `personal` /
+  `learning`), and the exact `allowedAnswer` the assistant may give.
+- `src/data/fredrik-projects.ts` — approved public-safe **project summaries**: status,
+  technologies, highlights, explicit `boundaries` for private projects, and the exact
+  `allowedAnswer`.
+- `src/data/fredrik-qa.ts` — **curated Q&A** for common recruiter intents.
+- `src/fredrik-context.ts` — aggregates the data modules: base public facts, the
+  sensitive-keyword list, canned blocked/rate-limited/not-confirmed/fallback answers, and
+  `buildFredrikSystemPrompt()` — the only source of what the AI may speak from. Same rules
+  as the résumé: public facts only, no internal codenames, git-verifiable metrics only.
+- `src/matcher.ts` — normalization + matching: the sensitive filter, curated exact/keyword
+  matching, `findSkillKnowledge` / `findProjectKnowledge` alias matching, the
+  not-confirmed detector, and `resolveLocalAnswer()` (the whole pre-AI pipeline in one
+  call, shared with the tests). Deliberately simple substring scoring, no NLP.
+- `src/tests/knowledge.test.ts` — zero-dependency test script (`npm test`).
 
-### Curated intents (answered without AI)
+### Local resolution order (inside stage 3)
 
-`strengths`, `role_fit`, `strongest_projects`, `technical_stack`, `why_interview`,
-`leadership`, `ai_experience`, `cloud_experience`, `salesforce_experience`,
-`contact_resume`. The widget's suggested questions all land here — instant, free,
-deterministic, and logged with a real `matched_intent`. This is also why enabling AI is
-cheap: the most common questions never reach the model.
+1. **Curated exact match** — the canonical recruiter questions keep their curated answers.
+2. **Knowledge base** — skill/project aliases (longest match wins), logged as
+   `skill:<name>` / `project:<name>` (e.g. `skill:tailscale`, `project:homebase`).
+3. **Curated keyword scoring** — broad recruiter phrasings (`strengths`, `role_fit`,
+   `strongest_projects`, `technical_stack`, `why_interview`, `leadership`,
+   `ai_experience`, `cloud_experience`, `salesforce_experience`, `production_support`,
+   `contact_resume`).
+4. **Not-confirmed detector** — "experience with X?"-shaped questions about a technology
+   that is *not* in the knowledge base get a deterministic conservative answer
+   (`skill_not_confirmed`): the bot never claims or invents unlisted experience.
+
+The widget's suggested questions all land in 1–3 — instant, free, deterministic, and
+logged with a real `matched_intent`. This is also why enabling AI is cheap: the most
+common questions never reach the model.
 
 ### Sensitive questions
 
@@ -82,6 +101,68 @@ personal/family/household/home information, secrets/credentials, or internal pro
 systems are answered with a fixed polite refusal (`source: "blocked"`,
 `matched_intent: "sensitive"`) and **never reach the model**. The AI system prompt repeats
 the same restrictions as a second layer.
+
+## Maintaining the knowledge base
+
+> **⚠️ Never connect the private second brain (or any private notes, files, or internal
+> employer material) to this public chatbot.** The knowledge base is a *curated* public
+> layer: every entry must be something you would happily publish directly on the portfolio
+> website. There is no RAG, no D1/Vectorize knowledge store, and none should be added
+> without an explicit decision — static typed TypeScript is the design.
+
+### Adding a public-safe skill
+
+Add a `SkillKnowledge` entry to `src/data/fredrik-skills.ts`:
+
+- `confidence` must be honest: `professional` (enterprise production work), `project`
+  (real shipped personal/side-project use), `personal` (hands-on personal infrastructure),
+  `learning` (exploring — the answer must say so). Never present personal/project
+  experience as enterprise experience.
+- `aliases` are lowercase, normalized phrases (run them through `normalize()` mentally:
+  no punctuation beyond `/+#.-`). Words of ≤4 chars are matched as whole words
+  automatically. Avoid generic words (`ai`, `cloud`, `experience`) that would hijack the
+  curated recruiter intents.
+- `allowedAnswer` is the exact answer users see — concise, recruiter-friendly,
+  conservative. Don't overstate; name the confidence level in prose when it isn't
+  enterprise experience (see the Tailscale entry as the template).
+
+### Adding a project summary
+
+Add a `ProjectKnowledge` entry to `src/data/fredrik-projects.ts`. For `private` projects,
+`boundaries` is required (the tests enforce it) — list exactly what must never be
+revealed, and write the `allowedAnswer` at concept level only. Enterprise projects stay
+generic: no internal codenames, client names, URLs, or confidential architecture.
+
+### Adding curated Q&A
+
+Add a `CuratedAnswer` to `src/data/fredrik-qa.ts`. The `question` string is matched
+exactly (it wins over everything except the sensitive filter); `keywords` are scored one
+point per matched phrase, ties keep the earliest entry, so order entries by recruiter
+relevance.
+
+### What NOT to include — ever
+
+Raw second-brain content; private project notes; employer-confidential implementation
+details; internal system/project codenames; client names; internal URLs or private
+endpoints; credentials, tokens, or secrets; architecture diagrams; personal logistics,
+finances, bills, vendors, household or family details; home address or exact location;
+invented, inferred, or inflated experience; metrics without a documented baseline.
+
+### Testing chatbot answers locally
+
+```bash
+npm test        # zero-dependency knowledge/pipeline tests (plain Node ≥22.18)
+npm run check   # TypeScript
+```
+
+`npm test` runs `src/tests/knowledge.test.ts` against `resolveLocalAnswer()` — the exact
+function production runs — covering: approved skills return their approved answers
+(Tailscale, Cloudflare Workers, AWS…), projects stay concept-level (Homebase, Second
+Brain), unknown skills get the deterministic not-confirmed answer instead of a
+hallucination, sensitive topics stay blocked, and the data files keep their public-safety
+invariants (everything `publicSafe`, private projects declare `boundaries`, aliases
+normalized). Add a test when you add an entry. For end-to-end checks, use
+`npm run dev:noai` + the curl examples below.
 
 ### Rate limiting
 
@@ -118,7 +199,8 @@ This repo uses `wrangler.jsonc`; the TOML equivalents are shown for reference.
   "ASK_FREDRIK_AI_TIMEOUT_MS": "6000",
   "ASK_FREDRIK_MAX_OUTPUT_TOKENS": "250",
   "ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS": "60",
-  "ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS": "10"
+  "ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS": "10",
+  "ASK_FREDRIK_LOG_MAX_ROWS": "1000"          // FIFO log retention; "0" = keep forever
 }
 ```
 
@@ -171,6 +253,12 @@ is a `console.warn`, never a user-facing error.
 **Privacy:** questions may be logged — the widget tells users not to submit sensitive
 information. Raw IP addresses are **never** stored; only a salted SHA-256 hash, and only
 when `IP_HASH_SALT` is set.
+
+**Retention (FIFO):** the log is a rolling window, not an archive. After each insert the
+Worker trims the table to the newest `ASK_FREDRIK_LOG_MAX_ROWS` rows (default **1000**;
+set `"0"` to keep everything). The insert and trim run in one transactional D1 batch, off
+the response path. Dashboard-side Workers Logs (observability) are separate and
+short-lived — roughly 3 days on the Free plan; D1 is the durable record.
 
 Database `ask-fredrik-db` was created 2026-07-06 and the schema applied (`schema.sql`).
 For a fresh setup: `npx wrangler d1 create ask-fredrik-db`, paste the id into
