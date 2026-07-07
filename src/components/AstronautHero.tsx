@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { useReducedMotion } from 'framer-motion';
+import { useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import { profile } from '../data/profile';
 import { useDesktopViewport } from './useDesktopViewport';
+import { GLIDE_SPRING, clamp01, debugGlide } from './scrollGlide';
 
 // The scrub encodes are all-intra (a keyframe every frame) so seeking is
 // instant at any scroll position; the original GOP encode stutters.
 // Phones get a 720p variant (~3 MB vs ~6 MB).
-const VIDEO_SRC = `${import.meta.env.BASE_URL}media/astronaut-video-scrub.mp4`;
-const VIDEO_SRC_SM = `${import.meta.env.BASE_URL}media/astronaut-video-scrub-sm.mp4`;
+const VIDEO_SRC = `${import.meta.env.BASE_URL}media/astronaut-hero-scrub.mp4`;
+const VIDEO_SRC_SM = `${import.meta.env.BASE_URL}media/astronaut-hero-scrub-sm.mp4`;
 /** Final frame — the settled helmet; what mobile / reduced-motion / failure show. */
-const POSTER_SRC = `${import.meta.env.BASE_URL}media/astronaut-video-poster.jpg`;
+const POSTER_SRC = `${import.meta.env.BASE_URL}media/astronaut-hero-poster.jpg`;
 /** First frame — the distant approach; what the scrubbed film opens on. */
-const START_SRC = `${import.meta.env.BASE_URL}media/astronaut-video-start.jpg`;
+const START_SRC = `${import.meta.env.BASE_URL}media/astronaut-hero-start.jpg`;
 
 /**
  * The film completes at this fraction of the runway; the remainder is a hold
@@ -36,9 +37,14 @@ const hudLabels = [
 /**
  * Cinematic hero: the film is scrubbed by scroll. The hero pins under the
  * nav while a 360vh runway maps scroll progress onto the video timeline —
- * the astronaut drifts in from the left and settles centered as you scroll.
+ * the astronaut drifts in from the left and settles filling the frame as
+ * you scroll.
  *
- * The smoothed progress is published as a CSS custom property (--p) on the
+ * Scroll only moves a spring's target; the sprung progress (GLIDE_SPRING —
+ * overdamped, settling a few hundred ms after scroll stops) is what every
+ * visual reads, so the film and choreography glide into place instead of
+ * freezing the instant scrolling stops. The sprung progress is published as
+ * a CSS custom property (--p) on the
  * hero, and hero.css choreographs every segment from it: the identity
  * (eyebrow → name → sub → CTAs) eases into frame while the astronaut moves,
  * then the visor telemetry assembles piece by piece once the film has ended.
@@ -60,6 +66,12 @@ export function AstronautHero() {
   const heroRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Scroll writes raw progress here; the spring's change stream (one tick
+  // per animation frame, kept alive by framer-motion until it rests) is
+  // what paints — no hand-rolled rAF loop needed.
+  const raw = useMotionValue(0);
+  const smooth = useSpring(raw, GLIDE_SPRING);
+
   // Without a film to scrub, the poster already shows the settled frame.
   useEffect(() => {
     if (!scrub) setSettled(true);
@@ -72,41 +84,47 @@ export function AstronautHero() {
     const video = videoRef.current;
     if (!runway || !hero || !video) return;
 
-    let raf = 0;
-    let shown = 0;
-    let target = 0;
     let lastP = '';
 
     const measure = () => {
       const rect = runway.getBoundingClientRect();
       const range = rect.height - window.innerHeight;
-      target = range > 0 ? Math.min(1, Math.max(0, -rect.top / range)) : 1;
+      raw.set(range > 0 ? clamp01(-rect.top / range) : 1);
     };
 
-    const apply = () => {
-      raf = 0;
-      const delta = target - shown;
-      shown = Math.abs(delta) < 0.001 ? target : shown + delta * 0.2;
+    // Seek only on whole-frame deltas, and never while a seek is in
+    // flight — queueing sub-frame seeks just thrashes the decoder.
+    const syncVideo = () => {
+      const dur = video.duration;
+      if (!Number.isFinite(dur) || dur <= 0 || video.seeking) return;
+      const t = Math.min(1, clamp01(smooth.get()) / FILM_END) * (dur - 0.05);
+      if (Math.abs(t - video.currentTime) > FRAME) video.currentTime = t;
+    };
+
+    const render = (v: number) => {
+      const shown = clamp01(v);
       // Skip the style write (and its recalc) when the change is invisible.
       const p = shown.toFixed(3);
       if (p !== lastP) {
         lastP = p;
         hero.style.setProperty('--p', p);
       }
-      // Seek only on whole-frame deltas, and never while a seek is in
-      // flight — queueing sub-frame seeks just thrashes the decoder.
-      const dur = video.duration;
-      if (Number.isFinite(dur) && dur > 0 && !video.seeking) {
-        const t = Math.min(1, shown / FILM_END) * (dur - 0.05);
-        if (Math.abs(t - video.currentTime) > FRAME) video.currentTime = t;
-      }
+      syncVideo();
       if (shown >= SETTLE_AT) setSettled(true);
-      if (shown !== target && !raf) raf = requestAnimationFrame(apply);
+      debugGlide('hero', raw.get(), shown);
     };
 
-    const onScroll = () => {
+    // A reload mid-page restores the scroll position — start settled there
+    // instead of springing through the whole film from frame one.
+    measure();
+    smooth.jump(raw.get());
+    render(smooth.get());
+
+    const unsubscribe = smooth.on('change', render);
+    const onScroll = measure;
+    const onMetadata = () => {
       measure();
-      if (!raf) raf = requestAnimationFrame(apply);
+      syncVideo();
     };
 
     // Mobile browsers don't paint seeks on a never-played video — prime the
@@ -126,22 +144,21 @@ export function AstronautHero() {
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
-    video.addEventListener('loadedmetadata', onScroll);
+    video.addEventListener('loadedmetadata', onMetadata);
     video.addEventListener('loadedmetadata', prime);
     // A skipped-while-seeking frame could leave the film a step behind at
     // rest — re-check once each seek lands.
-    video.addEventListener('seeked', onScroll);
+    video.addEventListener('seeked', syncVideo);
     prime();
-    onScroll();
     return () => {
-      if (raf) cancelAnimationFrame(raf);
+      unsubscribe();
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
-      video.removeEventListener('loadedmetadata', onScroll);
+      video.removeEventListener('loadedmetadata', onMetadata);
       video.removeEventListener('loadedmetadata', prime);
-      video.removeEventListener('seeked', onScroll);
+      video.removeEventListener('seeked', syncVideo);
     };
-  }, [scrub]);
+  }, [scrub, raw, smooth]);
 
   return (
     <section

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { useReducedMotion } from 'framer-motion';
+import { useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import { profile } from '../data/profile';
 import { useDesktopViewport } from './useDesktopViewport';
+import { GLIDE_SPRING, clamp01, debugGlide } from './scrollGlide';
 
 // All-intra re-encodes (a keyframe every frame, ffmpeg -g 1) like the hero's —
 // scroll-seeking a normal-GOP encode stutters. Phones get the 720p variant.
@@ -28,15 +29,6 @@ const FILM_END = 0.78;
 const REVEAL_END = 0.18;
 
 /**
- * Per-frame approach factor for the smoothed progress. Scroll input
- * moves the target; the shown value glides toward it and keeps easing
- * for a few frames after the scroll stops — gentle momentum, not lag.
- */
-const GLIDE = 0.14;
-
-const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
-
-/**
  * Closing scene: the contact section (sheet 06) staged as a cinematic
  * ending that mirrors the hero's mechanic — the light-reveal film is
  * scrubbed by scroll. On desktop the scene **pins** (sticky under a
@@ -44,11 +36,12 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
  * in phases — eyebrow, then headline and body, then the astronaut
  * lighting out of black on the right, then the CTAs, then a held beat
  * before the section unpins toward the footer. Scrolling back rewinds
- * it. One smoothed progress value drives everything: the scroll
- * handler only updates targets, and a rAF loop eases the shown value
- * toward them (and keeps easing briefly after scroll stops), writing
- * it to the `--fp` custom property that the phase ramps in finale.css
- * read, plus the film seek time. The pin is CSS-gated to viewports
+ * it. One sprung progress value drives everything: the scroll handler
+ * only moves spring targets (GLIDE_SPRING — overdamped, so the scrub
+ * never overshoots and plays backwards), and the springs keep gliding
+ * for a few hundred ms after scroll stops, writing the shown value to
+ * the `--fp` custom property that the phase ramps in finale.css read,
+ * plus the film seek time. The pin is CSS-gated to viewports
  * tall enough to fit the scene (see finale.css); everywhere else —
  * phones, short windows — the section stays in-flow: the text phases
  * map onto the section's travel through the viewport and the film onto
@@ -81,6 +74,15 @@ export function AstronautFinale() {
   const mediaRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Scroll writes raw targets here; the springs' change streams (one tick
+  // per animation frame, kept alive by framer-motion until they rest) are
+  // what paint. Scene text and film band travel separately in in-flow
+  // mode, so each gets its own spring.
+  const raw = useMotionValue(0);
+  const smooth = useSpring(raw, GLIDE_SPRING);
+  const filmRaw = useMotionValue(0);
+  const filmSmooth = useSpring(filmRaw, GLIDE_SPRING);
+
   useEffect(() => {
     if (!scrub) return;
     const section = sectionRef.current;
@@ -88,11 +90,7 @@ export function AstronautFinale() {
     const video = videoRef.current;
     if (!section || !media || !video) return;
 
-    let raf = 0;
-    let shown = 0;
-    let filmShown = 0;
-    let target = 0;
-    let filmTarget = 0;
+    let lastP = '';
 
     const travel = (top: number, vh: number) => {
       const range = vh * (1 - REVEAL_END);
@@ -106,42 +104,50 @@ export function AstronautFinale() {
       if (runway > vh * 0.5) {
         // Pinned: one progress through the runway; the film occupies
         // its middle stretch so text lands first and the end holds.
-        target = clamp01(-rect.top / runway);
-        filmTarget = clamp01((target - FILM_START) / (FILM_END - FILM_START));
+        const target = clamp01(-rect.top / runway);
+        raw.set(target);
+        filmRaw.set(clamp01((target - FILM_START) / (FILM_END - FILM_START)));
       } else {
         // In-flow: text phases follow the section's travel into the
         // viewport; the film follows its own band's travel, because on
         // phones it now sits below the content.
-        target = travel(rect.top, vh);
-        filmTarget = travel(media.getBoundingClientRect().top, vh);
+        raw.set(travel(rect.top, vh));
+        filmRaw.set(travel(media.getBoundingClientRect().top, vh));
       }
     };
 
-    const approach = (cur: number, tgt: number) => {
-      const delta = tgt - cur;
-      return Math.abs(delta) < 0.001 ? tgt : cur + delta * GLIDE;
-    };
-
-    const apply = () => {
-      raf = 0;
-      shown = approach(shown, target);
-      filmShown = approach(filmShown, filmTarget);
-      section.style.setProperty('--fp', shown.toFixed(4));
-      // Seek only on whole-frame deltas, and never while a seek is in
-      // flight — queueing sub-frame seeks just thrashes the decoder.
+    // Seek only on whole-frame deltas, and never while a seek is in
+    // flight — queueing sub-frame seeks just thrashes the decoder.
+    const syncVideo = () => {
       const dur = video.duration;
-      if (Number.isFinite(dur) && dur > 0 && !video.seeking) {
-        const t = filmShown * (dur - 0.05);
-        if (Math.abs(t - video.currentTime) > FRAME) video.currentTime = t;
-      }
-      if ((shown !== target || filmShown !== filmTarget) && !raf) {
-        raf = requestAnimationFrame(apply);
-      }
+      if (!Number.isFinite(dur) || dur <= 0 || video.seeking) return;
+      const t = clamp01(filmSmooth.get()) * (dur - 0.05);
+      if (Math.abs(t - video.currentTime) > FRAME) video.currentTime = t;
     };
 
-    const onScroll = () => {
+    const render = () => {
+      const shown = clamp01(smooth.get());
+      const p = shown.toFixed(4);
+      if (p !== lastP) {
+        lastP = p;
+        section.style.setProperty('--fp', p);
+      }
+      syncVideo();
+      debugGlide('finale', raw.get(), shown);
+    };
+
+    // A reload mid-page restores the scroll position — start settled there
+    // instead of springing through the whole reveal.
+    measure();
+    smooth.jump(raw.get());
+    filmSmooth.jump(filmRaw.get());
+    render();
+
+    const unsubscribers = [smooth.on('change', render), filmSmooth.on('change', render)];
+    const onScroll = measure;
+    const onMetadata = () => {
       measure();
-      if (!raf) raf = requestAnimationFrame(apply);
+      syncVideo();
     };
 
     // Mobile browsers don't paint seeks on a never-played video — prime the
@@ -180,24 +186,29 @@ export function AstronautFinale() {
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
-    video.addEventListener('loadedmetadata', onScroll);
+    video.addEventListener('loadedmetadata', onMetadata);
     // A skipped-while-seeking frame could leave the film a step behind at
     // rest — re-check once each seek lands.
-    video.addEventListener('seeked', onScroll);
-    onScroll();
+    video.addEventListener('seeked', syncVideo);
     return () => {
-      if (raf) cancelAnimationFrame(raf);
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
       observer?.disconnect();
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
-      video.removeEventListener('loadedmetadata', onScroll);
-      video.removeEventListener('seeked', onScroll);
+      video.removeEventListener('loadedmetadata', onMetadata);
+      video.removeEventListener('seeked', syncVideo);
       section.style.removeProperty('--fp');
     };
-  }, [scrub]);
+  }, [scrub, raw, smooth, filmRaw, filmSmooth]);
 
   return (
-    <section id="contact" className="finale" ref={sectionRef} aria-label="Contact">
+    <section
+      id="contact"
+      className="finale"
+      ref={sectionRef}
+      aria-label="Contact"
+      data-pinned-reveal=""
+    >
       <div className="finale-sticky">
         <div className="wrap finale-inner">
           <div className="finale-panel">

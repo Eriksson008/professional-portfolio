@@ -57,6 +57,75 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-07 — Floatier glide, hero recomposed for the new film, media renamed + repo
+  cleanup (user-directed brief).** Follow-up pass on the same day's spring work: (1)
+  `GLIDE_SPRING` retuned from stiffness 50 / damping 18 / mass 0.9 to **stiffness 26 /
+  damping 14 / mass 1.1** (still overdamped, ζ ≈ 1.31) — the scrub now trails scroll with a
+  clearly visible momentum tail (~1.5–2 s settle) on both the hero mp4 and the finale film.
+  (2) **Hero composition adjusted to the new film's framing**: the regenerated film settles on
+  a frame-filling helmet with the visor centered at ≈(56%, 41%) of the 16:9 image (the old one
+  settled smaller and centered), so the visor HUD moved/resized (`left: 56%`, `width:
+  min(44vw, 58vh)`, `aspect-ratio: 1.35` — inset on the glass, labels no longer float
+  off-visor), the ambient glow re-anchored to (56%, 41%) at `min(50vw, 76vh)`, the bottom
+  scrim deepened (0.82 → 0.88) under the identity panel (the new settled frame has a bright
+  suit at the bottom), and the phone `object-position` pan widened 30→50% ⇒ **24→58%** so the
+  settled visor actually centers under the portrait crop. Verified via DOM-geometry probe at
+  1586×1307 (HUD center within ~3% of the cover-cropped visor center; label confirmed on the
+  glass in a screenshot — this session's Chrome tab was background-throttled, so full-motion
+  verification stays on the post-deploy checklist). (3) **Media renamed for consistency** with
+  the finale set: `astronaut-video-*` → `astronaut-hero-{scrub,scrub-sm,poster,start}`, and
+  the two unreferenced source encodes moved out of the served bundle to
+  `media-src/astronaut-{hero,finale}-source.mp4` (~5.7 MB less in every Pages artifact);
+  `astronaut-video-end.png` (1.4 MB, referenced nowhere) deleted. (4) **Stale design docs of
+  the removed WebGL/constellation hero deleted** (constellation-hero plan+spec, WebGL visual
+  layer, hero formation sequence); the scroll-hero and dark-only art-direction specs remain —
+  they still describe the live mechanic and direction.
+
+- **2026-07-07 — Scroll-scrub smoothing moved to real springs + new hero film (user-directed
+  brief).** Both scroll-scrubbed scenes (hero + finale) replaced their hand-rolled rAF lerp
+  loops (`delta × 0.2` / `× 0.14` per frame — frame-rate dependent, so the glide tail nearly
+  vanished on 120 Hz displays, and no velocity state, so motion froze the instant scroll
+  stopped) with **framer-motion springs**: scroll handlers now only set raw targets on
+  `useMotionValue`s, and `useSpring` (shared `GLIDE_SPRING` in `src/components/scrollGlide.ts`:
+  stiffness 50, damping 18, mass 0.9, restDelta 0.0008 — deliberately overdamped, ζ ≈ 1.3, so
+  the scrubbed film never overshoots and plays backwards) drives the CSS vars (`--p`/`--fp`)
+  and film seeks; visuals keep gliding a few hundred ms after scroll stops. The whole-frame
+  seek throttle (`FRAME = 1/24`, skip while `video.seeking`) and the finale's dual
+  pinned/in-flow measure logic are unchanged; springs `jump()` to the restored scroll position
+  on mount so a mid-page reload doesn't replay the film. Dev-only `debugGlide` telemetry
+  (`[glide:hero|finale] raw= smooth=`, tree-shaken from prod via `import.meta.env.DEV`) remains
+  for tuning. Verified in-browser at full frame rate: after an instant scroll jump, raw froze
+  while `--p` eased 0 → 0.53 over ~1.2 s and hero film `currentTime` tracked it (0 → 5.4 s);
+  finale verified in both pinned (settled at 0.2003 target, glided 0.20 → 0.91 after jump) and
+  in-flow modes. Same session: **hero film replaced** with the user's
+  `astronaut-video-clean-zoomcrop.mp4` (1080p/24fps/8.04 s, same shape as before) — all four
+  assets regenerated per the README recipe (all-intra `-g 1` scrub 5.5 MB, 720p sm 2.9 MB,
+  start/poster stills; source kept as `astronaut-video.mp4`); the new film ends on a centered
+  frame-filling helmet, which the visor-HUD brackets and right-side identity panel frame
+  cleanly (screenshot-verified). Lint + build green.
+
+- **2026-07-07 — Ask Fredrik chat console polish + Contact anchor lands on the played-out
+  finale (user-directed brief, branch `ask-fredrik-guard-uptime`).** The chat widget was
+  refined into one coherent dark-glass console (styling + small state only; API/data
+  untouched): loose suggestion bubbles became a labelled **"Suggested prompts" tray**
+  (hairline-topped, 2-column grid on desktop, one horizontal swipe row ≤560px so the input
+  stays in thumb reach), the user message bubble went from bright white to **charcoal glass**
+  (`--accent-wash` + `--line`, 14px/5px radii matching the assistant bubble), the transcript
+  got scroll-aware **top/bottom gradient fades** (classes toggled from real scroll state, so
+  nothing fades when there's nothing beyond an edge), the typing indicator now reads
+  **"Thinking ···"** in mono, panel widened 400→420px, input gained a soft focus ring, and
+  the disclosure shrank to 0.62rem. Separately, **anchors into pinned-reveal sections land
+  settled**: `useAnchorGlide` now checks `data-pinned-reveal` (set on the finale section) and,
+  when the pin runway is active (same `runway > 0.5·vh` test as the component's `measure()`),
+  glides to `runway × 0.92` — past the last phase ramp (0.88) but short of unpinning — instead
+  of the runway top, where `--fp ≈ 0.07` showed the un-revealed scene ("Contact showed the
+  section before the second hero loaded"). In-flow mode and all other anchors are unaffected
+  (regression-probed: Career lands at nav offset 68px). Verified in-browser at 1111×1107
+  (this session's Chrome loaded video fine and allowed resize — the earlier session's
+  browser limits were environmental, not permanent): landing `--fp` measured 0.9197 with the
+  lit settled composition, chat verified at desktop + 520px widths, Enter-send/Escape-close/
+  fade toggling exercised. Lint + build green.
+
 - **2026-07-07 — Finale phase choreography: staged cinematic ending driven by one smoothed
   progress variable (user-directed brief).** The finale's text no longer uses framer-motion
   `whileInView` — the component's rAF lerp loop (glide factor 0.14; scroll moves the target,

@@ -64,7 +64,7 @@
 .af-panel {
   display: flex;
   flex-direction: column;
-  width: min(400px, calc(100vw - 1.8rem));
+  width: min(420px, calc(100vw - 1.8rem));
   max-height: min(600px, calc(100vh - 6.5rem));
   max-height: min(600px, calc(100dvh - 6.5rem));
   border: 1px solid var(--line);
@@ -155,22 +155,55 @@
 }
 
 /* ---- Conversation log ---- */
+/* Shell exists so scroll fades can overlay the log without scrolling
+   with it. Fades appear only when content actually continues past an
+   edge (classes toggled from scroll state in the component). */
+.af-log-shell {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.af-log-shell::before,
+.af-log-shell::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 34px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+  z-index: 1;
+}
+.af-log-shell::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(8, 10, 14, 0.85), rgba(8, 10, 14, 0));
+}
+.af-log-shell::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(8, 10, 14, 0.85), rgba(8, 10, 14, 0));
+}
+.af-log-shell.is-faded-top::before,
+.af-log-shell.is-faded-bottom::after {
+  opacity: 1;
+}
 .af-log {
   flex: 1;
   min-height: 180px;
   overflow-y: auto;
-  padding: 1.1rem 1.25rem;
+  padding: 1.15rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.75rem;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--silver-line) transparent;
 }
 .af-msg {
-  max-width: 88%;
-  padding: 0.7rem 0.95rem;
-  border-radius: 16px;
+  max-width: 86%;
+  padding: 0.68rem 0.9rem;
+  border-radius: 14px;
   font-size: 0.9rem;
   line-height: 1.55;
 }
@@ -178,35 +211,46 @@
   align-self: flex-start;
   background: var(--panel);
   border: 1px solid var(--line-soft);
-  border-bottom-left-radius: 6px;
+  border-bottom-left-radius: 5px;
   color: var(--muted);
 }
+/* User turns stay quiet: charcoal glass, not a bright block. */
 .af-msg-user {
   align-self: flex-end;
-  background: var(--text);
-  color: var(--on-accent);
-  border-bottom-right-radius: 6px;
+  background: var(--accent-wash);
+  border: 1px solid var(--line);
+  border-bottom-right-radius: 5px;
+  color: var(--text);
   font-weight: 500;
 }
 
-/* Typing indicator — three breathing dots. */
+/* Typing indicator — muted "Thinking" plus three breathing dots. */
 .af-typing {
   display: inline-flex;
   gap: 5px;
   align-items: center;
-  padding-block: 0.85rem;
+  padding-block: 0.72rem;
 }
-.af-typing span {
-  width: 5px;
-  height: 5px;
+.af-typing-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+  margin-right: 0.35rem;
+}
+.af-typing-dot {
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: var(--silver);
   animation: af-blink 1.1s infinite var(--ease);
 }
-.af-typing span:nth-child(2) {
+/* nth-child, not nth-of-type: the "Thinking" label is a span too, so
+   type-indexed selectors would put the wave on the wrong dots. */
+.af-typing-dot:nth-child(3) {
   animation-delay: 0.18s;
 }
-.af-typing span:nth-child(3) {
+.af-typing-dot:nth-child(4) {
   animation-delay: 0.36s;
 }
 @keyframes af-blink {
@@ -219,30 +263,48 @@
   }
 }
 
-/* ---- Suggested-question chips ---- */
+/* ---- Suggested-prompt tray ---- */
+/* A labelled tray inside the console rhythm, not loose bubbles. */
+.af-tray {
+  flex: none;
+  padding: 0.8rem 1.25rem 0.95rem;
+  border-top: 1px solid var(--line-soft);
+  background: rgba(255, 255, 255, 0.02);
+}
+.af-tray-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 0.55rem;
+}
 .af-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  padding: 0 1.25rem 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
 }
 .af-chip {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
+  line-height: 1.4;
   letter-spacing: 0.01em;
   color: var(--silver);
-  padding: 0.38rem 0.75rem;
-  background: var(--panel);
+  padding: 0.48rem 0.65rem;
+  background: transparent;
   border: 1px solid var(--line-soft);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius);
   cursor: pointer;
   text-align: left;
   transition:
     border-color 0.2s var(--ease),
+    background 0.2s var(--ease),
     color 0.2s var(--ease);
 }
-.af-chip:hover:not(:disabled) {
+.af-chip:hover:not(:disabled),
+.af-chip:focus-visible {
   border-color: var(--line-strong);
+  background: var(--panel);
   color: var(--text);
 }
 .af-chip:disabled {
@@ -275,6 +337,7 @@
 .af-input:focus {
   outline: none;
   border-color: var(--line-strong);
+  box-shadow: 0 0 0 3px var(--accent-wash);
 }
 .af-send {
   flex: none;
@@ -301,11 +364,12 @@
   cursor: default;
 }
 .af-disclosure {
-  padding: 0.65rem 1.25rem 1rem;
+  padding: 0.55rem 1.25rem 0.95rem;
   font-family: var(--font-mono);
-  font-size: 0.66rem;
+  font-size: 0.62rem;
   line-height: 1.5;
   color: var(--faint);
+  opacity: 0.8;
 }
 
 /* Screen-reader-only label. */
@@ -339,13 +403,31 @@
     max-height: calc(100vh - 10.5rem);
     max-height: calc(100dvh - 10.5rem);
   }
+  /* One swipeable row of prompts so the input stays within thumb reach. */
+  .af-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: -1.25rem;
+    padding-inline: 1.25rem;
+    padding-bottom: 0.2rem;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .af-chips::-webkit-scrollbar {
+    display: none;
+  }
+  .af-chip {
+    flex: none;
+    max-width: 78vw;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .af-panel {
     animation: none;
   }
-  .af-typing span {
+  .af-typing-dot {
     animation: none;
     opacity: 0.7;
   }

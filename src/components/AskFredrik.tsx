@@ -24,6 +24,8 @@ export function AskFredrik() {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [askedIds, setAskedIds] = useState<string[]>([]);
+  const [fadeTop, setFadeTop] = useState(false);
+  const [fadeBottom, setFadeBottom] = useState(false);
 
   const launcherRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -42,11 +44,20 @@ export function AskFredrik() {
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  // Fade the transcript edges only when there is content beyond them.
+  const syncFades = () => {
+    const log = logRef.current;
+    if (!log) return;
+    setFadeTop(log.scrollTop > 4);
+    setFadeBottom(log.scrollTop + log.clientHeight < log.scrollHeight - 4);
+  };
+
   // Follow the conversation: pin the log to its newest message.
   useEffect(() => {
     const log = logRef.current;
     if (log) log.scrollTop = log.scrollHeight;
-  }, [messages, busy]);
+    syncFades();
+  }, [messages, busy, open]);
 
   const close = () => {
     setOpen(false);
@@ -115,35 +126,47 @@ export function AskFredrik() {
             </button>
           </header>
 
-          <div ref={logRef} className="af-log" role="log" aria-live="polite">
-            <div className="af-msg af-msg-assistant">{greeting}</div>
-            {messages.map((msg) => (
-              <div key={msg.id} className={`af-msg af-msg-${msg.role}`}>
-                {msg.text}
-              </div>
-            ))}
-            {busy && (
-              <div className="af-msg af-msg-assistant af-typing" aria-label="Preparing answer">
-                <span />
-                <span />
-                <span />
-              </div>
-            )}
+          <div
+            className={`af-log-shell ${fadeTop ? 'is-faded-top' : ''} ${
+              fadeBottom ? 'is-faded-bottom' : ''
+            }`}
+          >
+            <div ref={logRef} className="af-log" role="log" aria-live="polite" onScroll={syncFades}>
+              <div className="af-msg af-msg-assistant">{greeting}</div>
+              {messages.map((msg) => (
+                <div key={msg.id} className={`af-msg af-msg-${msg.role}`}>
+                  {msg.text}
+                </div>
+              ))}
+              {busy && (
+                <div className="af-msg af-msg-assistant af-typing" aria-label="Preparing answer">
+                  <span className="af-typing-label">Thinking</span>
+                  <span className="af-typing-dot" />
+                  <span className="af-typing-dot" />
+                  <span className="af-typing-dot" />
+                </div>
+              )}
+            </div>
           </div>
 
           {remaining.length > 0 && (
-            <div className="af-chips" aria-label="Suggested questions">
-              {remaining.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  className="af-chip"
-                  disabled={busy}
-                  onClick={() => void send(s.question, s.id)}
-                >
-                  {s.question}
-                </button>
-              ))}
+            <div className="af-tray" role="group" aria-labelledby="af-tray-label">
+              <p className="af-tray-label" id="af-tray-label">
+                Suggested prompts
+              </p>
+              <div className="af-chips">
+                {remaining.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    className="af-chip"
+                    disabled={busy}
+                    onClick={() => void send(s.question, s.id)}
+                  >
+                    {s.question}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

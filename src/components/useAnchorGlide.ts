@@ -4,6 +4,13 @@ import { useEffect } from 'react';
 const NAV_OFFSET = 68;
 
 /**
+ * Landing progress inside a pinned-reveal runway: past the last phase
+ * ramp (0.88) so the scene arrives fully played, short of 1 so the
+ * section hasn't started unpinning toward what follows it.
+ */
+const RUNWAY_SETTLE = 0.92;
+
+/**
  * JS-driven glide for same-page anchor links. Native hash navigation is an
  * unreliable IntersectionObserver trigger (mobile WebKit doesn't fire
  * observers on programmatic jumps, leaving whileInView sections invisible
@@ -51,7 +58,18 @@ export function useAnchorGlide() {
       if (!el) return;
       e.preventDefault();
       history.replaceState(null, '', `#${id}`);
-      const top = Math.max(0, el.getBoundingClientRect().top + window.scrollY - NAV_OFFSET);
+      const rect = el.getBoundingClientRect();
+      // Sections that pin under a scroll runway (data-pinned-reveal — the
+      // finale) play their reveal across the runway, so landing at the top
+      // would show the scene un-revealed. Land where it has fully played
+      // instead. The runway check mirrors the component's measure(): when
+      // the section is in-flow (phones, short windows) it doesn't trigger
+      // and the anchor lands at the top as usual.
+      const runway = 'pinnedReveal' in el.dataset ? rect.height - window.innerHeight : 0;
+      const top =
+        runway > window.innerHeight * 0.5
+          ? rect.top + window.scrollY + runway * RUNWAY_SETTLE
+          : Math.max(0, rect.top + window.scrollY - NAV_OFFSET);
       if (reduce.matches) {
         window.scrollTo(0, top);
       } else {

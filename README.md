@@ -39,33 +39,36 @@ npm run format       # Prettier
 ## Astronaut hero
 
 The landing page opens on a **black-and-white astronaut film scrubbed by scroll**: the hero pins
-under the nav while a 300vh runway maps scroll progress onto the video timeline — the astronaut
-drifts in from the left and settles centered, dark visor to camera, at the reader's own pace.
+under the nav while a 360vh runway maps scroll progress onto the video timeline — the astronaut
+drifts in from the left and settles filling the frame, dark visor to camera, at the reader's own
+pace.
 The direction is luxury minimalism — Apple + NASA + high-end command interface, not a space
 theme.
 
 How it works (`src/components/AstronautHero.tsx` + `src/styles/hero.css`):
 
-- **Scroll drives the film.** A scroll listener measures progress through the runway and a
-  rAF-lerped seek sets `video.currentTime` (never `play()`), so fast flicks stay smooth and the
-  frame always settles exactly where the scroll position says. The film occupies the first 78%
-  of the runway; the rest is a hold on the settled frame. The served files are **all-intra
-  re-encodes** (a keyframe every frame, `ffmpeg -g 1`) — seeking a normal-GOP encode stutters
-  because every scrub position decodes from the last keyframe: `astronaut-video-scrub.mp4`
-  (1080p, ~6 MB) on ≥720 px viewports, `astronaut-video-scrub-sm.mp4` (720p, ~3 MB) on phones.
-  The original `astronaut-video.mp4` is kept as the source asset.
+- **Scroll drives the film.** A scroll listener only moves the target of an overdamped
+  framer-motion spring (`GLIDE_SPRING` in `src/components/scrollGlide.ts`); the sprung progress
+  is what seeks `video.currentTime` (never `play()`), so the film trails the finger with real
+  momentum and keeps gliding into place after scrolling stops — without ever overshooting and
+  playing backwards. The film occupies the first 78% of the runway; the rest is a hold on the
+  settled frame. The served files are **all-intra re-encodes** (a keyframe every frame,
+  `ffmpeg -g 1`) — seeking a normal-GOP encode stutters because every scrub position decodes
+  from the last keyframe: `astronaut-hero-scrub.mp4` (1080p, ~5.5 MB) on ≥720 px viewports,
+  `astronaut-hero-scrub-sm.mp4` (720p, ~3 MB) on phones. The original film is kept out of the
+  served bundle as `media-src/astronaut-hero-source.mp4`.
 - **Everything is choreographed from one variable.** The component publishes the smoothed
   progress as a CSS custom property (`--p`) on the hero; `hero.css` derives a per-segment eased
   window (`--t`) from it and drives opacity + `translate` + blur — so every segment moves
   frame-locked with the astronaut, forward and backward.
 - **The video is decorative only** — `aria-hidden`, muted, `playsInline`, no controls.
 - **Poster-under-video fallback.** Two stills extracted from the film: the **start frame**
-  (`astronaut-video-start.jpg`) is the video poster and scrub-mode background, so scroll
-  position 0 matches what loads; the **final frame** (`astronaut-video-poster.jpg`) backs
+  (`astronaut-hero-start.jpg`) is the video poster and scrub-mode background, so scroll
+  position 0 matches what loads; the **final frame** (`astronaut-hero-poster.jpg`) backs
   `prefers-reduced-motion` and video load failure — both degrade to the settled still,
   resolved, with no pinning. No real content depends on the video.
 - **Mobile scrubs too.** Phones get the 720p encode and a progress-linked `object-position`
-  pan (30% → 50%) that keeps the astronaut in frame under the portrait crop as he crosses the
+  pan (24% → 58%) that keeps the astronaut in frame under the portrait crop as he crosses the
   16:9 frame; the HUD stays desktop-only, so on phones the film + identity carry the sequence.
 - **Opening sequence.** The page opens on the astronaut alone against black with only a scroll
   cue. As the astronaut moves, the identity segments ease into frame bottom-right one at a time
@@ -111,11 +114,11 @@ subject drifts across the frame during the reveal, so the film is shown whole (1
 cover-cropped): CTA column on the left, film bleeding to the right viewport edge on desktop;
 a full-width 16:9 band above the stacked content on phones.
 
-- **Scrub discipline** (same as the hero): a scroll listener + rAF-lerped seek sets
-  `video.currentTime` (never `play()`ed for playback); seeks land only on whole-frame deltas
-  and never while one is in flight; the decode pipeline is primed with one muted play → pause
-  so mobile browsers paint seeks. Decorative only: `aria-hidden`, muted, `playsInline`, no
-  controls.
+- **Scrub discipline** (same as the hero): scroll only moves the targets of overdamped
+  framer-motion springs (`GLIDE_SPRING`), whose sprung values seek `video.currentTime` (never
+  `play()`ed for playback); seeks land only on whole-frame deltas and never while one is in
+  flight; the decode pipeline is primed with one muted play → pause so mobile browsers paint
+  seeks. Decorative only: `aria-hidden`, muted, `playsInline`, no controls.
 - **Lazy.** The film sits at the page's end, so it loads `preload="metadata"` until an
   IntersectionObserver sees the section within two viewports, then flips to `auto` + primes.
 - **Fallbacks.** `prefers-reduced-motion` and load failure both render the lit final-frame
@@ -123,9 +126,9 @@ a full-width 16:9 band above the stacked content on phones.
 - **Encodes.** Served files are **all-intra re-encodes** (a keyframe every frame, `ffmpeg
   -g 1`) like the hero's — seeking a normal-GOP encode stutters: `astronaut-finale-scrub.mp4`
   (1080p, ~3.8 MB, crf 26) on ≥720 px viewports, `astronaut-finale-scrub-sm.mp4` (720p,
-  ~2.1 MB, crf 27) on phones. Their source, `astronaut-finale-1080p.mp4` (~3 MB, kept as the
-  source asset), is a 1080p lanczos upscale of the original 720p clip, cleaned and re-encoded
-  with ffmpeg:
+  ~2.1 MB, crf 27) on phones. Their source, `media-src/astronaut-finale-source.mp4` (~3 MB,
+  kept out of the served bundle), is a 1080p lanczos upscale of the original 720p clip, cleaned
+  and re-encoded with ffmpeg:
   `-vf "delogo=…,gradfun=1.2:16,scale=1920:1080:flags=lanczos,unsharp=5:5:0.25:5:5:0"
   -c:v libx264 -crf 17 -preset slow -pix_fmt yuv420p -movflags +faststart -an` —
   `gradfun` debands the dark gradients, `faststart` fronts the moov atom for streaming, `-an`

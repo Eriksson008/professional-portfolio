@@ -2,7 +2,7 @@
    Astronaut hero — scroll-scrubbed film.
    A 360vh runway pins the frame under the nav and maps scroll
    progress onto the video timeline: the astronaut enters from
-   the left and settles centered as you scroll. The component
+   the left and settles filling the frame as you scroll. The component
    publishes the smoothed progress as --p (0..1) on .hero, and
    the choreography block at the end of this file eases every
    segment into frame on its own progress window — identity
@@ -59,17 +59,19 @@
   z-index: 1;
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, transparent 22%),
-    linear-gradient(180deg, transparent 42%, rgba(0, 0, 0, 0.42) 72%, rgba(0, 0, 0, 0.82) 100%),
+    linear-gradient(180deg, transparent 42%, rgba(0, 0, 0, 0.46) 72%, rgba(0, 0, 0, 0.88) 100%),
     radial-gradient(60% 55% at 82% 78%, rgba(0, 0, 0, 0.45), transparent 70%);
 }
 
-/* Ambient glow — a quiet cool halo where the helmet settles. */
+/* Ambient glow — a quiet cool halo where the helmet settles. The settled
+   frame is a frame-filling helmet with the visor centered at ≈(56%, 41%)
+   of the 16:9 image — the glow and HUD below both anchor there. */
 .hero-glow {
   position: absolute;
   z-index: 1;
-  left: 50%;
-  top: 44%;
-  width: min(60vw, 62vh);
+  left: 56%;
+  top: 41%;
+  width: min(50vw, 76vh);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   border-radius: 50%;
@@ -86,12 +88,12 @@
 .hero-hud {
   position: absolute;
   z-index: 2;
-  left: 50%;
+  left: 56%;
   top: 40%;
-  /* Wide, short frame: the bottom bracket + label group must stay on the
-     visor glass, not fall to the helmet rim. */
-  width: min(46vw, 58vh);
-  aspect-ratio: 1.5;
+  /* Inset within the settled visor so brackets + labels all read as data
+     on the glass, not on the helmet rim (visor ≈ 45vw × 70vh at 16:9). */
+  width: min(44vw, 58vh);
+  aspect-ratio: 1.35;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -343,7 +345,7 @@
 /* ---- Responsive ---- */
 @media (max-width: 1100px) {
   .hero-hud {
-    width: min(52vw, 54vh);
+    width: min(50vw, 56vh);
   }
 }
 
@@ -366,13 +368,14 @@
   .hero-hud {
     display: none;
   }
-  /* Portrait crop: hold the astronaut in frame, panning to center with the
-     film (he enters at the left of the 16:9 frame and settles centered). */
+  /* Portrait crop: hold the astronaut in frame, panning with the film (he
+     enters at the left of the 16:9 frame; the settled visor centers at
+     ≈56% of it, which lands mid-screen at object-position ≈58%). */
   .hero-runway.is-scrub .hero-media {
-    background-position: 30% center;
+    background-position: 24% center;
   }
   .hero-runway.is-scrub .hero-media video {
-    object-position: calc(30% + clamp(0, calc(var(--p) / 0.78), 1) * 20%) center;
+    object-position: calc(24% + clamp(0, calc(var(--p) / 0.78), 1) * 34%) center;
   }
   .hero-scrim {
     background:
