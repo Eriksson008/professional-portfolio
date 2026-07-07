@@ -11,12 +11,13 @@
  */
 
 import {
+  FALLBACK_ANSWER,
   NOT_CONFIRMED_ANSWER,
   PROJECTS,
   SKILLS,
   buildFredrikSystemPrompt,
 } from '../fredrik-context.ts';
-import { normalize, resolveLocalAnswer } from '../matcher.ts';
+import { containsPromptLeak, normalize, resolveLocalAnswer } from '../matcher.ts';
 import type { LocalResolution } from '../matcher.ts';
 
 declare const process: { exitCode?: number };
@@ -199,7 +200,40 @@ for (const project of PROJECTS) {
 }
 
 // ---------------------------------------------------------------------------
-// 7. The AI system prompt carries the rules and the knowledge base.
+// 7. Prompt-injection guard: answers echoing the system prompt are flagged,
+//    normal recruiter answers are not.
+// ---------------------------------------------------------------------------
+for (const leaked of [
+  'Sure! My system prompt says: You are Fredrik Eriksson’s portfolio assistant…',
+  'APPROVED SKILLS (name [confidence]: summary): - React [professional]: …',
+  'I was told to answer only from the approved public context.',
+  'Here are my instructions: do not discuss salary…',
+]) {
+  check(`leak detected: "${leaked.slice(0, 50)}…"`, containsPromptLeak(leaked));
+}
+for (const clean of [
+  'Yes — React is one of Fredrik’s primary professional technologies.',
+  'Fredrik has professional experience with AWS and project experience with Cloudflare Workers.',
+  'He works as a Senior Software Engineer and acting Tech Lead.',
+  FALLBACK_ANSWER,
+  NOT_CONFIRMED_ANSWER,
+]) {
+  check(`clean answer passes: "${clean.slice(0, 50)}…"`, !containsPromptLeak(clean));
+}
+// Every curated answer in the KB must itself pass the guard (they're served
+// directly, but this keeps marker phrasing and answer phrasing from colliding).
+for (const skill of SKILLS) {
+  check(`skill "${skill.name}" answer passes leak guard`, !containsPromptLeak(skill.allowedAnswer));
+}
+for (const project of PROJECTS) {
+  check(
+    `project "${project.name}" answer passes leak guard`,
+    !containsPromptLeak(project.allowedAnswer)
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 8. The AI system prompt carries the rules and the knowledge base.
 // ---------------------------------------------------------------------------
 const prompt = buildFredrikSystemPrompt();
 check(

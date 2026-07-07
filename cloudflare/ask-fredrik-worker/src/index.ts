@@ -22,7 +22,7 @@
  */
 
 import { FALLBACK_ANSWER, RATE_LIMITED_ANSWER, SYSTEM_PROMPT } from './fredrik-context.ts';
-import { resolveLocalAnswer } from './matcher.ts';
+import { containsPromptLeak, resolveLocalAnswer } from './matcher.ts';
 
 /** Minimal structural type for the Workers AI binding — keeps the Worker
  *  compiling and running whether or not the binding is configured. */
@@ -184,7 +184,15 @@ async function callWorkersAi(env: Env, question: string): Promise<{ answer: stri
       ),
     ]);
     const answer = extractAiText(result);
-    return answer ? { answer, model } : null;
+    if (!answer) return null;
+    // Prompt-injection guard: an answer that echoes the system prompt or the
+    // serialized knowledge base is discarded — the caller serves the curated
+    // fallback and the leak attempt sees nothing.
+    if (containsPromptLeak(answer)) {
+      console.warn('Workers AI answer discarded: looks like a system-prompt leak.');
+      return null;
+    }
+    return { answer, model };
   } catch (err) {
     console.warn('Workers AI call failed:', err);
     return null;

@@ -57,6 +57,17 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-07 — Prompt-leak guard, uptime checks, TODO cleanup (branch
+  `ask-fredrik-guard-uptime`).** The guarded Workers AI call now discards any answer that
+  echoes the system prompt / serialized KB (`containsPromptLeak` markers: section headers,
+  bracketed confidence tags, rule sentences) and serves the curated fallback instead — a
+  data-invariant test also forces every curated `allowedAnswer` to pass the guard (it
+  immediately caught "system prompt" inside the Workers AI skill answer; reworded).
+  `uptime.yml` pings the live site + Worker health endpoint every 6 h (workflow failure =
+  GitHub email). CLAUDE.md/AGENTS.md stale go-live TODOs replaced with the real open items
+  (OG preview validation, WAF rate rule, Web Analytics — the latter two are dashboard-side).
+  332 tests green.
+
 - **2026-07-06 — Ask Fredrik hardening (branch `ask-fredrik-hardening`).** CI workflow
   `worker-tests.yml` runs `npm run check` + `npm test` on any change under
   `cloudflare/ask-fredrik-worker/` (deploys stay manual); sensitive filter extended with
