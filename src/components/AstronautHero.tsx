@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import { profile } from '../data/profile';
 import { useDesktopViewport } from './useDesktopViewport';
-import { GLIDE_SPRING, clamp01, debugGlide } from './scrollGlide';
+import { GLIDE_SPRING, HERO_SPRING_DESKTOP, clamp01, debugGlide } from './scrollGlide';
 
 // The scrub encodes are all-intra (a keyframe every frame) so seeking is
 // instant at any scroll position; the original GOP encode stutters.
@@ -68,9 +68,11 @@ export function AstronautHero() {
 
   // Scroll writes raw progress here; the spring's change stream (one tick
   // per animation frame, kept alive by framer-motion until it rests) is
-  // what paints — no hand-rolled rAF loop needed.
+  // what paints — no hand-rolled rAF loop needed. Desktop gets a tighter
+  // spring so a chunky mouse wheel tracks the film instead of trailing it;
+  // phones keep the softer shared glide (which feels right under touch).
   const raw = useMotionValue(0);
-  const smooth = useSpring(raw, GLIDE_SPRING);
+  const smooth = useSpring(raw, desktop ? HERO_SPRING_DESKTOP : GLIDE_SPRING);
 
   // Without a film to scrub, the poster already shows the settled frame.
   useEffect(() => {

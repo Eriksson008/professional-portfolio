@@ -20,6 +20,28 @@
   height: 360vh;
 }
 
+/* ---- Desktop scrub tuning (≥720px; phones keep the softer, longer scrub) ----
+   A shorter runway so each mouse-wheel notch moves the film enough to feel
+   connected (paired with the tighter desktop spring in AstronautHero), plus
+   compositor isolation so the per-frame video seek and the blurred identity
+   reveal repaint on their own GPU layers instead of thrashing the whole hero. */
+@media (min-width: 720px) {
+  .hero-runway.is-scrub {
+    height: 320vh;
+  }
+  .hero-runway.is-scrub .hero-media video {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform;
+  }
+  .hero-runway.is-scrub .hero-eyebrow,
+  .hero-runway.is-scrub .hero-name,
+  .hero-runway.is-scrub .hero-sub,
+  .hero-runway.is-scrub .hero-ctas {
+    will-change: transform, filter;
+  }
+}
+
 .hero {
   position: relative;
   min-height: calc(100svh - 68px);

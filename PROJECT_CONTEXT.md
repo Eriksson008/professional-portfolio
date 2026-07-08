@@ -57,6 +57,25 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-07 — Desktop hero scrub smoothness (mouse-wheel), mobile untouched (user-directed
+  brief).** The soft shared `GLIDE_SPRING` (26/14/1.1, ~1.5–2 s tail) feels great under a
+  trackpad's continuous deltas but disconnected/stuttery under a mouse wheel's chunky notches
+  (the film trails and keeps gliding after the wheel stops). Three scoped desktop-only fixes,
+  all gated to ≥720px so the well-liked mobile scrub and the finale are byte-for-byte unchanged:
+  (1) a **tighter desktop hero spring** — new `HERO_SPRING_DESKTOP` (stiffness 60 / damping 20 /
+  mass 1.0, still overdamped ζ ≈ 1.29 so it never plays backwards, ~0.7 s settle); the hero uses
+  `desktop ? HERO_SPRING_DESKTOP : GLIDE_SPRING`, mobile + finale keep `GLIDE_SPRING`. (2)
+  **Runway 360vh → 320vh on desktop only** (`@media (min-width: 720px)`; mobile stays 360vh) so
+  each wheel notch moves the film enough to feel connected. (3) **Compositor isolation** on
+  desktop: `translateZ(0)`/`will-change` on the scrubbed `<video>` and `will-change: transform,
+  filter` on the four blurred identity lines, so the per-frame seek repaint and the animated
+  `blur()` reveal rasterize on their own GPU layers instead of thrashing the hero. Video encoding
+  was already scrub-optimal (all-intra, 193/193 keyframes — every seek decodes independently);
+  the whole-frame seek throttle (`> 1/24 s`, skip while `seeking`) is unchanged. Lint + build
+  green; verified computed runway = 320vh and layer hints applied at 1586px, no console errors.
+  Note: `<video>` scrub repaint is inherently not rAF-locked, so a trace of decode-cadence
+  softness remains — these changes tighten and isolate it without a canvas/WebGL rewrite.
+
 - **2026-07-07 — Floatier glide, hero recomposed for the new film, media renamed + repo
   cleanup (user-directed brief).** Follow-up pass on the same day's spring work: (1)
   `GLIDE_SPRING` retuned from stiffness 50 / damping 18 / mass 0.9 to **stiffness 26 /
