@@ -26,16 +26,15 @@ const SETTLE_AT = 0.5;
 /** One frame of the 24fps film — seeking finer than this is wasted decode. */
 const FRAME = 1 / 24;
 
-/** Mission telemetry — a bulleted readout on the settled visor. All figures
-    are verifiable elsewhere on the page; value carries, label anchors. The
-    role line ships a shorter label for the narrow portrait breakpoint. */
-type Telemetry = { value: string; label: string; labelSm?: string };
-const telemetry: Telemetry[] = [
+/** Mission telemetry — a bulleted readout on the settled visor (desktop only;
+    hidden on phones where it crowds the portrait frame). All figures are
+    verifiable elsewhere on the page; value carries, label anchors. */
+const telemetry = [
   { value: 'Exceptional ×3', label: 'Reviews' },
   { value: '750+', label: 'Commits' },
   { value: '120+', label: 'Stories' },
-  { value: 'Acting Tech Lead', label: 'Senior Software Engineer', labelSm: 'Sr. Software Engineer' },
-];
+  { value: 'Acting Tech Lead', label: 'Senior Software Engineer' },
+] as const;
 
 /**
  * Cinematic hero: the film is scrubbed by scroll. The hero pins under the
@@ -199,16 +198,7 @@ export function AstronautHero() {
           {telemetry.map((t) => (
             <div className="hud-cell" key={t.label}>
               <span className="hud-cell-value">{t.value}</span>
-              <span className="hud-cell-label">
-                {t.labelSm ? (
-                  <>
-                    <span className="hud-label-full">{t.label}</span>
-                    <span className="hud-label-sm">{t.labelSm}</span>
-                  </>
-                ) : (
-                  t.label
-                )}
-              </span>
+              <span className="hud-cell-label">{t.label}</span>
             </div>
           ))}
         </div>

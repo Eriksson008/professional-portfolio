@@ -70,11 +70,10 @@ docker compose up --build       # production container at http://localhost:8790 
   (`role="group"` + `aria-label`, no longer `aria-hidden`); no background/blur/border (reads as
   data on the glass). **Choreography preserved**: resolves in the post-film hold — the list fades/
   drifts up on `--p` 0.76→0.88, lines clear left-to-right (0.78/0.81/0.84/0.87), blur-in on
-  desktop only. **Mobile (≤719px):** same list re-centered (`left: 50%`, `top: 38%`) and tightened
-  (smaller mono) so the role line fits the portrait width, with the role label shortened to
-  **Sr. Software Engineer** for that breakpoint (both variants ship as real text, toggled by CSS —
-  no `:has()`); was previously `display:none`. Reduced-motion/static heroes fade it in on
-  `.is-settled`. Video, scrub springs,
+  desktop only. **Desktop-only** — hidden (`display:none`) at ≤719px, where on the portrait crop
+  it crowded the visor and the stacked identity below (an interim mobile-fit pass with a shortened
+  "Sr. Software Engineer" label was tried, then dropped once the readout was made desktop-only).
+  Reduced-motion/static heroes fade it in on `.is-settled`. Video, scrub springs,
   runway, and mobile scroll behavior untouched. All old `.hud-corner/.hud-tick/.hud-label` markup
   + CSS removed. Lint + build green.
 - **2026-07-07 — Desktop hero scrub smoothness (mouse-wheel), mobile untouched (user-directed
