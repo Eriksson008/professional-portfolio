@@ -57,6 +57,26 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-07 — Hero HUD reworked from four-corner brackets to a bulleted telemetry readout on
+  the visor (user-directed brief, two passes).** The scattered corner-bracket / edge-tick /
+  four-label overlay read too "gaming HUD". First pass tried a centered glass strip at the top of
+  the frame; user redirected: put it **on the astronaut helmet, in the Mission-Portfolio font/
+  style, as a bulleted HUD list**. Final: a **panel-less floating readout** anchored to the same
+  visor point as the ambient glow (`left: 56%`, `top: 41%`, centered via `translate(-50%,-50%)`),
+  styled in the `.hero-eyebrow` idiom — mono, uppercase, letter-spaced, silver. Four lines, each a
+  hairline dash bullet (echoing the eyebrow's lead rule) + value (`--silver`) + label
+  (`--silver-2`): **Exceptional ×3 · Reviews**, **750+ · Commits**, **120+ · Stories**, **Acting
+  Tech Lead · Senior Software Engineer** (role line; no "hybrid"). Real text
+  (`role="group"` + `aria-label`, no longer `aria-hidden`); no background/blur/border (reads as
+  data on the glass). **Choreography preserved**: resolves in the post-film hold — the list fades/
+  drifts up on `--p` 0.76→0.88, lines clear left-to-right (0.78/0.81/0.84/0.87), blur-in on
+  desktop only. **Mobile (≤719px):** same list re-centered (`left: 50%`, `top: 38%`) and tightened
+  (smaller mono) so the role line fits the portrait width, with the role label shortened to
+  **Sr. Software Engineer** for that breakpoint (both variants ship as real text, toggled by CSS —
+  no `:has()`); was previously `display:none`. Reduced-motion/static heroes fade it in on
+  `.is-settled`. Video, scrub springs,
+  runway, and mobile scroll behavior untouched. All old `.hud-corner/.hud-tick/.hud-label` markup
+  + CSS removed. Lint + build green.
 - **2026-07-07 — Desktop hero scrub smoothness (mouse-wheel), mobile untouched (user-directed
   brief).** The soft shared `GLIDE_SPRING` (26/14/1.1, ~1.5–2 s tail) feels great under a
   trackpad's continuous deltas but disconnected/stuttery under a mouse wheel's chunky notches

@@ -26,13 +26,16 @@ const SETTLE_AT = 0.5;
 /** One frame of the 24fps film — seeking finer than this is wasted decode. */
 const FRAME = 1 / 24;
 
-/** Mission data mirrored on the visor — all figures verifiable elsewhere on the page. */
-const hudLabels = [
-  { pos: 'tl', text: 'Impact · Exceptional ×3' },
-  { pos: 'tr', text: 'Commits · 750+' },
-  { pos: 'bl', text: 'Stories · 120+' },
-  { pos: 'br', text: 'Role · Tech Lead' },
-] as const;
+/** Mission telemetry — a bulleted readout on the settled visor. All figures
+    are verifiable elsewhere on the page; value carries, label anchors. The
+    role line ships a shorter label for the narrow portrait breakpoint. */
+type Telemetry = { value: string; label: string; labelSm?: string };
+const telemetry: Telemetry[] = [
+  { value: 'Exceptional ×3', label: 'Reviews' },
+  { value: '750+', label: 'Commits' },
+  { value: '120+', label: 'Stories' },
+  { value: 'Acting Tech Lead', label: 'Senior Software Engineer', labelSm: 'Sr. Software Engineer' },
+];
 
 /**
  * Cinematic hero: the film is scrubbed by scroll. The hero pins under the
@@ -192,17 +195,21 @@ export function AstronautHero() {
 
         <div className="hero-glow" aria-hidden="true" />
 
-        <div className="hero-hud" aria-hidden="true">
-          <span className="hud-corner hud-tl" />
-          <span className="hud-corner hud-tr" />
-          <span className="hud-corner hud-bl" />
-          <span className="hud-corner hud-br" />
-          <span className="hud-tick hud-tick-l" />
-          <span className="hud-tick hud-tick-r" />
-          {hudLabels.map((l) => (
-            <span key={l.pos} className={`hud-label hud-label-${l.pos}`}>
-              {l.text}
-            </span>
+        <div className="hero-hud" role="group" aria-label="Career telemetry">
+          {telemetry.map((t) => (
+            <div className="hud-cell" key={t.label}>
+              <span className="hud-cell-value">{t.value}</span>
+              <span className="hud-cell-label">
+                {t.labelSm ? (
+                  <>
+                    <span className="hud-label-full">{t.label}</span>
+                    <span className="hud-label-sm">{t.labelSm}</span>
+                  </>
+                ) : (
+                  t.label
+                )}
+              </span>
+            </div>
           ))}
         </div>
 
