@@ -57,6 +57,27 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-07 — Private Ask-Fredrik admin dashboard (branch `prompts-dashboard`, user-directed
+  brief).** Internal "mission control" analytics panel to see what visitors prompt the Ask Fredrik
+  widget. Shipped as a **separate Vite entry** (`admin/ask-fredrik/index.html` + `src/admin/**`) at
+  route `/admin/ask-fredrik/`, code-split so **none of it lands in the public bundle** and it is
+  never linked from the public nav (`noindex, nofollow`). Gated build-time by
+  `ENABLE_ASK_DASHBOARD` (default on). **Auth = server-side token** (brief's option b; Cloudflare
+  Access isn't wired and isn't "easy"): the admin types the `ADMIN_TOKEN` into a login field, held
+  only in tab `sessionStorage` and sent as `Authorization: Bearer` — **no secret in the bundle**.
+  Worker (`cloudflare/ask-fredrik-worker`) extended additively: `/admin/logs` gained
+  `from/to/source/intent/q/limit/offset` + `total` (backward-compatible with the original curl
+  contract), and a new `GET /admin/stats` returns aggregates. Both admin endpoints now answer CORS
+  **only** for the dashboard origins (Pages + localhost) and still require the bearer — Bearer auth
+  means no CSRF surface, so this doesn't weaken the prior "no-CORS curl-only" posture. **No D1
+  migration** — the existing `ask_fredrik_logs` schema already had every field. Privacy: display-only
+  redaction of emails/phones/long-ids (`src/admin/redact.ts`); raw D1 unchanged; CSV export uses the
+  same redacted values. Verified end-to-end against a local Worker (seeded D1): auth 401s, filters,
+  pagination, CORS allow/deny, `/ask` untouched, and the browser panel rendering + redacting live
+  rows. Full guide: [`docs/ask-fredrik-dashboard.md`](docs/ask-fredrik-dashboard.md). Open follow-up:
+  the CLAUDE.md TODO to add a Cloudflare WAF rate rule on `/ask` still applies; `/admin/*` is not
+  rate-limited (token-gated).
+
 - **2026-07-07 — Hero HUD reworked from four-corner brackets to a bulleted telemetry readout on
   the visor (user-directed brief, two passes).** The scattered corner-bracket / edge-tick /
   four-label overlay read too "gaming HUD". First pass tried a centered glass strip at the top of

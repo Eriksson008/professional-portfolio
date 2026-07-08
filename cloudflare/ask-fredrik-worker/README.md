@@ -38,23 +38,38 @@ Content-Type: application/json
 → 400 { "error": "..." }   invalid JSON, missing/empty/too-long question
 → 405 { "error": "..." }   non-POST on /ask
 
-GET /admin/logs[?limit=25|50|100]        (default 100, max 100)
+GET /admin/logs[?limit=&offset=&from=&to=&source=&intent=&q=]   (limit default 100, max 100)
 Authorization: Bearer <ADMIN_TOKEN>
 
-→ 200 { "count": n, "logs": [...] }
+→ 200 { "count": n, "total": N, "limit": l, "offset": o, "logs": [...] }
+→ 400 { "error": "..." }                 bad filter/limit/offset
 → 401 { "error": "Unauthorized." }       missing/wrong token
 → 503 { "error": "..." }                 ADMIN_TOKEN or D1 not configured
+
+GET /admin/stats                         aggregate overview metrics
+Authorization: Bearer <ADMIN_TOKEN>
+
+→ 200 { total, today, last7d, last30d, bySource, blocked, fallback,
+        topIntents:[{intent,count}], daily:[{day,count}] }
 ```
+
+The two `/admin/*` endpoints back the private [Ask-Fredrik dashboard](../../docs/ask-fredrik-dashboard.md).
+`/admin/logs` filters: `from`/`to` (ISO date/datetime bounds on `created_at`), `source`
+(one of the five sources), `intent` (exact `matched_intent`), `q` (LIKE search on the
+question), plus `limit`/`offset` pagination. All values are bound parameters. With no
+params, `/admin/logs` is backward-compatible with the original curl contract (the new
+`total`/`limit`/`offset` keys are additive).
 
 Rate-limited and blocked questions still return HTTP 200 with a polite canned answer — the
 widget renders it like any other reply. Responses never contain prompts, the approved
 context object, secrets, stack traces, or internal error details.
 
-`GET /` is a health check. CORS on `/ask` is allowlisted to local development
-(`http://localhost:*`, `http://127.0.0.1:*`) and the GitHub Pages origin
-(`https://eriksson008.github.io`) — edit the allowlist at the top of `src/index.ts`.
-`/admin/logs` sends **no** CORS headers at all: it's a curl/CLI endpoint and can never be
-read by a browser page on another origin.
+`GET /` is a health check. CORS on `/ask` and on the two `/admin/*` endpoints is allowlisted
+to local development (`http://localhost:*`, `http://127.0.0.1:*`) and the GitHub Pages origin
+(`https://eriksson008.github.io`) — edit the allowlist at the top of `src/index.ts`. The
+`/admin/*` endpoints answer CORS only for those dashboard origins **and** still require the
+`ADMIN_TOKEN` bearer; because auth is a header (not a cookie) there is no CSRF surface, and a
+page on any other origin gets neither the CORS headers nor the token.
 
 ## Architecture
 

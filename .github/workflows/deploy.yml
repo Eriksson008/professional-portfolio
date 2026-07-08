@@ -42,6 +42,14 @@ jobs:
           # repo Actions *variable* VITE_ASK_FREDRIK_API_URL to the Worker's /ask
           # URL to enable it; unset/empty keeps the free static answers.
           VITE_ASK_FREDRIK_API_URL: ${{ vars.VITE_ASK_FREDRIK_API_URL }}
+          # Private Ask-Fredrik admin dashboard (admin/ask-fredrik). Held OFF in
+          # production until the Worker carrying GET /admin/stats + admin CORS is
+          # deployed (cd cloudflare/ask-fredrik-worker && npx wrangler deploy) —
+          # otherwise the published panel would 404/CORS-fail against the old
+          # Worker. TO PUBLISH IT: after that deploy, change this to 'true' (or
+          # delete this line — the build defaults to enabled). Local dev/preview
+          # are unaffected and stay enabled. See docs/ask-fredrik-dashboard.md.
+          ENABLE_ASK_DASHBOARD: 'false'
 
       - uses: actions/configure-pages@v6
 
