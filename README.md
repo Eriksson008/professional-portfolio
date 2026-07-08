@@ -39,7 +39,7 @@ npm run format       # Prettier
 ## Astronaut hero
 
 The landing page opens on a **black-and-white astronaut film scrubbed by scroll**: the hero pins
-under the nav while a 360vh runway maps scroll progress onto the video timeline — the astronaut
+under the nav while a tall runway (320vh on desktop, 360vh on phones) maps scroll progress onto the video timeline — the astronaut
 drifts in from the left and settles filling the frame, dark visor to camera, at the reader's own
 pace.
 The direction is luxury minimalism — Apple + NASA + high-end command interface, not a space

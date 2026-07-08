@@ -57,6 +57,45 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-07 — Hero HUD reworked from four-corner brackets to a bulleted telemetry readout on
+  the visor (user-directed brief, two passes).** The scattered corner-bracket / edge-tick /
+  four-label overlay read too "gaming HUD". First pass tried a centered glass strip at the top of
+  the frame; user redirected: put it **on the astronaut helmet, in the Mission-Portfolio font/
+  style, as a bulleted HUD list**. Final: a **panel-less floating readout** anchored to the same
+  visor point as the ambient glow (`left: 56%`, `top: 41%`, centered via `translate(-50%,-50%)`),
+  styled in the `.hero-eyebrow` idiom — mono, uppercase, letter-spaced, silver. Four lines, each a
+  hairline dash bullet (echoing the eyebrow's lead rule) + value (`--silver`) + label
+  (`--silver-2`): **Exceptional ×3 · Reviews**, **750+ · Commits**, **120+ · Stories**, **Acting
+  Tech Lead · Senior Software Engineer** (role line; no "hybrid"). Real text
+  (`role="group"` + `aria-label`, no longer `aria-hidden`); no background/blur/border (reads as
+  data on the glass). **Choreography preserved**: resolves in the post-film hold — the list fades/
+  drifts up on `--p` 0.76→0.88, lines clear left-to-right (0.78/0.81/0.84/0.87), blur-in on
+  desktop only. **Mobile (≤719px):** same list re-centered (`left: 50%`, `top: 38%`) and tightened
+  (smaller mono) so the role line fits the portrait width, with the role label shortened to
+  **Sr. Software Engineer** for that breakpoint (both variants ship as real text, toggled by CSS —
+  no `:has()`); was previously `display:none`. Reduced-motion/static heroes fade it in on
+  `.is-settled`. Video, scrub springs,
+  runway, and mobile scroll behavior untouched. All old `.hud-corner/.hud-tick/.hud-label` markup
+  + CSS removed. Lint + build green.
+- **2026-07-07 — Desktop hero scrub smoothness (mouse-wheel), mobile untouched (user-directed
+  brief).** The soft shared `GLIDE_SPRING` (26/14/1.1, ~1.5–2 s tail) feels great under a
+  trackpad's continuous deltas but disconnected/stuttery under a mouse wheel's chunky notches
+  (the film trails and keeps gliding after the wheel stops). Three scoped desktop-only fixes,
+  all gated to ≥720px so the well-liked mobile scrub and the finale are byte-for-byte unchanged:
+  (1) a **tighter desktop hero spring** — new `HERO_SPRING_DESKTOP` (stiffness 60 / damping 20 /
+  mass 1.0, still overdamped ζ ≈ 1.29 so it never plays backwards, ~0.7 s settle); the hero uses
+  `desktop ? HERO_SPRING_DESKTOP : GLIDE_SPRING`, mobile + finale keep `GLIDE_SPRING`. (2)
+  **Runway 360vh → 320vh on desktop only** (`@media (min-width: 720px)`; mobile stays 360vh) so
+  each wheel notch moves the film enough to feel connected. (3) **Compositor isolation** on
+  desktop: `translateZ(0)`/`will-change` on the scrubbed `<video>` and `will-change: transform,
+  filter` on the four blurred identity lines, so the per-frame seek repaint and the animated
+  `blur()` reveal rasterize on their own GPU layers instead of thrashing the hero. Video encoding
+  was already scrub-optimal (all-intra, 193/193 keyframes — every seek decodes independently);
+  the whole-frame seek throttle (`> 1/24 s`, skip while `seeking`) is unchanged. Lint + build
+  green; verified computed runway = 320vh and layer hints applied at 1586px, no console errors.
+  Note: `<video>` scrub repaint is inherently not rAF-locked, so a trace of decode-cadence
+  softness remains — these changes tighten and isolate it without a canvas/WebGL rewrite.
+
 - **2026-07-07 — Floatier glide, hero recomposed for the new film, media renamed + repo
   cleanup (user-directed brief).** Follow-up pass on the same day's spring work: (1)
   `GLIDE_SPRING` retuned from stiffness 50 / damping 18 / mass 0.9 to **stiffness 26 /
