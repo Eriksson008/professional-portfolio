@@ -154,11 +154,6 @@
 .hud-cell-label {
   color: var(--silver-2);
 }
-/* The role line carries a shorter label for the narrow portrait breakpoint;
-   full one shows everywhere else. */
-.hud-label-sm {
-  display: none;
-}
 
 /* ---- Identity — lower right, synced to the approach ---- */
 .hero-content {
@@ -320,26 +315,10 @@
   .hero {
     min-height: 92svh;
   }
-  /* The film pans the visor to mid-screen — center the readout there and
-     tighten it so the role line fits the portrait width. */
+  /* Desktop-only telemetry: on the portrait crop it crowds the visor and the
+     stacked identity below, so drop it entirely on phones. */
   .hero-hud {
-    left: 50%;
-    top: 38%;
-    gap: 0.6rem;
-  }
-  .hud-cell {
-    font-size: 0.58rem;
-    letter-spacing: 0.16em;
-    gap: 0.55rem;
-  }
-  .hud-cell::before {
-    width: 14px;
-  }
-  .hud-label-full {
     display: none;
-  }
-  .hud-label-sm {
-    display: inline;
   }
   /* Portrait crop: hold the astronaut in frame, panning with the film (he
      enters at the left of the 16:9 frame; the settled visor centers at
@@ -472,8 +451,7 @@
   .hero-runway.is-scrub .hero-eyebrow,
   .hero-runway.is-scrub .hero-name,
   .hero-runway.is-scrub .hero-sub,
-  .hero-runway.is-scrub .hero-ctas,
-  .hero-runway.is-scrub .hud-cell {
+  .hero-runway.is-scrub .hero-ctas {
     filter: none;
   }
 }
