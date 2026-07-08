@@ -49,7 +49,7 @@ jobs:
           # Worker. TO PUBLISH IT: after that deploy, change this to 'true' (or
           # delete this line — the build defaults to enabled). Local dev/preview
           # are unaffected and stay enabled. See docs/ask-fredrik-dashboard.md.
-          ENABLE_ASK_DASHBOARD: 'false'
+          ENABLE_ASK_DASHBOARD: 'true'
 
       - uses: actions/configure-pages@v6
 
