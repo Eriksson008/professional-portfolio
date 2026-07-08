@@ -2,7 +2,16 @@
  * Ask Fredrik — Cloudflare Worker backend.
  *
  * POST /ask         { question, sessionId?, page? }  →  { answer, source, matchedIntent? }
- * GET  /admin/logs  Bearer ADMIN_TOKEN               →  { count, logs }
+ * GET  /admin/logs  Bearer ADMIN_TOKEN               →  { count, total, limit, offset, logs }
+ * GET  /admin/stats Bearer ADMIN_TOKEN               →  { total, today, last7d, ... }
+ *
+ * The two /admin/* endpoints back the private Ask-Fredrik dashboard
+ * (admin/ask-fredrik in the portfolio build). /admin/logs accepts optional
+ * filters (from, to, source, intent, q) + pagination (limit, offset); with no
+ * params it is backward-compatible with the original curl contract. Both are
+ * gated by the ADMIN_TOKEN bearer secret and, unlike /ask, are answered with
+ * CORS headers only for the dashboard's own origins (GitHub Pages + localhost)
+ * so the browser panel can read them — the token is still required either way.
  *
  * Answer pipeline for a valid question, in order:
  *   1. rate limit   → source "rate_limited"  (in-memory, best-effort)
@@ -74,6 +83,17 @@ const DEFAULT_LOG_MAX_ROWS = 1000;
 const MAX_QUESTION_LENGTH = 500;
 const DEFAULT_LOG_LIMIT = 100;
 const MAX_LOG_LIMIT = 100;
+const MAX_LOG_OFFSET = 100000;
+
+/** The five answer sources the pipeline can record — the allowlist for the
+ *  admin "source" filter (anything else is rejected before it reaches SQL). */
+const KNOWN_SOURCES = new Set<AskSource>(['ai', 'fallback', 'static', 'blocked', 'rate_limited']);
+
+/** Accepts an ISO date (YYYY-MM-DD) or full ISO datetime — the admin filter
+ *  bounds. Values are always bound as parameters; this only rejects garbage. */
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?(\.\d+)?Z?)?$/;
+
+const DAY_MS = 86_400_000;
 
 /** Integer env var with a fallback and sane bounds (unset/garbage → fallback). */
 function envInt(value: string | undefined, fallback: number, min: number, max: number): number {
@@ -393,48 +413,216 @@ async function handleAsk(
   return respond(FALLBACK_ANSWER, 'fallback', null, null);
 }
 
-async function handleAdminLogs(request: Request, env: Env, url: URL): Promise<Response> {
-  // No CORS headers anywhere in this handler: browser pages on other origins
-  // can never read these responses. The /ask rate limiter does not apply here.
+/**
+ * Bearer-token gate shared by both /admin/* handlers. Returns a Response to
+ * short-circuit with (misconfigured token, wrong/absent token, or no DB) or
+ * null when the caller may proceed. `origin` is the resolved admin CORS origin
+ * so even error responses are readable by the dashboard's fetch.
+ */
+function requireAdmin(request: Request, env: Env, origin: string | null): Response | null {
   if (!env.ADMIN_TOKEN) {
-    return json({ error: 'Admin endpoint is not configured.' }, 503, null);
+    return json({ error: 'Admin endpoint is not configured.' }, 503, origin);
   }
   const auth = request.headers.get('Authorization');
   if (auth !== `Bearer ${env.ADMIN_TOKEN}`) {
-    return json({ error: 'Unauthorized.' }, 401, null, { 'WWW-Authenticate': 'Bearer' });
+    return json({ error: 'Unauthorized.' }, 401, origin, { 'WWW-Authenticate': 'Bearer' });
   }
   if (!env.ASK_FREDRIK_DB) {
-    return json({ error: 'Logging database is not configured.' }, 503, null);
+    return json({ error: 'Logging database is not configured.' }, 503, origin);
   }
+  return null;
+}
+
+interface LogFilters {
+  from: string | null;
+  to: string | null;
+  source: AskSource | null;
+  intent: string | null;
+  q: string | null;
+}
+
+/** Parse + validate the shared filter query params. Returns { error } on bad
+ *  input so the handler can answer 400. Dates are compared lexically against
+ *  the ISO8601 created_at column, so string bounds sort correctly. */
+function parseLogFilters(url: URL): LogFilters | { error: string } {
+  const from = url.searchParams.get('from');
+  const to = url.searchParams.get('to');
+  const source = url.searchParams.get('source');
+  const intent = url.searchParams.get('intent');
+  const q = url.searchParams.get('q');
+  if (from !== null && !ISO_DATE_RE.test(from)) return { error: '"from" must be an ISO date.' };
+  if (to !== null && !ISO_DATE_RE.test(to)) return { error: '"to" must be an ISO date.' };
+  if (source !== null && !KNOWN_SOURCES.has(source as AskSource)) {
+    return { error: '"source" is not a recognized value.' };
+  }
+  return {
+    from,
+    to,
+    source: (source as AskSource) ?? null,
+    intent: intent && intent.length <= 100 ? intent : null,
+    q: q && q.length <= 200 ? q : null,
+  };
+}
+
+/** Build a parameterized WHERE clause + positional binds from the filters.
+ *  Every value is bound (never interpolated). The q search is a LIKE with its
+ *  own wildcards escaped, so a literal % or _ can't widen the match. */
+function buildLogWhere(f: LogFilters): { clause: string; binds: unknown[] } {
+  const conds: string[] = [];
+  const binds: unknown[] = [];
+  if (f.from) {
+    conds.push('created_at >= ?');
+    binds.push(f.from);
+  }
+  if (f.to) {
+    conds.push('created_at <= ?');
+    binds.push(f.to);
+  }
+  if (f.source) {
+    conds.push('source = ?');
+    binds.push(f.source);
+  }
+  if (f.intent) {
+    conds.push('matched_intent = ?');
+    binds.push(f.intent);
+  }
+  if (f.q) {
+    conds.push("question LIKE ? ESCAPE '\\'");
+    binds.push(`%${f.q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
+  }
+  return { clause: conds.length ? `WHERE ${conds.join(' AND ')}` : '', binds };
+}
+
+async function handleAdminLogs(
+  request: Request,
+  env: Env,
+  url: URL,
+  origin: string | null
+): Promise<Response> {
+  const denied = requireAdmin(request, env, origin);
+  if (denied) return denied;
+
+  const filters = parseLogFilters(url);
+  if ('error' in filters) return json({ error: filters.error }, 400, origin);
 
   let limit = DEFAULT_LOG_LIMIT;
   const limitParam = url.searchParams.get('limit');
   if (limitParam !== null) {
     const parsed = Number.parseInt(limitParam, 10);
     if (!Number.isInteger(parsed) || parsed < 1 || parsed > MAX_LOG_LIMIT) {
-      return json(
-        { error: `"limit" must be an integer between 1 and ${MAX_LOG_LIMIT}.` },
-        400,
-        null
-      );
+      return json({ error: `"limit" must be an integer between 1 and ${MAX_LOG_LIMIT}.` }, 400, origin);
     }
     limit = parsed;
   }
 
+  let offset = 0;
+  const offsetParam = url.searchParams.get('offset');
+  if (offsetParam !== null) {
+    const parsed = Number.parseInt(offsetParam, 10);
+    if (!Number.isInteger(parsed) || parsed < 0 || parsed > MAX_LOG_OFFSET) {
+      return json({ error: `"offset" must be an integer between 0 and ${MAX_LOG_OFFSET}.` }, 400, origin);
+    }
+    offset = parsed;
+  }
+
+  const { clause, binds } = buildLogWhere(filters);
   try {
-    const { results } = await env.ASK_FREDRIK_DB.prepare(
-      `SELECT id, created_at, question, answer, source, matched_intent,
-              session_id, page, referrer, user_agent, ip_hash, model, latency_ms
-       FROM ask_fredrik_logs
-       ORDER BY created_at DESC
-       LIMIT ?1`
-    )
-      .bind(limit)
-      .all();
-    return json({ count: results.length, logs: results }, 200, null);
+    const db = env.ASK_FREDRIK_DB!;
+    const [page, totals] = await db.batch([
+      db
+        .prepare(
+          `SELECT id, created_at, question, answer, source, matched_intent,
+                  session_id, page, referrer, user_agent, ip_hash, model, latency_ms
+           FROM ask_fredrik_logs
+           ${clause}
+           ORDER BY created_at DESC
+           LIMIT ? OFFSET ?`
+        )
+        .bind(...binds, limit, offset),
+      db.prepare(`SELECT COUNT(*) AS total FROM ask_fredrik_logs ${clause}`).bind(...binds),
+    ]);
+    const total = Number((totals.results?.[0] as { total?: number } | undefined)?.total ?? 0);
+    return json({ count: page.results.length, total, limit, offset, logs: page.results }, 200, origin);
   } catch (err) {
     console.warn('ask_fredrik_logs query failed:', err);
-    return json({ error: 'Failed to read logs.' }, 500, null);
+    return json({ error: 'Failed to read logs.' }, 500, origin);
+  }
+}
+
+/**
+ * Aggregate metrics for the dashboard overview. Time-bucket counts (today /
+ * last 7d / last 30d) are fixed windows over all data — deliberately not
+ * filtered, so the summary cards are a stable "mission control" readout while
+ * the table below handles filtering. One D1 batch, all read-only aggregates.
+ */
+async function handleAdminStats(
+  request: Request,
+  env: Env,
+  origin: string | null
+): Promise<Response> {
+  const denied = requireAdmin(request, env, origin);
+  if (denied) return denied;
+
+  const now = Date.now();
+  const startOfUtcDay = new Date(now);
+  startOfUtcDay.setUTCHours(0, 0, 0, 0);
+  const todayIso = startOfUtcDay.toISOString();
+  const iso7 = new Date(now - 7 * DAY_MS).toISOString();
+  const iso30 = new Date(now - 30 * DAY_MS).toISOString();
+  const iso14 = new Date(now - 14 * DAY_MS).toISOString();
+
+  try {
+    const db = env.ASK_FREDRIK_DB!;
+    const [total, today, last7d, last30d, bySource, topIntents, daily] = await db.batch([
+      db.prepare('SELECT COUNT(*) AS c FROM ask_fredrik_logs'),
+      db.prepare('SELECT COUNT(*) AS c FROM ask_fredrik_logs WHERE created_at >= ?').bind(todayIso),
+      db.prepare('SELECT COUNT(*) AS c FROM ask_fredrik_logs WHERE created_at >= ?').bind(iso7),
+      db.prepare('SELECT COUNT(*) AS c FROM ask_fredrik_logs WHERE created_at >= ?').bind(iso30),
+      db.prepare('SELECT source, COUNT(*) AS c FROM ask_fredrik_logs GROUP BY source'),
+      db.prepare(
+        `SELECT matched_intent AS intent, COUNT(*) AS c
+         FROM ask_fredrik_logs
+         WHERE matched_intent IS NOT NULL AND matched_intent != ''
+         GROUP BY matched_intent ORDER BY c DESC LIMIT 10`
+      ),
+      db
+        .prepare(
+          `SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS c
+           FROM ask_fredrik_logs WHERE created_at >= ? GROUP BY day ORDER BY day`
+        )
+        .bind(iso14),
+    ]);
+
+    const count = (r: D1Result): number => Number((r.results?.[0] as { c?: number } | undefined)?.c ?? 0);
+    const bySourceMap: Record<string, number> = {};
+    for (const row of bySource.results as Array<{ source: string | null; c: number }>) {
+      bySourceMap[row.source ?? 'unknown'] = Number(row.c);
+    }
+
+    return json(
+      {
+        total: count(total),
+        today: count(today),
+        last7d: count(last7d),
+        last30d: count(last30d),
+        bySource: bySourceMap,
+        blocked: bySourceMap.blocked ?? 0,
+        fallback: bySourceMap.fallback ?? 0,
+        topIntents: (topIntents.results as Array<{ intent: string; c: number }>).map((r) => ({
+          intent: r.intent,
+          count: Number(r.c),
+        })),
+        daily: (daily.results as Array<{ day: string; c: number }>).map((r) => ({
+          day: r.day,
+          count: Number(r.c),
+        })),
+      },
+      200,
+      origin
+    );
+  } catch (err) {
+    console.warn('ask_fredrik_logs stats query failed:', err);
+    return json({ error: 'Failed to read stats.' }, 500, origin);
   }
 }
 
@@ -464,16 +652,39 @@ export default {
       return handleAsk(request, env, ctx, origin);
     }
 
-    if (url.pathname === '/admin/logs') {
-      if (request.method !== 'GET') {
-        return json({ error: 'Method not allowed. Use GET.' }, 405, null, { Allow: 'GET' });
+    if (url.pathname === '/admin/logs' || url.pathname === '/admin/stats') {
+      // Admin CORS: only the dashboard's own origins (GitHub Pages + localhost)
+      // ever receive CORS headers, and the ADMIN_TOKEN bearer is still required.
+      // Since auth is a header (not a cookie) there is no CSRF surface; a page on
+      // any other origin gets neither the headers nor the token.
+      const origin = resolveCorsOrigin(request);
+      if (request.method === 'OPTIONS') {
+        const headers = new Headers({
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+          'Access-Control-Max-Age': '86400',
+        });
+        if (origin !== null) {
+          headers.set('Access-Control-Allow-Origin', origin);
+          headers.append('Vary', 'Origin');
+        }
+        return new Response(null, { status: 204, headers });
       }
-      return handleAdminLogs(request, env, url);
+      if (request.method !== 'GET') {
+        return json({ error: 'Method not allowed. Use GET.' }, 405, origin, { Allow: 'GET' });
+      }
+      return url.pathname === '/admin/stats'
+        ? handleAdminStats(request, env, origin)
+        : handleAdminLogs(request, env, url, origin);
     }
 
     if (url.pathname === '/' && request.method === 'GET') {
       return json(
-        { status: 'ok', service: 'ask-fredrik-worker', endpoints: ['POST /ask', 'GET /admin/logs'] },
+        {
+          status: 'ok',
+          service: 'ask-fredrik-worker',
+          endpoints: ['POST /ask', 'GET /admin/logs', 'GET /admin/stats'],
+        },
         200,
         resolveCorsOrigin(request)
       );
