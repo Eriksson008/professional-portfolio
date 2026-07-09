@@ -558,15 +558,25 @@ async function handleAdminLogs(
 async function handleAdminStats(
   request: Request,
   env: Env,
+  url: URL,
   origin: string | null
 ): Promise<Response> {
   const denied = requireAdmin(request, env, origin);
   if (denied) return denied;
 
   const now = Date.now();
-  const startOfUtcDay = new Date(now);
-  startOfUtcDay.setUTCHours(0, 0, 0, 0);
-  const todayIso = startOfUtcDay.toISOString();
+  // "today" bound: the dashboard passes the viewer's local start-of-day (as UTC
+  // ISO) so the card matches its local-timezone "Today" table filter. Absent or
+  // malformed (e.g. an older/curl caller) → fall back to the UTC calendar day.
+  const todayParam = url.searchParams.get('today');
+  let todayIso: string;
+  if (todayParam !== null && ISO_DATE_RE.test(todayParam)) {
+    todayIso = todayParam;
+  } else {
+    const startOfUtcDay = new Date(now);
+    startOfUtcDay.setUTCHours(0, 0, 0, 0);
+    todayIso = startOfUtcDay.toISOString();
+  }
   const iso7 = new Date(now - 7 * DAY_MS).toISOString();
   const iso30 = new Date(now - 30 * DAY_MS).toISOString();
   const iso14 = new Date(now - 14 * DAY_MS).toISOString();
@@ -674,7 +684,7 @@ export default {
         return json({ error: 'Method not allowed. Use GET.' }, 405, origin, { Allow: 'GET' });
       }
       return url.pathname === '/admin/stats'
-        ? handleAdminStats(request, env, origin)
+        ? handleAdminStats(request, env, url, origin)
         : handleAdminLogs(request, env, url, origin);
     }
 

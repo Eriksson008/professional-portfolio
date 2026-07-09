@@ -57,6 +57,30 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-09 — Dashboard time-filter correctness pass (local-timezone anchoring) + first
+  frontend test harness (repo review, branch `prompts-dashboard`).** Review of the admin
+  dashboard surfaced one real bug class: the table renders `created_at` in the **viewer's local
+  timezone** (`toLocaleString`), but the **Today** and **Custom** range filters were computing
+  day boundaries in **UTC** (`setUTCHours`, `…T00:00:00Z`). For the user (UTC+2) that shifted
+  ranges by the offset — a prompt shown as "today" locally could fall outside the "Today" filter
+  (off-by-one near midnight). Fix: `src/admin/dateRanges.ts` refactored into a documented pure
+  utility (`getDateRangeForFilter(query, now?)`, `normalizeDateRange`, `startOfLocalDayIso`,
+  `formatDashboardDate`) that anchors `today`/`custom` to the **local calendar day** and
+  serializes to UTC for the query (storage/query stay UTC; rolling 7d/30d unchanged —
+  timezone-independent). Custom `to` is inclusive of the whole local day; inverted custom ranges
+  are swapped; garbage date input is dropped instead of throwing. The **Today summary card** now
+  matches the Today filter — the dashboard passes its local start-of-day to
+  `GET /admin/stats?today=<iso>`; the Worker (`handleAdminStats`) reads it additively and falls
+  back to the UTC day when absent/malformed (backward-compatible with curl/older callers, no
+  redeploy required for the rest to work). Table time cells gained a `title="<iso> (UTC)"` for
+  unambiguous reference. Added the repo's **first frontend test** (`src/admin/dateRanges.test.ts`,
+  `npm test` via `node --test`, zero-dependency, timezone-independent assertions) — 11 checks;
+  test files excluded from the app `tsc` build. No public-portfolio changes; admin bundle stays
+  code-split (~5 KB gz). Verified: 11 date tests + lint + worker `tsc` + 332 worker tests + full
+  build all green. **Open:** the Worker must be redeployed (`wrangler deploy`) for the stats
+  `today` param to take effect; the 14-day sparkline still buckets by UTC day (cosmetic, noted in
+  `docs/ask-fredrik-dashboard.md`).
+
 - **2026-07-07 — Private Ask-Fredrik admin dashboard (branch `prompts-dashboard`, user-directed
   brief).** Internal "mission control" analytics panel to see what visitors prompt the Ask Fredrik
   widget. Shipped as a **separate Vite entry** (`admin/ask-fredrik/index.html` + `src/admin/**`) at

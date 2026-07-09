@@ -98,6 +98,26 @@ The dashboard reads the existing `ask_fredrik_logs` table (`cloudflare/ask-fredr
 The table is FIFO-capped (~1000 rows, `ASK_FREDRIK_LOG_MAX_ROWS`), so "all time" means the most
 recent ~1000 prompts.
 
+## Time zones
+
+Timestamps are stored and queried in **UTC** (`created_at` is an ISO8601 instant) — that never
+changes. Everything user-facing is anchored to the **viewer's local timezone**, so the filters
+line up with the times shown in the table:
+
+- The table renders each `created_at` in local time (`formatDashboardDate`); hover a row's time to
+  see the exact raw UTC instant.
+- **Today** and **Custom** ranges are computed from the local calendar day and then serialized to
+  UTC for the query (`getDateRangeForFilter` in `src/admin/dateRanges.ts`). A custom `to = <day>`
+  is inclusive of that whole local day. This avoids the off-by-one where a prompt shown as "today"
+  in local time fell outside a UTC-day filter.
+- **Last 7 / 30 days** are rolling `N×24h` windows (timezone-independent).
+- The **Today** summary card matches the Today filter: the dashboard passes its local start-of-day
+  to `GET /admin/stats?today=<iso>` (older Workers ignore the param and fall back to the UTC day).
+- Known minor limitation: the 14-day volume sparkline still buckets by UTC calendar day, so a bar
+  boundary can be off by the UTC offset near midnight. It's a trend indicator only.
+
+The range logic is covered by `src/admin/dateRanges.test.ts` (`npm test`).
+
 ## Privacy
 
 - **Display redaction:** the dashboard masks obvious emails → `[email]`, phone-like runs →
