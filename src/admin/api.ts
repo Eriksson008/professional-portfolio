@@ -1,5 +1,5 @@
 import type { LogQuery, LogsResponse, StatsResponse } from './types';
-import { resolveRange } from './dateRanges';
+import { getDateRangeForFilter, startOfLocalDayIso } from './dateRanges';
 
 /**
  * Admin API base — the Ask-Fredrik Worker origin. Derived from the public
@@ -60,14 +60,26 @@ async function adminFetch<T>(path: string, params: URLSearchParams, token: strin
   return (await res.json()) as T;
 }
 
+/**
+ * Anchor the stats "Today" count to the viewer's local calendar day so the
+ * summary card matches the "Today" table filter (both local-day; storage stays
+ * UTC). Older Workers that predate this param simply ignore it and fall back to
+ * their UTC-day count — backward-compatible either way.
+ */
+export function buildStatsParams(now: number = Date.now()): URLSearchParams {
+  const params = new URLSearchParams();
+  params.set('today', startOfLocalDayIso(now));
+  return params;
+}
+
 export function fetchStats(token: string): Promise<StatsResponse> {
-  return adminFetch<StatsResponse>('/admin/stats', new URLSearchParams(), token);
+  return adminFetch<StatsResponse>('/admin/stats', buildStatsParams(), token);
 }
 
 /** Build the /admin/logs query params from the current filter state. */
 export function buildLogParams(query: LogQuery): URLSearchParams {
   const params = new URLSearchParams();
-  const { from, to } = resolveRange(query);
+  const { from, to } = getDateRangeForFilter(query);
   if (from) params.set('from', from);
   if (to) params.set('to', to);
   if (query.source) params.set('source', query.source);

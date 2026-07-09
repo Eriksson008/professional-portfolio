@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { LogRecord } from '../types';
 import { redact } from '../redact';
-import { formatTimestamp } from '../dateRanges';
+import { formatDashboardDate } from '../dateRanges';
 
 /** Copy-to-clipboard button with a brief confirmation state. */
 function CopyButton({ text }: { text: string }) {
@@ -36,8 +36,8 @@ function Row({ log }: { log: LogRecord }) {
   const blocked = log.source === 'blocked';
   return (
     <tr className={blocked ? 'is-blocked' : undefined}>
-      <td data-label="Time" className="admin-td-time">
-        {formatTimestamp(log.created_at)}
+      <td data-label="Time" className="admin-td-time" title={`${log.created_at} (UTC)`}>
+        {formatDashboardDate(log.created_at)}
       </td>
       <td data-label="Prompt" className="admin-td-prompt">
         <span className="admin-prompt-text">{question}</span>
