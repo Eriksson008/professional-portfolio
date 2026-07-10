@@ -653,36 +653,10 @@ site exposes only honest, defensible, public-safe content.
   hero).
 - **Media follow-ups:** add a webm encode next to the mp4 for better compression
   (`ffmpeg -i astronaut-video.mp4 -c:v libvpx-vp9 -crf 38 -b:v 0 -an astronaut-video.webm`).
-- **Finish going live:** make the GitHub repo public and set Settings → Pages → Source =
-  "GitHub Actions" (the workflow handles the rest on push to `main`).
-- After first deploy, verify the live site: asset paths, résumé download, and the OG preview
-  (paste the URL into LinkedIn Post Inspector / X card validator).
-- **Ask Fredrik — go live:** (1) ~~create the production D1~~ **done 2026-07-06**
-  (`ask-fredrik-db`, id `20967ca0-…`, region ENAM, schema applied `--remote` and
-  verified); (2) ~~verify the Cloudflare account email~~ **done 2026-07-06**;
-  (3) ~~set secrets~~ **done 2026-07-06** — `ADMIN_TOKEN` + `IP_HASH_SALT` uploaded to
-  the (draft, not yet deployed) `ask-fredrik-worker`; the admin token value is with the
-  user, only its hash lives at Cloudflare (rotate anytime with `wrangler secret put`);
-  (4) ~~implement Workers AI + matcher + rate limiting~~ **done 2026-07-06 (v4)** —
-  code-complete and runtime-verified except the live AI call itself;
-  (5) ~~register the workers.dev subdomain~~ **done 2026-07-06** (user, Cloudflare dash);
-  (6) ~~enable AI + deploy~~ **done 2026-07-06** — live at
-  `https://ask-fredrik-worker.eriksson-fredrik08.workers.dev` with
-  `ASK_FREDRIK_AI_ENABLED="true"`. First deploy surfaced two production-only fixes:
-  the original default model was **deprecated by Cloudflare** (error 5028) → switched to
-  `@cf/meta/llama-3.1-8b-instruct-fp8` (config var, no code change), and cold-start AI
-  calls exceeded 6 s → `ASK_FREDRIK_AI_TIMEOUT_MS` raised to `"10000"` (warm calls run
-  1.4–4 s). Verified in production: static/blocked/ai/fallback sources + model +
-  latency all logged to D1, non-null `ip_hash` at the edge, admin auth, CORS preflight
-  for the Pages origin, spoof origins rejected;
-  (7) ~~set the repo Actions variable~~ **done 2026-07-06** — `VITE_ASK_FREDRIK_API_URL`
-  = the Worker's `/ask` URL (via `gh variable set`); (8) ~~merge `ask-fredrik-v1` →
-  `main`~~ **done 2026-07-06** — merged (one PROJECT_CONTEXT conflict, resolved by
-  dropping main's duplicate entries) and deployed via the Pages workflow (run green).
-  Live-site verified: new CSS hash served, all three finale media files answer range
-  requests (206), and the deployed bundle contains both the finale scrub sources and
-  the Worker URL — **Ask Fredrik and the astronaut finale are now live** at
-  https://eriksson008.github.io/professional-portfolio/.
+- Validate the live OG social preview and confirm the public résumé download link.
+- Add the planned Cloudflare WAF rate-limiting rule for `/ask`; the Worker's in-memory limiter is
+  best-effort per isolate.
+- Consider Cloudflare Web Analytics if visitor-level insight is useful alongside the D1 question log.
 - Keep the site coherent with the résumé whenever a shared fact changes.
 - Keep tone conservative and enterprise-friendly; metrics git-verifiable only.
 
