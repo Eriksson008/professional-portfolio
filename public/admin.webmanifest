@@ -1,0 +1,16 @@
+{
+  "name": "Portfolio Admin",
+  "short_name": "Admin",
+  "description": "Private portfolio administration dashboard.",
+  "start_url": "admin/ask-fredrik/",
+  "scope": "admin/ask-fredrik/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    { "src": "admin-icons/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "admin-icons/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "admin-icons/icon-maskable-192.png", "type": "image/png", "sizes": "192x192", "purpose": "maskable" },
+    { "src": "admin-icons/icon-maskable-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}
