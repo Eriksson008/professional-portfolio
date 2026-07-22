@@ -1,8 +1,31 @@
 # AGENTS.md
 
-This file must stay aligned with CLAUDE.md so Codex and Claude Code follow the same project workflow. When editing this file, update CLAUDE.md in the same change.
+Canonical, cross-tool operating guide for **Professional Portfolio**. Both Claude Code (via `CLAUDE.md`, which imports this file with `@AGENTS.md`) and Codex (which reads `AGENTS.md` natively) follow it. **Edit this file only** — do not copy it back into `CLAUDE.md`.
 
-Guidance for Codex working in this repo.
+<!-- ai-workflow:default-start (managed by ai-workflows/update-repo-workflow; edit the template, not here) -->
+## Default agent workflow
+
+This is the standing process for both Claude Code and Codex in this repo — it applies to every task
+**without needing to be restated in the prompt**. Scale effort to the task (see the tiers below).
+
+1. Understand the requested **outcome** first, then inspect the **relevant** implementation.
+2. Read the repo docs and any active `tasks/` context relevant to the request.
+3. Do **not** scan the whole repository when targeted inspection is enough.
+4. Delegate substantial or cross-cutting investigation to a **read-only explorer** agent; skip subagents for trivial changes.
+5. For broad or high-risk changes, write a **brief plan** before editing.
+6. **One implementation owner** per feature/branch; never let two agents edit overlapping files; use an isolated **worktree** only for genuinely independent work.
+7. Make the **smallest defensible change** that satisfies the request; preserve unrelated user work.
+8. Run focused checks while implementing; run the repo's **supported verification** (`scripts/verify.ps1` / `.sh`) before claiming done.
+9. Have an **independent reviewer** (the `reviewer` agent, or Codex `codex review`) check meaningful changes; use **browser validation** for meaningful UI behavior changes.
+10. Compare the result to the requested outcome and acceptance criteria. Report failed/skipped/unavailable checks honestly — **never claim a check passed unless it actually ran**.
+11. Do **not** commit, push, deploy, migrate, or mutate external systems unless explicitly authorized. Protect secrets and private data.
+
+### Effort tiers
+
+- **Trivial** (typo, tiny text/style fix, one obvious test): inspect the file, make the change, run a targeted check. No subagents.
+- **Normal** (contained feature, bug fix, focused refactor): focused exploration → one implementation owner → repo verification → independent review.
+- **Complex / high-risk** (architecture, auth, migrations, infra, cross-app or sensitive-data changes): parallel read-only investigation where useful → written plan → one owner per isolated workstream → targeted + full verification → specialist review → browser/integration evidence where applicable → explicit rollback/risk consideration.
+<!-- ai-workflow:default-end -->
 
 ## What this is
 
@@ -44,6 +67,33 @@ too**; keep the two in sync when a shared fact changes.
   values ad hoc. Watch selector specificity in `src/styles/app.css`.
 - Accessibility floor: semantic HTML, visible keyboard focus, `prefers-reduced-motion` respected.
 - Run `npm run lint` and `npm run build` before claiming code or build-affecting work is done.
+
+## Verification
+
+Run checks when the task touches code, content, build config, or assets (dependencies already
+installed — do **not** reinstall):
+
+| Check | Command | Notes |
+| --- | --- | --- |
+| lint | `npm run lint` | `eslint .` |
+| test | `npm test` | `node --test "src/**/*.test.ts"` |
+| build | `npm run build` | `tsc -b && vite build` (build also typechecks) |
+| format | `npm run format` | prettier (optional) |
+
+Or run the supported gates at once: `pwsh scripts/verify.ps1` / `bash scripts/verify.sh`. The
+companion Cloudflare Worker in `cloudflare/ask-fredrik-worker/` has its own checks (`npm run check`,
+`npm test`) — run those when the Worker changes. The verify script **never deploys**.
+
+## Agent workflow & coordination
+
+- **Task packets:** copy `tasks/TEMPLATE.md` for any non-trivial change.
+- **Shared playbooks:** `../.agents/skills/` (workspace-shared) — `implement-feature`,
+  `investigate-bug`, `verify-change`, `review-change`, `update-project-status`.
+- **Claude Code subagents:** `.claude/agents/explorer.md` (read-only recon) and
+  `.claude/agents/reviewer.md` (independent pre-merge review). **Codex** uses `codex review`.
+- **Coordination rules:** one implementation owner per feature/branch; parallelize read-only
+  investigation *before* writing; the reviewer must not be the author; show real command output
+  before claiming a check passed; report skipped/unavailable checks explicitly.
 
 ## Privacy & public-safe content rules
 
