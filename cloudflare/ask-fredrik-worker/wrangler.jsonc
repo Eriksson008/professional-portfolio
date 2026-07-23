@@ -22,6 +22,13 @@
   // does nothing — AI runs only when ASK_FREDRIK_AI_ENABLED below is "true".
   "ai": { "binding": "AI" },
 
+  // The private admin dashboard, served by this Worker at /admin/ask-fredrik/.
+  // Built (and gitignored) by the portfolio root's `npm run build:admin`;
+  // requests that match no asset (e.g. /ask, /admin/logs) fall through to the
+  // Worker. The /admin paths are gated by Cloudflare Access at the edge AND
+  // re-validated in-Worker (src/access.ts).
+  "assets": { "directory": "./public" },
+
   // Workers Logs in the Cloudflare dashboard (Workers & Pages →
   // ask-fredrik-worker → Logs): invocation logs + console.warn output (AI
   // failures, D1 insert failures). Included on the Free plan. User questions
@@ -35,7 +42,16 @@
   // defaults in code when a var is unset or unparseable. Only the literal
   // string "true" enables AI ("false" or unset = curated answers only, no
   // model calls). Enabled 2026-07-06 at first deploy. See README.md.
+  //
+  // ACCESS_TEAM_DOMAIN + ACCESS_APP_AUD identify the Cloudflare Access
+  // application protecting /admin (not secrets — the JWT is what proves
+  // identity). Fill them in after creating the Access app (README ›
+  // "Cloudflare Access setup"); while empty, every admin endpoint fails
+  // closed with 503. The admin email allowlist is the ADMIN_ALLOWED_EMAILS
+  // *secret* (wrangler secret put), never a var here.
   "vars": {
+    "ACCESS_TEAM_DOMAIN": "https://fredrikeriksson.cloudflareaccess.com",
+    "ACCESS_APP_AUD": "3b4b8c76a02094b48bb0d9059d0f9b3c3a529ef82e9a6a5a04aec751eb0f3210",
     "ASK_FREDRIK_AI_ENABLED": "true",
     "ASK_FREDRIK_MODEL": "@cf/meta/llama-3.1-8b-instruct-fp8",
     "ASK_FREDRIK_AI_TIMEOUT_MS": "10000",

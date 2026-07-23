@@ -9,9 +9,11 @@ interface ImportMetaEnv {
   readonly VITE_ASK_FREDRIK_API_URL?: string;
 
   /**
-   * Optional override for the admin dashboard's API origin. Defaults to the
-   * origin of VITE_ASK_FREDRIK_API_URL, so it's rarely needed. Public URL
-   * only — the admin token is entered at runtime, never built in.
+   * Optional override for the admin dashboard's API origin — used for local
+   * dev (Vite on :8790 → wrangler dev on :8787). Falls back to the origin of
+   * VITE_ASK_FREDRIK_API_URL, then to '' (same-origin: in production the
+   * Worker serves the dashboard itself behind Cloudflare Access). Public URL
+   * only — no secret is ever built in.
    */
   readonly VITE_ASK_FREDRIK_ADMIN_URL?: string;
 }

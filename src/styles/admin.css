@@ -85,7 +85,7 @@ button {
   outline-offset: 2px;
 }
 
-/* ---------- Token gate ---------- */
+/* ---------- Auth screens (checking / sign-in / forbidden / error) ---------- */
 .admin-gate {
   min-height: 100vh;
   display: grid;
@@ -123,26 +123,6 @@ button {
   color: var(--muted);
   font-size: 0.88rem;
 }
-.admin-gate-input {
-  width: 100%;
-  padding: 0.7rem 0.9rem;
-  background: var(--ink-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: var(--font-mono);
-  letter-spacing: 0.04em;
-}
-.admin-gate-input:focus {
-  outline: none;
-  border-color: var(--ice-line);
-}
-.admin-gate-error {
-  margin: 0;
-  color: #ffb4b4;
-  font-size: 0.82rem;
-}
-
 /* ---------- Shell + header ---------- */
 .admin-shell {
   max-width: 1220px;
@@ -172,6 +152,37 @@ button {
   font-size: clamp(1.5rem, 4vw, 2.1rem);
   font-weight: 600;
   letter-spacing: -0.01em;
+}
+
+/* Signed-in identity, kept unobtrusive next to the title. */
+.admin-id {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.admin-id-email {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--silver-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-id-badge {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ice);
+  border: 1px solid var(--ice-line);
+  background: var(--ice-wash);
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.55rem;
+  white-space: nowrap;
+}
+.admin-id .admin-btn {
+  text-decoration: none;
 }
 
 /* ---------- Metric cards ---------- */
@@ -234,6 +245,12 @@ button {
   margin: 0;
   color: var(--faint);
   font-size: 0.85rem;
+}
+.admin-panel-note {
+  margin: 0.8rem 0 0;
+  color: var(--faint);
+  font-size: 0.72rem;
+  line-height: 1.45;
 }
 
 /* Source bars */

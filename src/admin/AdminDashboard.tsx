@@ -1,20 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { LogQuery, LogsResponse, StatsResponse } from './types';
-import {
-  ADMIN_BASE,
-  AdminApiError,
-  PAGE_SIZE,
-  fetchAllLogs,
-  fetchLogs,
-  fetchStats,
-} from './api';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import type { LogQuery, LogsResponse, MeResponse, StatsResponse } from './types';
+import { ADMIN_BASE, PAGE_SIZE, fetchAllLogs, fetchLogs, fetchMe, fetchStats } from './api';
+import { classifyAuthFailure } from './authErrors';
 import { logsToCsv, downloadCsv } from './csv';
-import { TokenGate } from './components/TokenGate';
 import { MetricCards } from './components/MetricCards';
 import { Filters } from './components/Filters';
 import { PromptsTable } from './components/PromptsTable';
-
-const TOKEN_KEY = 'ask_fredrik_admin_token';
 
 const DEFAULT_QUERY: LogQuery = {
   range: '7d',
@@ -26,35 +17,106 @@ const DEFAULT_QUERY: LogQuery = {
   page: 0,
 };
 
-/** Top-level: token gate → dashboard. Token lives in sessionStorage only. */
-export function AdminDashboard() {
-  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem(TOKEN_KEY));
-  const [authError, setAuthError] = useState<string | null>(null);
+type AuthPhase =
+  | { phase: 'checking' }
+  | { phase: 'ready'; identity: MeResponse }
+  | { phase: 'unauthorized' }
+  | { phase: 'forbidden' }
+  | { phase: 'error'; message: string };
 
-  const signOut = useCallback((message?: string) => {
-    sessionStorage.removeItem(TOKEN_KEY);
-    setToken(null);
-    setAuthError(message ?? null);
+/**
+ * Top-level: authenticate via GET /admin/me, then render the dashboard.
+ * There is no login form and nothing to store — in production the page and
+ * API are Cloudflare-Access-protected on the Worker's own origin, so the
+ * browser's Access session is the credential. See docs/ask-fredrik-dashboard.md.
+ */
+export function AdminDashboard() {
+  const [auth, setAuth] = useState<AuthPhase>({ phase: 'checking' });
+
+  const authFailed = useCallback((e: unknown) => {
+    setAuth(classifyAuthFailure(e));
   }, []);
 
-  if (!token) {
-    return (
-      <TokenGate
-        error={authError}
-        configured={ADMIN_BASE !== null}
-        onSubmit={(t) => {
-          sessionStorage.setItem(TOKEN_KEY, t);
-          setAuthError(null);
-          setToken(t);
-        }}
-      />
-    );
-  }
+  const checkAuth = useCallback(() => {
+    setAuth({ phase: 'checking' });
+    fetchMe()
+      .then((identity) => setAuth({ phase: 'ready', identity }))
+      .catch(authFailed);
+  }, [authFailed]);
 
-  return <Dashboard token={token} onSignOut={signOut} />;
+  useEffect(checkAuth, [checkAuth]);
+
+  switch (auth.phase) {
+    case 'checking':
+      return (
+        <AuthScreen title="Checking access…">
+          Verifying your Cloudflare Access session with the Worker.
+        </AuthScreen>
+      );
+    case 'unauthorized':
+      return (
+        <AuthScreen
+          title="Sign-in required"
+          actionLabel="Sign in"
+          onAction={() => window.location.reload()}
+        >
+          This console is protected by Cloudflare Access. Reloading the page starts the
+          sign-in flow; you'll land back here once you're authenticated.
+        </AuthScreen>
+      );
+    case 'forbidden':
+      return (
+        <AuthScreen title="Not authorized">
+          You are signed in, but this account is not on the admin allowlist for this
+          console. If that's unexpected, check the Worker's ADMIN_ALLOWED_EMAILS secret.
+        </AuthScreen>
+      );
+    case 'error':
+      return (
+        <AuthScreen title="Something went wrong" actionLabel="Retry" onAction={checkAuth}>
+          {auth.message}
+        </AuthScreen>
+      );
+    case 'ready':
+      return <Dashboard identity={auth.identity} onAuthFailed={authFailed} />;
+  }
 }
 
-function Dashboard({ token, onSignOut }: { token: string; onSignOut: (message?: string) => void }) {
+/** Full-screen card for the pre-dashboard states (checking / 401 / 403 / error). */
+function AuthScreen({
+  title,
+  children,
+  actionLabel,
+  onAction,
+}: {
+  title: string;
+  children: ReactNode;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div className="admin-gate">
+      <div className="admin-gate-card">
+        <p className="admin-gate-kicker">Ask&nbsp;Fredrik · Mission Control</p>
+        <h1 className="admin-gate-title">{title}</h1>
+        <p className="admin-gate-sub">{children}</p>
+        {actionLabel && onAction && (
+          <button type="button" className="admin-btn admin-btn--primary" onClick={onAction}>
+            {actionLabel}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Dashboard({
+  identity,
+  onAuthFailed,
+}: {
+  identity: MeResponse;
+  onAuthFailed: (e: unknown) => void;
+}) {
   const [query, setQuery] = useState<LogQuery>(DEFAULT_QUERY);
   const [debounced, setDebounced] = useState<LogQuery>(DEFAULT_QUERY);
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -66,13 +128,16 @@ function Dashboard({ token, onSignOut }: { token: string; onSignOut: (message?: 
 
   const handleErr = useCallback(
     (e: unknown) => {
-      if (e instanceof AdminApiError && e.status === 401) {
-        onSignOut('Invalid or expired admin token.');
+      // A mid-session 401/403 (expired Access session, allowlist change) drops
+      // the whole dashboard back to the matching auth screen.
+      const failure = classifyAuthFailure(e);
+      if (failure.phase !== 'error') {
+        onAuthFailed(e);
         return;
       }
-      setError(e instanceof Error ? e.message : 'Something went wrong.');
+      setError(failure.message);
     },
-    [onSignOut]
+    [onAuthFailed]
   );
 
   // Debounce filter changes (chiefly the search box) before hitting the API.
@@ -81,23 +146,23 @@ function Dashboard({ token, onSignOut }: { token: string; onSignOut: (message?: 
     return () => clearTimeout(t);
   }, [query]);
 
-  // Overview stats: load once per token / manual refresh.
+  // Overview stats: load once per mount / manual refresh.
   useEffect(() => {
     let cancelled = false;
-    fetchStats(token)
+    fetchStats()
       .then((s) => !cancelled && setStats(s))
       .catch((e) => !cancelled && handleErr(e));
     return () => {
       cancelled = true;
     };
-  }, [token, refreshTick, handleErr]);
+  }, [refreshTick, handleErr]);
 
   // Recent-prompts page: reload on any filter/pagination change.
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetchLogs(debounced, token)
+    fetchLogs(debounced)
       .then((r) => {
         if (cancelled) return;
         setLogs(r);
@@ -111,7 +176,7 @@ function Dashboard({ token, onSignOut }: { token: string; onSignOut: (message?: 
     return () => {
       cancelled = true;
     };
-  }, [debounced, token, refreshTick, handleErr]);
+  }, [debounced, refreshTick, handleErr]);
 
   const patchQuery = useCallback((patch: Partial<LogQuery>) => {
     setQuery((q) => {
@@ -126,14 +191,14 @@ function Dashboard({ token, onSignOut }: { token: string; onSignOut: (message?: 
   const handleExport = useCallback(async () => {
     setExporting(true);
     try {
-      const rows = await fetchAllLogs(debounced, token);
+      const rows = await fetchAllLogs(debounced);
       downloadCsv(logsToCsv(rows), `ask-fredrik-${new Date().toISOString().slice(0, 10)}.csv`);
     } catch (e) {
       handleErr(e);
     } finally {
       setExporting(false);
     }
-  }, [debounced, token, handleErr]);
+  }, [debounced, handleErr]);
 
   const intents = useMemo(() => {
     const set = new Set<string>(stats?.topIntents.map((i) => i.intent) ?? []);
@@ -153,9 +218,18 @@ function Dashboard({ token, onSignOut }: { token: string; onSignOut: (message?: 
           <p className="admin-kicker">Ask&nbsp;Fredrik</p>
           <h1 className="admin-title">Prompt Mission Control</h1>
         </div>
-        <button type="button" className="admin-btn" onClick={() => onSignOut()}>
-          Sign out
-        </button>
+        <div className="admin-id">
+          <span className="admin-id-email" title="Verified by the Worker from your Cloudflare Access identity">
+            {identity.email}
+          </span>
+          {identity.authMode === 'dev' ? (
+            <span className="admin-id-badge">dev session</span>
+          ) : (
+            <a className="admin-btn" href={`${ADMIN_BASE}/cdn-cgi/access/logout`}>
+              Sign out
+            </a>
+          )}
+        </div>
       </header>
 
       {stats && <MetricCards stats={stats} />}

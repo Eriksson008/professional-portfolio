@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Ask Fredrik — Admin</title>
-    <!-- Private admin panel: keep it out of search indexes entirely. Access is
-         gated server-side by the Worker's ADMIN_TOKEN — this page only shows a
-         token prompt to anyone without it. -->
+    <!-- Private admin panel: keep it out of search indexes entirely. In
+         production this page is served by the Ask-Fredrik Worker itself
+         (npm run build:admin) behind Cloudflare Access, and the Worker
+         re-validates the Access identity on every API call. -->
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#000000" />
     <meta name="color-scheme" content="dark" />

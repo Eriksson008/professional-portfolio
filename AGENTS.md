@@ -131,6 +131,21 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
   for visitor-level insight to complement the D1 question log.
 
 ### Done
+- [x] **Cloudflare Access setup completed + admin live on the Worker — 2026-07-23.** Access
+  enabled on the production `workers.dev` URL (Domains → Restricted), app path-scoped to
+  `/admin` (destination `ask-fredrik-worker.eriksson-fredrik08.workers.dev/admin`), Allow
+  policy = admin email via one-time PIN; `ACCESS_TEAM_DOMAIN`/`ACCESS_APP_AUD` filled,
+  `ADMIN_ALLOWED_EMAILS` secret set, `ADMIN_TOKEN` deleted, `build:admin` + deploy done.
+  Live-verified: `/ask` public with correct CORS, `/admin/*` 302s to Access, dashboard loads
+  signed-in end-to-end. Gotcha for the future: `ACCESS_TEAM_DOMAIN` must include the
+  `https://` scheme (it is compared to the JWT `iss` and used to build the JWKS URL) — the
+  bare hostname fails closed with 401.
+- [x] **Admin auth moved to Cloudflare Access — 2026-07-23.** Manual `ADMIN_TOKEN` paste
+  retired: the Worker validates the Access JWT in-Worker (`src/access.ts`, WebCrypto, zero
+  deps) against an email-allowlist secret, `GET /admin/me` added, and the admin dashboard now
+  deploys as Worker static assets (`npm run build:admin`) instead of shipping in the Pages
+  artifact. Loopback-only dev auth mode; 49 new worker tests. See
+  `docs/ask-fredrik-dashboard.md` + the TODO above for the remaining dashboard-side config.
 - [x] **Live on GitHub Pages — 2026-07-06.** Repo public, Pages source = GitHub Actions,
   `deploy.yml` publishes on every push to `main`; live-site verified (asset hashes, finale
   media range requests, Ask Fredrik Worker URL in the bundle). Live at

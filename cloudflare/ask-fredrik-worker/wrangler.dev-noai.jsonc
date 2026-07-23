@@ -14,6 +14,7 @@
       "database_id": "20967ca0-cf71-4498-afed-a44368a31000"
     }
   ],
+  "assets": { "directory": "./public" },
   "vars": {
     "ASK_FREDRIK_AI_ENABLED": "false",
     "ASK_FREDRIK_MODEL": "@cf/meta/llama-3.1-8b-instruct-fp8",

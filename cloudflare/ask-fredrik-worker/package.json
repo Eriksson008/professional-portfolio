@@ -5,11 +5,14 @@
   "description": "Cloudflare Worker backend for the Ask Fredrik portfolio assistant (Workers Free, Workers-AI-ready).",
   "type": "module",
   "scripts": {
+    "predev": "node -e \"require('node:fs').mkdirSync('public',{recursive:true})\"",
     "dev": "wrangler dev",
+    "predev:noai": "node -e \"require('node:fs').mkdirSync('public',{recursive:true})\"",
     "dev:noai": "wrangler dev --config wrangler.dev-noai.jsonc",
+    "predeploy": "node -e \"require('node:fs').mkdirSync('public',{recursive:true})\"",
     "deploy": "wrangler deploy",
     "check": "tsc --noEmit",
-    "test": "node src/tests/knowledge.test.ts"
+    "test": "node src/tests/knowledge.test.ts && node src/tests/admin-auth.test.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250109.0",

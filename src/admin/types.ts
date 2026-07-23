@@ -42,8 +42,19 @@ export interface StatsResponse {
   bySource: Partial<Record<AskSource | 'unknown', number>>;
   blocked: number;
   fallback: number;
+  /** Mean stored latency_ms over the log window / last 7 days. null when no
+   *  row carries a latency; optional so an older Worker still renders. */
+  avgLatencyMs?: number | null;
+  avgLatencyMs7d?: number | null;
   topIntents: Array<{ intent: string; count: number }>;
   daily: Array<{ day: string; count: number }>;
+}
+
+/** GET /admin/me — the authenticated administrator, as verified by the Worker
+ *  (Cloudflare Access assertion, or the explicit local dev mode). */
+export interface MeResponse {
+  email: string;
+  authMode: 'access' | 'dev';
 }
 
 /** Named time ranges for the selector; `custom` uses the from/to date inputs. */

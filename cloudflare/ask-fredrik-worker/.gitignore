@@ -1,5 +1,8 @@
 # Wrangler local state + build cache
 .wrangler/
 
-# Local-only Worker env vars (none needed in v1, but never commit them)
+# Local-only Worker env vars (dev-auth mode lives here, never in wrangler.jsonc)
 .dev.vars
+
+# Admin dashboard assets — built by the portfolio root's `npm run build:admin`
+public/

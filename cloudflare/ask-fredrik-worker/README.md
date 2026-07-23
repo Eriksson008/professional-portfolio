@@ -38,22 +38,31 @@ Content-Type: application/json
 → 400 { "error": "..." }   invalid JSON, missing/empty/too-long question
 → 405 { "error": "..." }   non-POST on /ask
 
+GET /admin/me                            Cloudflare Access identity (no D1 needed)
+
+→ 200 { "email": "...", "authMode": "access" | "dev" }
+→ 401 { "error": "Unauthorized." }       missing/invalid Access assertion
+→ 403 { "error": "Forbidden." }          valid identity, not on the admin allowlist
+→ 503 { "error": "..." }                 Access env config missing (fail closed)
+
 GET /admin/logs[?limit=&offset=&from=&to=&source=&intent=&q=]   (limit default 100, max 100)
-Authorization: Bearer <ADMIN_TOKEN>
+Cloudflare Access (validated in-Worker)
 
 → 200 { "count": n, "total": N, "limit": l, "offset": o, "logs": [...] }
 → 400 { "error": "..." }                 bad filter/limit/offset
-→ 401 { "error": "Unauthorized." }       missing/wrong token
-→ 503 { "error": "..." }                 ADMIN_TOKEN or D1 not configured
+→ 401 / 403 / 503                        as for /admin/me (503 also when D1 is missing)
 
 GET /admin/stats                         aggregate overview metrics
-Authorization: Bearer <ADMIN_TOKEN>
+Cloudflare Access (validated in-Worker)
 
 → 200 { total, today, last7d, last30d, bySource, blocked, fallback,
+        avgLatencyMs, avgLatencyMs7d,    // mean stored latency_ms; null when unrecorded
         topIntents:[{intent,count}], daily:[{day,count}] }
 ```
 
-The two `/admin/*` endpoints back the private [Ask-Fredrik dashboard](../../docs/ask-fredrik-dashboard.md).
+The `/admin/*` endpoints back the private [Ask-Fredrik dashboard](../../docs/ask-fredrik-dashboard.md),
+which this Worker also **serves** as static assets at `/admin/ask-fredrik/` (built into
+`./public` by the portfolio root's `npm run build:admin` — see Deploy below).
 `/admin/logs` filters: `from`/`to` (ISO date/datetime bounds on `created_at`), `source`
 (one of the five sources), `intent` (exact `matched_intent`), `q` (LIKE search on the
 question), plus `limit`/`offset` pagination. All values are bound parameters. With no
@@ -64,17 +73,24 @@ Rate-limited and blocked questions still return HTTP 200 with a polite canned an
 widget renders it like any other reply. Responses never contain prompts, the approved
 context object, secrets, stack traces, or internal error details.
 
-`GET /` is a health check. CORS on `/ask` and on the two `/admin/*` endpoints is allowlisted
-to local development (`http://localhost:*`, `http://127.0.0.1:*`) and the GitHub Pages origin
-(`https://eriksson008.github.io`) — edit the allowlist at the top of `src/index.ts`. The
-`/admin/*` endpoints answer CORS only for those dashboard origins **and** still require the
-`ADMIN_TOKEN` bearer; because auth is a header (not a cookie) there is no CSRF surface, and a
-page on any other origin gets neither the CORS headers nor the token.
+`GET /` is a health check. CORS on `/ask` is allowlisted to local development
+(`http://localhost:*`, `http://127.0.0.1:*`) and the GitHub Pages origin
+(`https://eriksson008.github.io`) — edit the allowlist at the top of `src/index.ts`.
+
+**Admin auth** is Cloudflare Access: the edge gate signs the user in, and the Worker
+*re-validates* the forwarded `Cf-Access-Jwt-Assertion` JWT itself (`src/access.ts` — RS256
+signature against the team JWKS, issuer, AUD tag, expiry) and then checks the verified email
+against the `ADMIN_ALLOWED_EMAILS` secret. Client-supplied headers are never trusted as
+identity, assertions are never logged, and all admin routes are read-only GETs. In production
+the dashboard is same-origin with the Worker, so `/admin/*` answers CORS **only** for
+localhost dev origins; no other origin can read it.
 
 ## Architecture
 
 - `src/index.ts` — routing, validation, CORS, the answer pipeline, rate limiting, the
-  guarded Workers AI call, D1 logging, and the admin endpoint.
+  guarded Workers AI call, D1 logging, and the admin endpoints.
+- `src/access.ts` — Cloudflare Access authentication: zero-dependency WebCrypto validation
+  of the Access JWT, the admin email allowlist, and the loopback-only local dev mode.
 - `src/data/fredrik-skills.ts` — approved public-safe **skills**: typed entries with
   aliases, an explicit confidence level (`professional` / `project` / `personal` /
   `learning`), and the exact `allowedAnswer` the assistant may give.
@@ -90,7 +106,10 @@ page on any other origin gets neither the CORS headers nor the token.
   matching, `findSkillKnowledge` / `findProjectKnowledge` alias matching, the
   not-confirmed detector, and `resolveLocalAnswer()` (the whole pre-AI pipeline in one
   call, shared with the tests). Deliberately simple substring scoring, no NLP.
-- `src/tests/knowledge.test.ts` — zero-dependency test script (`npm test`).
+- `src/tests/knowledge.test.ts` + `src/tests/admin-auth.test.ts` — zero-dependency test
+  scripts (`npm test`): knowledge/pipeline invariants, and the full admin auth path
+  (signed/forged/expired assertions, allowlist, dev-mode gating) against the real fetch
+  handler.
 
 ### Local resolution order (inside stage 3)
 
@@ -187,7 +206,8 @@ otherwise a random per-isolate salt — raw IPs are never stored, in memory or i
 is **in-memory per Worker isolate**: zero latency, zero cost, resets on isolate recycle.
 This is basic abuse protection to stop one client burning the Workers AI daily allocation —
 **not** enterprise-grade bot protection. For hard guarantees, add a Cloudflare WAF rate
-rule (free tier includes one) in front of the Worker. `/admin/logs` is not rate-limited.
+rule (free tier includes one) in front of the Worker. `/admin/*` is not rate-limited
+(Access-gated instead).
 
 ### Cost & quota safety
 
@@ -208,7 +228,10 @@ This repo uses `wrangler.jsonc`; the TOML equivalents are shown for reference.
 
 ```jsonc
 "ai": { "binding": "AI" },
+"assets": { "directory": "./public" },   // admin dashboard (built by `npm run build:admin`)
 "vars": {
+  "ACCESS_TEAM_DOMAIN": "",              // https://<team>.cloudflareaccess.com — admin auth
+  "ACCESS_APP_AUD": "",                  // Access app AUD tag — admin auth
   "ASK_FREDRIK_AI_ENABLED": "false",                      // flip to "true" to enable AI
   "ASK_FREDRIK_MODEL": "@cf/meta/llama-3.1-8b-instruct-fp8",
   "ASK_FREDRIK_AI_TIMEOUT_MS": "6000",
@@ -225,6 +248,8 @@ This repo uses `wrangler.jsonc`; the TOML equivalents are shown for reference.
 binding = "AI"
 
 [vars]
+ACCESS_TEAM_DOMAIN = ""
+ACCESS_APP_AUD = ""
 ASK_FREDRIK_AI_ENABLED = "true"
 ASK_FREDRIK_MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8"
 ASK_FREDRIK_AI_TIMEOUT_MS = "6000"
@@ -233,27 +258,47 @@ ASK_FREDRIK_RATE_LIMIT_WINDOW_SECONDS = "60"
 ASK_FREDRIK_RATE_LIMIT_MAX_REQUESTS = "10"
 ```
 
-All vars are optional — the Worker applies the same defaults in code when one is unset or
-unparseable. `ASK_FREDRIK_AI_ENABLED` defaults to **off**; only the literal string `"true"`
+All tuning vars are optional — the Worker applies the same defaults in code when one is
+unset or unparseable. The two `ACCESS_*` vars are required **for the admin endpoints only**
+(empty → `/admin/*` fails closed with 503; `/ask` is unaffected).
+`ASK_FREDRIK_AI_ENABLED` defaults to **off**; only the literal string `"true"`
 enables AI. If `@cf/meta/llama-3.1-8b-instruct-fp8` is ever retired, set `ASK_FREDRIK_MODEL` to
 any currently available small **instruct/text-generation** model from the
 [Workers AI model catalog](https://developers.cloudflare.com/workers-ai/models/) (pick one
 whose page shows the `messages` chat input) — no code change needed.
 
+### Cloudflare Access setup (admin auth)
+
+Admin authentication needs three pieces of configuration (no values belong in the repo
+beyond the two non-secret vars):
+
+| Config | Where | What |
+| --- | --- | --- |
+| Access application | Cloudflare dashboard | Workers & Pages → this Worker → Settings → Domains & Routes → `workers.dev` → **Enable Cloudflare Access**, then in Zero Trust scope the app to the **`/admin` paths only** (never `/ask` or `/`) and set its Allow policy to the admin email(s). |
+| `ACCESS_TEAM_DOMAIN` | `wrangler.jsonc` var | `https://<team>.cloudflareaccess.com` (Zero Trust team domain). |
+| `ACCESS_APP_AUD` | `wrangler.jsonc` var | The Access application's AUD tag (app overview page). |
+| `ADMIN_ALLOWED_EMAILS` | Worker **secret** | Comma-separated admin email allowlist (case-insensitive). |
+
+While any of the three env pieces is missing, every `/admin/*` request answers `503` — the
+endpoints fail closed, and `/ask` is unaffected. The full checklist with verification steps
+lives in [docs/ask-fredrik-dashboard.md](../../docs/ask-fredrik-dashboard.md).
+
 ### Secrets (production)
 
 ```bash
-npx wrangler secret put ADMIN_TOKEN     # long random string — protects GET /admin/logs
-npx wrangler secret put IP_HASH_SALT    # long random string — salts the IP hash
+npx wrangler secret put ADMIN_ALLOWED_EMAILS   # comma-separated admin email allowlist
+npx wrangler secret put IP_HASH_SALT           # long random string — salts the IP hash
 ```
 
-Both set 2026-07-06. If `ADMIN_TOKEN` is unset, `/admin/logs` returns 503; if
-`IP_HASH_SALT` is unset, `ip_hash` is not stored (the rate limiter then uses a per-isolate
-random salt instead). Secrets never appear in code, config, responses, or the frontend
-bundle. For `wrangler dev`, put local-only values in `.dev.vars` (gitignored):
+If `IP_HASH_SALT` is unset, `ip_hash` is not stored (the rate limiter then uses a
+per-isolate random salt instead). Secrets never appear in code, config, responses, or the
+frontend bundle. The old `ADMIN_TOKEN` bearer secret is retired — delete it with
+`npx wrangler secret delete ADMIN_TOKEN` once the Access setup is live. For `wrangler dev`,
+put local-only values in `.dev.vars` (gitignored):
 
 ```
-ADMIN_TOKEN=dev-admin-token
+ASK_FREDRIK_DEV_AUTH=allow                  # loopback-only dev auth (see src/access.ts)
+ASK_FREDRIK_DEV_AUTH_EMAIL=dev-admin@localhost
 IP_HASH_SALT=dev-salt
 ASK_FREDRIK_AI_ENABLED=true     # optional local override of the wrangler.jsonc var
 ```
@@ -323,10 +368,12 @@ for i in $(seq 1 11); do curl -s -X POST http://localhost:8787/ask \
   -d '{"question":"test '$i'","sessionId":"same-session"}' | head -c 120; echo; done
 ```
 
-Read the logs back (token from `.dev.vars`) and verify the `source` values:
+Read the logs back (the `.dev.vars` dev auth mode covers loopback requests — no header
+needed) and verify the `source` values:
 
 ```bash
-curl -s "http://localhost:8787/admin/logs?limit=25" -H "Authorization: Bearer dev-admin-token"
+curl -s "http://127.0.0.1:8787/admin/me"              # → { "email": "...", "authMode": "dev" }
+curl -s "http://127.0.0.1:8787/admin/logs?limit=25"
 
 npx wrangler d1 execute ask-fredrik-db --local --command \
   "SELECT source, matched_intent, model, latency_ms, question FROM ask_fredrik_logs ORDER BY created_at DESC LIMIT 10"
@@ -337,17 +384,30 @@ Type-check with `npm run check`.
 ## Deploy (Workers Free)
 
 ```bash
+# from the repo root: build the admin dashboard into ./public (Worker assets)
+npm run build:admin
+
+cd cloudflare/ask-fredrik-worker
 npm run deploy
 ```
 
 Wrangler prints the public URL, e.g. `https://ask-fredrik-worker.<your-subdomain>.workers.dev`.
+The deploy uploads the Worker **and** the `./public` assets (the admin dashboard at
+`/admin/ask-fredrik/`); skipping `build:admin` deploys with whatever assets were last built.
+
+> **Order matters on first setup:** static assets are served at the edge *before* the Worker
+> runs, so the dashboard **shell** (HTML/JS — it contains no data or secrets) is only gated by
+> the Access app, not by the in-Worker JWT check. Create and path-scope the Access application
+> **before** the first deploy that includes assets; the admin APIs themselves fail closed (503)
+> either way.
 To enable AI in production, set `ASK_FREDRIK_AI_ENABLED` to `"true"` in `wrangler.jsonc`
-and redeploy. Verify against production the same way as locally (the admin call with your
-real `ADMIN_TOKEN`):
+and redeploy. Verify production admin access through Cloudflare Access — in a browser via
+the dashboard URL, or from a terminal:
 
 ```bash
+cloudflared access login https://ask-fredrik-worker.<your-subdomain>.workers.dev/admin/me
 curl -s "https://ask-fredrik-worker.<your-subdomain>.workers.dev/admin/logs?limit=50" \
-  -H "Authorization: Bearer <your ADMIN_TOKEN>"
+  -H "cf-access-token: $(cloudflared access token -app=https://ask-fredrik-worker.<your-subdomain>.workers.dev/admin/me)"
 ```
 
 ## Pointing the frontend at the Worker

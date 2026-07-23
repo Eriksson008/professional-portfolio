@@ -2,16 +2,18 @@
  * Ask Fredrik — Cloudflare Worker backend.
  *
  * POST /ask         { question, sessionId?, page? }  →  { answer, source, matchedIntent? }
- * GET  /admin/logs  Bearer ADMIN_TOKEN               →  { count, total, limit, offset, logs }
- * GET  /admin/stats Bearer ADMIN_TOKEN               →  { total, today, last7d, ... }
+ * GET  /admin/me    Cloudflare Access                →  { email, authMode }
+ * GET  /admin/logs  Cloudflare Access                →  { count, total, limit, offset, logs }
+ * GET  /admin/stats Cloudflare Access                →  { total, today, last7d, ... }
  *
- * The two /admin/* endpoints back the private Ask-Fredrik dashboard
- * (admin/ask-fredrik in the portfolio build). /admin/logs accepts optional
- * filters (from, to, source, intent, q) + pagination (limit, offset); with no
- * params it is backward-compatible with the original curl contract. Both are
- * gated by the ADMIN_TOKEN bearer secret and, unlike /ask, are answered with
- * CORS headers only for the dashboard's own origins (GitHub Pages + localhost)
- * so the browser panel can read them — the token is still required either way.
+ * The /admin/* endpoints back the private Ask-Fredrik dashboard, which is
+ * served by this same Worker as static assets at /admin/ask-fredrik/ (built by
+ * the portfolio's `npm run build:admin` into ./public). Cloudflare Access
+ * gates the /admin paths at the edge; every admin request is additionally
+ * authenticated in-Worker by validating the Access JWT and an admin email
+ * allowlist — see src/access.ts. Being same-origin with the dashboard, the
+ * admin endpoints need no production CORS; localhost origins are still
+ * answered for the Vite dev server.
  *
  * Answer pipeline for a valid question, in order:
  *   1. rate limit   → source "rate_limited"  (in-memory, best-effort)
@@ -24,12 +26,14 @@
  *
  * Every valid question is logged to D1 (best-effort, off the response path).
  * Runs entirely on the Workers/D1/Workers-AI Free plans. No API keys in code
- * — the two secrets (ADMIN_TOKEN, IP_HASH_SALT) live in Worker secrets, and
- * every feature degrades gracefully when its binding, var, or secret is
- * absent: no AI binding or ASK_FREDRIK_AI_ENABLED != "true" simply means
- * step 4 is skipped.
+ * — the two secrets (ADMIN_ALLOWED_EMAILS, IP_HASH_SALT) live in Worker
+ * secrets, and every feature degrades gracefully when its binding, var, or
+ * secret is absent: no AI binding or ASK_FREDRIK_AI_ENABLED != "true" simply
+ * means step 4 is skipped, while missing Access config fails the admin
+ * endpoints closed (503).
  */
 
+import { authenticateAdmin, type AdminIdentity } from './access.ts';
 import { FALLBACK_ANSWER, RATE_LIMITED_ANSWER, SYSTEM_PROMPT } from './fredrik-context.ts';
 import { containsPromptLeak, resolveLocalAnswer } from './matcher.ts';
 
@@ -46,8 +50,19 @@ export interface Env {
   /** Workers AI binding. Optional: without it, unmatched questions get the
    *  curated fallback answer. */
   AI?: AiBinding;
-  /** Secret: bearer token for GET /admin/logs. Missing → endpoint returns 503. */
-  ADMIN_TOKEN?: string;
+  /** Var: Cloudflare Access team domain, e.g. "https://myteam.cloudflareaccess.com".
+   *  Missing/empty → admin endpoints return 503 (fail closed). */
+  ACCESS_TEAM_DOMAIN?: string;
+  /** Var: the Access application's AUD tag. Missing/empty → admin 503. */
+  ACCESS_APP_AUD?: string;
+  /** Secret: comma-separated admin email allowlist (case-insensitive). A valid
+   *  Access identity outside this list gets 403; unset → admin 503. */
+  ADMIN_ALLOWED_EMAILS?: string;
+  /** Dev-only (set in .dev.vars, NEVER in wrangler.jsonc): "allow" skips Access
+   *  validation — but only for loopback hosts. See src/access.ts. */
+  ASK_FREDRIK_DEV_AUTH?: string;
+  /** Dev-only: identity email reported while ASK_FREDRIK_DEV_AUTH is active. */
+  ASK_FREDRIK_DEV_AUTH_EMAIL?: string;
   /** Secret: salt for hashing the connecting IP. Missing → ip_hash is not stored.
    *  Raw IPs are never stored either way. */
   IP_HASH_SALT?: string;
@@ -105,8 +120,9 @@ function envInt(value: string | undefined, fallback: number, min: number, max: n
  * CORS allowlist for /ask: local development (any localhost/127.0.0.1 port —
  * Vite dev 5173, Vite preview 4173, the Docker/nginx site on 8790) plus the
  * GitHub Pages portfolio origin. Everything else gets no CORS headers.
- * /admin/logs deliberately gets no CORS headers at all — it is a curl/CLI
- * endpoint, never callable from a browser page on another origin.
+ * The /admin/* endpoints are same-origin with the Worker-served dashboard in
+ * production, so they answer CORS only for localhost origins — the Vite dev
+ * server during local development. No other origin can read them.
  */
 const ALLOWED_ORIGINS = ['https://eriksson008.github.io'];
 const ALLOWED_ORIGIN_PATTERNS = [
@@ -120,6 +136,13 @@ function resolveCorsOrigin(request: Request): string | null {
   if (ALLOWED_ORIGINS.includes(origin)) return origin;
   if (ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin))) return origin;
   return null;
+}
+
+/** Admin CORS: localhost dev origins only — production is same-origin. */
+function resolveAdminCorsOrigin(request: Request): string | null {
+  const origin = request.headers.get('Origin');
+  if (origin === null) return null;
+  return ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin)) ? origin : null;
 }
 
 function json(body: unknown, status: number, origin: string | null, extra?: HeadersInit): Response {
@@ -414,19 +437,26 @@ async function handleAsk(
 }
 
 /**
- * Bearer-token gate shared by both /admin/* handlers. Returns a Response to
- * short-circuit with (misconfigured token, wrong/absent token, or no DB) or
- * null when the caller may proceed. `origin` is the resolved admin CORS origin
- * so even error responses are readable by the dashboard's fetch.
+ * Cloudflare Access gate shared by every /admin/* handler. Returns the
+ * authenticated identity, or a Response to short-circuit with (503 missing
+ * config, 401 missing/invalid assertion, 403 email not allowlisted). `origin`
+ * is the resolved admin CORS origin so even error responses are readable by
+ * the dashboard's fetch during local dev. See src/access.ts.
  */
-function requireAdmin(request: Request, env: Env, origin: string | null): Response | null {
-  if (!env.ADMIN_TOKEN) {
-    return json({ error: 'Admin endpoint is not configured.' }, 503, origin);
+async function requireAdmin(
+  request: Request,
+  env: Env,
+  origin: string | null
+): Promise<AdminIdentity | Response> {
+  const result = await authenticateAdmin(request, env);
+  if (!result.ok) {
+    return json({ error: result.error }, result.status, origin);
   }
-  const auth = request.headers.get('Authorization');
-  if (auth !== `Bearer ${env.ADMIN_TOKEN}`) {
-    return json({ error: 'Unauthorized.' }, 401, origin, { 'WWW-Authenticate': 'Bearer' });
-  }
+  return result.identity;
+}
+
+/** The logs/stats handlers additionally need D1; /admin/me does not. */
+function requireDb(env: Env, origin: string | null): Response | null {
   if (!env.ASK_FREDRIK_DB) {
     return json({ error: 'Logging database is not configured.' }, 503, origin);
   }
@@ -499,8 +529,10 @@ async function handleAdminLogs(
   url: URL,
   origin: string | null
 ): Promise<Response> {
-  const denied = requireAdmin(request, env, origin);
-  if (denied) return denied;
+  const auth = await requireAdmin(request, env, origin);
+  if (auth instanceof Response) return auth;
+  const noDb = requireDb(env, origin);
+  if (noDb) return noDb;
 
   const filters = parseLogFilters(url);
   if ('error' in filters) return json({ error: filters.error }, 400, origin);
@@ -555,14 +587,23 @@ async function handleAdminLogs(
  * filtered, so the summary cards are a stable "mission control" readout while
  * the table below handles filtering. One D1 batch, all read-only aggregates.
  */
+/** GET /admin/me — the safe identity payload the dashboard boots from. */
+async function handleAdminMe(request: Request, env: Env, origin: string | null): Promise<Response> {
+  const auth = await requireAdmin(request, env, origin);
+  if (auth instanceof Response) return auth;
+  return json({ email: auth.email, authMode: auth.authMode }, 200, origin);
+}
+
 async function handleAdminStats(
   request: Request,
   env: Env,
   url: URL,
   origin: string | null
 ): Promise<Response> {
-  const denied = requireAdmin(request, env, origin);
-  if (denied) return denied;
+  const auth = await requireAdmin(request, env, origin);
+  if (auth instanceof Response) return auth;
+  const noDb = requireDb(env, origin);
+  if (noDb) return noDb;
 
   const now = Date.now();
   // "today" bound: the dashboard passes the viewer's local start-of-day (as UTC
@@ -583,11 +624,21 @@ async function handleAdminStats(
 
   try {
     const db = env.ASK_FREDRIK_DB!;
-    const [total, today, last7d, last30d, bySource, topIntents, daily] = await db.batch([
+    const [total, today, last7d, last30d, latency, bySource, topIntents, daily] = await db.batch([
       db.prepare('SELECT COUNT(*) AS c FROM ask_fredrik_logs'),
       db.prepare('SELECT COUNT(*) AS c FROM ask_fredrik_logs WHERE created_at >= ?').bind(todayIso),
       db.prepare('SELECT COUNT(*) AS c FROM ask_fredrik_logs WHERE created_at >= ?').bind(iso7),
       db.prepare('SELECT COUNT(*) AS c FROM ask_fredrik_logs WHERE created_at >= ?').bind(iso30),
+      // Average answer latency from the stored per-request latency_ms — over
+      // the whole (FIFO-capped) log window and the last 7 days. NULL when no
+      // rows carry a latency; the dashboard shows that as "not recorded".
+      db
+        .prepare(
+          `SELECT AVG(latency_ms) AS avg_all,
+                  AVG(CASE WHEN created_at >= ? THEN latency_ms END) AS avg_7d
+           FROM ask_fredrik_logs WHERE latency_ms IS NOT NULL`
+        )
+        .bind(iso7),
       db.prepare('SELECT source, COUNT(*) AS c FROM ask_fredrik_logs GROUP BY source'),
       db.prepare(
         `SELECT matched_intent AS intent, COUNT(*) AS c
@@ -604,6 +655,9 @@ async function handleAdminStats(
     ]);
 
     const count = (r: D1Result): number => Number((r.results?.[0] as { c?: number } | undefined)?.c ?? 0);
+    const latencyRow = latency.results?.[0] as { avg_all?: number | null; avg_7d?: number | null } | undefined;
+    const avgMs = (v: number | null | undefined): number | null =>
+      typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : null;
     const bySourceMap: Record<string, number> = {};
     for (const row of bySource.results as Array<{ source: string | null; c: number }>) {
       bySourceMap[row.source ?? 'unknown'] = Number(row.c);
@@ -618,6 +672,8 @@ async function handleAdminStats(
         bySource: bySourceMap,
         blocked: bySourceMap.blocked ?? 0,
         fallback: bySourceMap.fallback ?? 0,
+        avgLatencyMs: avgMs(latencyRow?.avg_all),
+        avgLatencyMs7d: avgMs(latencyRow?.avg_7d),
         topIntents: (topIntents.results as Array<{ intent: string; c: number }>).map((r) => ({
           intent: r.intent,
           count: Number(r.c),
@@ -662,16 +718,21 @@ export default {
       return handleAsk(request, env, ctx, origin);
     }
 
-    if (url.pathname === '/admin/logs' || url.pathname === '/admin/stats') {
-      // Admin CORS: only the dashboard's own origins (GitHub Pages + localhost)
-      // ever receive CORS headers, and the ADMIN_TOKEN bearer is still required.
-      // Since auth is a header (not a cookie) there is no CSRF surface; a page on
-      // any other origin gets neither the headers nor the token.
-      const origin = resolveCorsOrigin(request);
+    if (
+      url.pathname === '/admin/me' ||
+      url.pathname === '/admin/logs' ||
+      url.pathname === '/admin/stats'
+    ) {
+      // Admin CORS: production is same-origin (the Worker serves the dashboard
+      // itself), so only localhost origins — the Vite dev server — ever receive
+      // CORS headers. Every response still requires the Cloudflare Access
+      // identity (or the explicit loopback-only dev mode); all admin routes are
+      // read-only GETs, and no other origin can read them.
+      const origin = resolveAdminCorsOrigin(request);
       if (request.method === 'OPTIONS') {
         const headers = new Headers({
           'Access-Control-Allow-Methods': 'GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+          'Access-Control-Allow-Headers': 'Content-Type',
           'Access-Control-Max-Age': '86400',
         });
         if (origin !== null) {
@@ -683,6 +744,7 @@ export default {
       if (request.method !== 'GET') {
         return json({ error: 'Method not allowed. Use GET.' }, 405, origin, { Allow: 'GET' });
       }
+      if (url.pathname === '/admin/me') return handleAdminMe(request, env, origin);
       return url.pathname === '/admin/stats'
         ? handleAdminStats(request, env, url, origin)
         : handleAdminLogs(request, env, url, origin);
@@ -693,7 +755,7 @@ export default {
         {
           status: 'ok',
           service: 'ask-fredrik-worker',
-          endpoints: ['POST /ask', 'GET /admin/logs', 'GET /admin/stats'],
+          endpoints: ['POST /ask', 'GET /admin/me', 'GET /admin/logs', 'GET /admin/stats'],
         },
         200,
         resolveCorsOrigin(request)

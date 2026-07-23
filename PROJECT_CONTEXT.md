@@ -57,6 +57,43 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-23 — Admin auth replaced with Cloudflare Access; admin dashboard now served by the
+  Worker (user-directed brief; supersedes the 2026-07-07 token-gate design).** The manually
+  pasted `ADMIN_TOKEN` bearer (sessionStorage + `Authorization` header) is fully retired.
+  New architecture: (1) **the admin UI moved out of the GitHub Pages artifact** — GitHub Pages
+  can never sit behind Cloudflare Access, and a cross-origin SPA against an Access-protected
+  API is the third-party-cookie/CORS failure mode Cloudflare's own docs warn about — and is
+  instead **built by `npm run build:admin`** (Vite `--mode admin-worker`: admin entry only,
+  base `/`, `publicDir` off + admin-icon copy) **into the Worker's gitignored `./public`
+  assets dir**, which `wrangler deploy` serves at `/admin/ask-fredrik/` same-origin with the
+  admin API (Access supports `workers.dev` one-click since Oct 2025; the app must be
+  path-scoped to `/admin` so public `/ask` + `GET /` stay open). (2) **The Worker re-validates
+  the Access assertion itself** (`src/access.ts`, zero-dep WebCrypto): RS256 against the team
+  JWKS (per-isolate cache, refetch on unknown kid), issuer + AUD + expiry (60 s leeway), then
+  the verified email must be in the `ADMIN_ALLOWED_EMAILS` **secret** — 401 invalid / 403
+  not-allowlisted / 503 fail-closed when `ACCESS_TEAM_DOMAIN`/`ACCESS_APP_AUD` vars or the
+  secret are unset; assertions are never logged. One `requireAdmin` middleware guards all
+  admin routes incl. the new **`GET /admin/me`** (`{email, authMode}`) the dashboard boots
+  from. Admin CORS shrank to localhost-only (production is same-origin; all admin routes are
+  read-only GETs, so no CSRF surface returned with the cookie). (3) **Local dev**:
+  `ASK_FREDRIK_DEV_AUTH=allow` in `.dev.vars` only, honored **only for loopback hostnames** —
+  a leaked var cannot open production (tested). (4) **Frontend**: TokenGate + sessionStorage
+  deleted; boot = `/admin/me` → checking / sign-in-required (reload triggers Access) /
+  forbidden / error states; identity shown in the header (Access logout link, "dev session"
+  badge); stats gained honest `avgLatencyMs`/`avgLatencyMs7d` cards ("not recorded" when
+  null) from the stored `latency_ms` — no invented metrics. (5) **Tests**: new zero-dep
+  `admin-auth.test.ts` (49 checks) drives the real fetch handler with a locally generated RSA
+  key + stubbed JWKS/D1: forged/expired/wrong-aud/wrong-issuer/alg-none/tampered assertions,
+  allowlist 403s, `/admin/me` shape, dev-mode hostname gating, `/ask` untouched. Verified:
+  worker `tsc` + 381 checks, root lint + 11 tests + both builds green. **Dashboard-side setup
+  completed and live-verified the same day** (Access on the production `workers.dev` URL, app
+  scoped to `/admin`, PIN policy for the admin email, vars + `ADMIN_ALLOWED_EMAILS` secret set,
+  `ADMIN_TOKEN` deleted, deployed): `/ask` answers publicly with correct CORS, all `/admin/*`
+  paths 302 to Access, and the dashboard renders signed-in against production D1. One gotcha
+  hit and fixed: `ACCESS_TEAM_DOMAIN` must include the `https://` scheme (compared verbatim to
+  the JWT `iss`, and used to build the JWKS URL) — the bare hostname fails closed as 401.
+  Spec: `docs/superpowers/specs/2026-07-23-ask-fredrik-access-auth-design.md`.
+
 - **2026-07-09 — Dashboard time-filter correctness pass (local-timezone anchoring) + first
   frontend test harness (repo review, branch `prompts-dashboard`).** Review of the admin
   dashboard surfaced one real bug class: the table renders `created_at` in the **viewer's local
