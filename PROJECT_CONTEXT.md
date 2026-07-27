@@ -57,6 +57,33 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-27 — The Worker was renamed `ask-fredrik-worker` → `ask-fredrik`, and three things did
+  not follow it.** The `-worker` suffix was noise in a hostname that already ends `.workers.dev`.
+
+  **Cloudflare has no rename operation.** The name is the Worker's identity *and* its `workers.dev`
+  hostname, so this was a deploy under the new name followed by a delete of the old Worker. What did
+  not move by itself, in descending order of how quietly it fails:
+
+  1. **The `ADMIN_ALLOWED_EMAILS` secret.** Secrets are stored per script name. The new Worker starts
+     with none, and `src/access.ts` fails closed — every admin endpoint returns 503 and it reads
+     exactly like a code regression. Re-set with `wrangler secret put`.
+  2. **The Cloudflare Access application's destination**, because Access protects a *hostname*. The
+     `Ask Fredrik` application was given the new destination alongside the old one *before* the
+     deploy, so `/admin` was never briefly unprotected. It was **edited, not recreated** — a new
+     application would have issued a new AUD and invalidated `ACCESS_APP_AUD` in `wrangler.jsonc`.
+  3. **The `VITE_ASK_FREDRIK_API_URL` GitHub Actions repository variable**, which is not in this
+     repository at all. It bakes the Worker's `/ask` URL into the portfolio bundle at build time, so
+     until it is updated *and the Pages build re-runs*, the published widget still calls the old
+     hostname. This is the one that survives a green CI run on both repos.
+
+  The D1 database moved for free: it is bound by id, and the id belongs to the database rather than
+  to whichever Worker binds it. Workers AI likewise.
+
+  **The directory stays `cloudflare/ask-fredrik-worker/`**, as does the npm package name. They
+  describe "the Worker for Ask Fredrik" rather than the deployed Worker, and renaming them would
+  have churned every workflow path, the Vite `outDir`, and the sibling `resume-project` coherence
+  checks for no gain.
+
 - **2026-07-27 — The phone number on `public/resume.pdf` is an accepted exception to the privacy
   rule (user decision).** An independent review flagged that the served résumé carries
   `(862) 225-8524` on a crawlable URL while `AGENTS.md` said "do not expose personal phone number".

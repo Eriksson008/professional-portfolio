@@ -37,7 +37,7 @@ const TEAM_DOMAIN = 'https://testteam.cloudflareaccess.com';
 const APP_AUD = 'aud-tag-for-tests';
 const ADMIN_EMAIL = 'admin@example.com';
 const KID = 'test-key-1';
-const PROD_URL = 'https://ask-fredrik-worker.example.workers.dev';
+const PROD_URL = 'https://ask-fredrik.example.workers.dev';
 
 function b64url(bytes: Uint8Array): string {
   let binary = '';

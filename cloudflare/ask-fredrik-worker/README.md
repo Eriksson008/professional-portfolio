@@ -391,7 +391,7 @@ cd cloudflare/ask-fredrik-worker
 npm run deploy
 ```
 
-Wrangler prints the public URL, e.g. `https://ask-fredrik-worker.<your-subdomain>.workers.dev`.
+Wrangler prints the public URL, e.g. `https://ask-fredrik.<your-subdomain>.workers.dev`.
 The deploy uploads the Worker **and** the `./public` assets (the admin dashboard at
 `/admin/ask-fredrik/`); skipping `build:admin` deploys with whatever assets were last built.
 
@@ -405,9 +405,9 @@ and redeploy. Verify production admin access through Cloudflare Access — in a 
 the dashboard URL, or from a terminal:
 
 ```bash
-cloudflared access login https://ask-fredrik-worker.<your-subdomain>.workers.dev/admin/me
-curl -s "https://ask-fredrik-worker.<your-subdomain>.workers.dev/admin/logs?limit=50" \
-  -H "cf-access-token: $(cloudflared access token -app=https://ask-fredrik-worker.<your-subdomain>.workers.dev/admin/me)"
+cloudflared access login https://ask-fredrik.<your-subdomain>.workers.dev/admin/me
+curl -s "https://ask-fredrik.<your-subdomain>.workers.dev/admin/logs?limit=50" \
+  -H "cf-access-token: $(cloudflared access token -app=https://ask-fredrik.<your-subdomain>.workers.dev/admin/me)"
 ```
 
 ## Pointing the frontend at the Worker
@@ -419,7 +419,7 @@ build-time URL — never a key or secret.
   `VITE_ASK_FREDRIK_API_URL=http://localhost:8787/ask` and restart `npm run dev`.
 - **GitHub Pages:** set a repository **Actions variable** (Settings → Secrets and variables →
   Actions → Variables) named `VITE_ASK_FREDRIK_API_URL` to
-  `https://ask-fredrik-worker.<your-subdomain>.workers.dev/ask`. The deploy workflow passes it
+  `https://ask-fredrik.<your-subdomain>.workers.dev/ask`. The deploy workflow passes it
   into the build; leave it unset and the site keeps using its own static answers.
 
 Since the Worker now carries the same curated static answers as the frontend (plus AI), it

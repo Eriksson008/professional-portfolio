@@ -181,7 +181,7 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
 ### Done
 - [x] **Cloudflare Access setup completed + admin live on the Worker — 2026-07-23.** Access
   enabled on the production `workers.dev` URL (Domains → Restricted), app path-scoped to
-  `/admin` (destination `ask-fredrik-worker.eriksson-fredrik08.workers.dev/admin`), Allow
+  `/admin` (destination `ask-fredrik.eriksson-fredrik08.workers.dev/admin`), Allow
   policy = admin email via one-time PIN; `ACCESS_TEAM_DOMAIN`/`ACCESS_APP_AUD` filled,
   `ADMIN_ALLOWED_EMAILS` secret set, `ADMIN_TOKEN` deleted, `build:admin` + deploy done.
   Live-verified: `/ask` public with correct CORS, `/admin/*` 302s to Access, dashboard loads

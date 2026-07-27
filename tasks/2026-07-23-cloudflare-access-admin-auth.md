@@ -103,7 +103,7 @@ All checks run 2026-07-23 on the implementation session:
 
 Dashboard-side setup done interactively (browser driven by Claude, sign-ins by Fredrik):
 Access enabled on the production `workers.dev` URL (Public → Restricted), app auto-created
-and path-scoped to `ask-fredrik-worker.eriksson-fredrik08.workers.dev/admin`, Allow policy =
+and path-scoped to `ask-fredrik.eriksson-fredrik08.workers.dev/admin`, Allow policy =
 `eriksson.fredrik08@gmail.com` (one-time PIN IdP). `ACCESS_TEAM_DOMAIN` + `ACCESS_APP_AUD`
 filled in `wrangler.jsonc`, `wrangler secret put ADMIN_ALLOWED_EMAILS`, `npm run build:admin`,
 `npm run deploy`, `wrangler secret delete ADMIN_TOKEN`.

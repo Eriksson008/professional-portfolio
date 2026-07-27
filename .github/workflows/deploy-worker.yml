@@ -27,7 +27,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ask-fredrik-worker-production
+  group: ask-fredrik-production
   cancel-in-progress: false
 
 jobs:
@@ -114,7 +114,7 @@ jobs:
         if: steps.creds.outputs.present == 'true'
         run: |
           sleep 5
-          body=$(curl -sS -X POST "https://ask-fredrik-worker.eriksson-fredrik08.workers.dev/ask" \
+          body=$(curl -sS -X POST "https://ask-fredrik.eriksson-fredrik08.workers.dev/ask" \
             -H "Content-Type: application/json" \
             -H "Origin: https://eriksson008.github.io" \
             -d '{"question":"What is Fredrik'"'"'s technical stack?"}')

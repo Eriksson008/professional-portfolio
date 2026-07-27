@@ -6,7 +6,7 @@ linked from the public site. In production the panel is served by the Ask-Fredri
 itself** and protected by **Cloudflare Access**: the page and every admin API sit behind an
 Access sign-in, and the Worker re-validates the Access identity on every request.
 
-- **Route (production):** `https://ask-fredrik-worker.<account>.workers.dev/admin/ask-fredrik/`
+- **Route (production):** `https://ask-fredrik.<account>.workers.dev/admin/ask-fredrik/`
   — served from the Worker's static assets, behind Cloudflare Access. The panel is **no longer
   part of the GitHub Pages build** (Pages can't be Access-protected; nothing admin-related ships
   in the public artifact anymore).
@@ -68,7 +68,7 @@ defense in depth, and the email allowlist can be narrower than the Access policy
 
 The repo can't do these; they're Cloudflare-dashboard-side:
 
-1. **Create the Access application.** Workers & Pages → `ask-fredrik-worker` → Settings →
+1. **Create the Access application.** Workers & Pages → `ask-fredrik` → Settings →
    Domains & Routes → `workers.dev` → **Enable Cloudflare Access** (one-click), then **Manage
    Cloudflare Access** to open the app in Zero Trust.
 2. **Scope it to `/admin`.** In Zero Trust → Access → Applications, edit the application so it

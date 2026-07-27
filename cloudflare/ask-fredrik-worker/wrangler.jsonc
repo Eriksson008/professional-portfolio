@@ -3,7 +3,30 @@
 // features, no secrets, no API keys.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "ask-fredrik-worker",
+
+  // Renamed from `ask-fredrik-worker` on 2026-07-27. Cloudflare has no rename
+  // operation - the name *is* the Worker's identity and its workers.dev
+  // hostname - so that change was a deploy under this name plus a delete of the
+  // old Worker. Three things did NOT move by themselves and had to be redone:
+  //
+  //   - the `ADMIN_ALLOWED_EMAILS` **secret**, which is stored per script name
+  //     and does not follow a rename. Every admin endpoint fails closed without
+  //     it, which looks like a code bug and is not one.
+  //   - the Cloudflare Access application's destination, since Access protects
+  //     a hostname. It was *edited* rather than recreated, so ACCESS_APP_AUD
+  //     below is still correct; recreating it would have issued a new AUD.
+  //   - the `VITE_ASK_FREDRIK_API_URL` GitHub Actions repository variable,
+  //     which bakes this Worker's /ask URL into the portfolio bundle at build
+  //     time and lives outside this repository entirely.
+  //
+  // The D1 database moved for free: it is bound by id, and the id is a property
+  // of the database rather than of whatever Worker happens to bind it.
+  //
+  // The *directory* is still `cloudflare/ask-fredrik-worker/`, as is the npm
+  // package name. That is deliberate: they describe "the Worker for Ask
+  // Fredrik", not the deployed Worker's name, and renaming them would have
+  // churned every workflow path for no gain.
+  "name": "ask-fredrik",
   "main": "src/index.ts",
   "compatibility_date": "2026-06-01",
 
@@ -30,7 +53,7 @@
   "assets": { "directory": "./public" },
 
   // Workers Logs in the Cloudflare dashboard (Workers & Pages →
-  // ask-fredrik-worker → Logs): invocation logs + console.warn output (AI
+  // ask-fredrik → Logs): invocation logs + console.warn output (AI
   // failures, D1 insert failures). Included on the Free plan. User questions
   // themselves are already logged to D1 — this adds operational visibility.
   "observability": {

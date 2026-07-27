@@ -4,7 +4,7 @@
 // subdomain exists, or whenever you want dev with zero AI usage. Keep the
 // D1/vars blocks in sync with wrangler.jsonc.
 {
-  "name": "ask-fredrik-worker",
+  "name": "ask-fredrik",
   "main": "src/index.ts",
   "compatibility_date": "2026-06-01",
   "d1_databases": [

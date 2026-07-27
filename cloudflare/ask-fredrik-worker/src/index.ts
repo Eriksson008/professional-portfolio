@@ -754,7 +754,7 @@ export default {
       return json(
         {
           status: 'ok',
-          service: 'ask-fredrik-worker',
+          service: 'ask-fredrik',
           endpoints: ['POST /ask', 'GET /admin/me', 'GET /admin/logs', 'GET /admin/stats'],
         },
         200,

@@ -6,7 +6,7 @@ add `/admin/me`, evolve the admin panel toward an observability console, keep `/
 ## Decisions
 
 1. **The admin UI moves to the Worker's own origin** (Workers static assets, served at
-   `https://ask-fredrik-worker.<account>.workers.dev/admin/ask-fredrik/`), and out of the
+   `https://ask-fredrik.<account>.workers.dev/admin/ask-fredrik/`), and out of the
    GitHub Pages artifact. Rationale:
    - GitHub Pages is not on a Cloudflare zone, so Access can never protect the page there —
      the brief requires the *deployed admin page* to be protected.
