@@ -1,0 +1,123 @@
+name: Deploy Ask Fredrik Worker
+
+# WHY THIS EXISTS
+# The knowledge base is committed here, but the Worker only picks it up on
+# `wrangler deploy`. On 2026-07-27 a fix that unblocked questions about
+# passwordless authentication was committed, pushed, and green in CI — and the
+# live assistant kept refusing the question for hours, because deploying was a
+# separate manual step nobody had reason to remember. Committing a knowledge
+# change and having the assistant still contradict it is the exact failure this
+# removes.
+#
+# Supersedes the earlier "deploying the Worker stays manual" posture. Manual
+# `npm run deploy` still works and is unchanged; this just means you no longer
+# have to remember it.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/ask-fredrik-worker/**'
+      - 'src/admin/**' # the admin dashboard is built INTO the Worker's assets
+      - 'vite.config.ts'
+      - '.github/workflows/deploy-worker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ask-fredrik-worker-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Test, build admin assets, deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Secrets are checked first so a missing one is a clear, early message
+      # rather than a confusing wrangler auth error 90 seconds in — and so the
+      # workflow reports "skipped", not "failed", before they are configured.
+      - name: Check for deploy credentials
+        id: creds
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$ACCOUNT" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Worker not deployed"
+              echo
+              echo 'Set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in'
+              echo 'Settings → Secrets and variables → Actions to enable automatic deploys.'
+              echo 'The token needs **Workers Scripts: Edit** and **D1: Edit** on this account.'
+              echo
+              echo 'Until then, deploy by hand:'
+              echo '`cd cloudflare/ask-fredrik-worker && npm run deploy`'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install Worker dependencies
+        working-directory: cloudflare/ask-fredrik-worker
+        run: npm ci
+
+      - name: Type-check the Worker
+        working-directory: cloudflare/ask-fredrik-worker
+        run: npm run check
+
+      # Gate: the knowledge base carries public-safety invariants (nothing
+      # non-public-safe, no answer that trips the prompt-leak guard, the system
+      # prompt under its size cap) plus the Access auth suite. Never deploy a
+      # knowledge base that fails these.
+      - name: Run Worker tests
+        working-directory: cloudflare/ask-fredrik-worker
+        run: npm test
+
+      # MUST run before deploy. wrangler.jsonc serves `./public` as static
+      # assets and the Worker's own predeploy only mkdirs it — the admin
+      # dashboard is built here, from the ROOT package, by `build:admin`.
+      # Deploying without this publishes an empty directory and 404s /admin.
+      - name: Build the admin dashboard into the Worker's assets
+        run: npm run build:admin
+
+      - name: Verify the admin assets actually landed
+        run: |
+          test -f cloudflare/ask-fredrik-worker/public/admin/ask-fredrik/index.html \
+            || { echo "::error::admin assets missing — refusing to deploy an empty public/"; exit 1; }
+
+      - name: Deploy Worker
+        if: steps.creds.outputs.present == 'true'
+        working-directory: cloudflare/ask-fredrik-worker
+        run: npm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # Proves the deploy actually took, rather than trusting a green wrangler
+      # exit. /ask is public by design; /admin/* stays behind Cloudflare Access.
+      - name: Smoke-test the live assistant
+        if: steps.creds.outputs.present == 'true'
+        run: |
+          sleep 5
+          body=$(curl -sS -X POST "https://ask-fredrik-worker.eriksson-fredrik08.workers.dev/ask" \
+            -H "Content-Type: application/json" \
+            -H "Origin: https://eriksson008.github.io" \
+            -d '{"question":"What is Fredrik'"'"'s technical stack?"}')
+          echo "$body" | head -c 300; echo
+          echo "$body" | grep -q '"answer"' \
+            || { echo "::error::live /ask did not return an answer after deploy"; exit 1; }

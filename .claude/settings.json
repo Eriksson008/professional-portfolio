@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ../resume-project/scripts/coherence-hook.mjs",
+            "timeout": 45,
+            "statusMessage": "Checking résumé ↔ portfolio coherence..."
+          }
+        ]
+      }
+    ]
+  }
+}

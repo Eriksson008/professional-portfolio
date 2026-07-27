@@ -129,6 +129,32 @@ companion Cloudflare Worker in `cloudflare/ask-fredrik-worker/` has its own chec
   produce — and it is absent from all of them today (verified 2026-07-27). Do not "helpfully" add it
   to `profile.ts` links or `APPROVED_CONTEXT.contact`.
 
+## Automation (added 2026-07-27)
+
+Two mechanisms keep this repo from drifting away from the résumé it advertises. Both exist because
+the drift really happened: the résumé was repositioned and republished while this repo's typed data
+and knowledge base stayed a version behind, and separately a committed knowledge-base fix sat
+undeployed while the live assistant kept contradicting it.
+
+- **`.github/workflows/deploy-worker.yml` — the Worker deploys itself.** Any push to `main` that
+  touches `cloudflare/ask-fredrik-worker/**`, `src/admin/**`, or `vite.config.ts` type-checks the
+  Worker, runs its tests, builds the admin dashboard into its assets, verifies those assets landed,
+  deploys, and smoke-tests live `/ask`. **Supersedes the old "deploying the Worker stays manual"
+  posture**; `npm run deploy` still works by hand. Needs `CLOUDFLARE_API_TOKEN` and
+  `CLOUDFLARE_ACCOUNT_ID` repo secrets — without them the job reports a clear skip instead of
+  failing. The admin build step is not optional: `wrangler.jsonc` serves `./public` and the
+  Worker's own `predeploy` only creates the directory, so deploying without `npm run build:admin`
+  publishes an empty folder and 404s `/admin`.
+- **A `PostToolUse` hook in `.claude/settings.json`** runs
+  `../resume-project/scripts/coherence-hook.mjs` after any `Write`/`Edit`. When the edited file is
+  under `src/data/`, `cloudflare/ask-fredrik-worker/src/`, or the sibling's
+  `resume-building/output/`, it runs the cross-repo coherence check and speaks up only on a real
+  contradiction. It **detects**; it never deploys. Silent otherwise, and a no-op if the private
+  sibling repo is not checked out.
+
+The same check runs in the sibling's CI weekly, so portfolio-side drift is caught even when nothing
+here changes.
+
 ## Docker commands
 
 ```bash
