@@ -211,7 +211,7 @@ professional-portfolio/
 │   ├── components/         # Nav, ConstellationHero, About, Experience, Projects, Skills, …
 │   ├── hooks/              # useSmoothProgress.ts, usePointer.ts, useVisualTier.ts (reduced-motion-aware)
 │   └── styles/             # tokens.css + app.css + constellation-hero.css (design system)
-├── public/                 # resume.pdf, favicon.svg, og-image.png, .nojekyll
+├── public/                 # resume.pdf, favicon.svg, og-image-v2.png, .nojekyll
 ├── cloudflare/
 │   └── ask-fredrik-worker/ # optional Workers Free backend for the Ask Fredrik widget (own README);
 │                           # also serves the private admin dashboard (below) behind Cloudflare Access
