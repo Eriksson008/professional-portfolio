@@ -96,9 +96,10 @@ export const CURATED_ANSWERS: CuratedAnswer[] = [
     question: 'What leadership experience does Fredrik have?',
     keywords: ['lead', 'leadership', 'mentor', 'manage', 'team', 'tech lead', 'code review'],
     answer:
-      'Fredrik has carried acting Tech Lead responsibilities for roughly the last year and a half ' +
-      'on an enterprise Salesforce platform team: design decisions, code review, mentoring and ' +
-      'onboarding, release ownership, and translating business needs into technical plans. He owns ' +
+      'Fredrik has carried acting Tech Lead responsibilities for roughly the last year and a half, ' +
+      'leading 7 engineers across two teams and mentoring 3 of them: design decisions, code review, ' +
+      'onboarding, release ownership, and translating business needs into technical plans. The ' +
+      'Salesforce platform he leads serves about 250 Group Insurance users. He owns ' +
       'Copado deployments, release coordination, and production support, and his leadership was ' +
       'part of what earned three consecutive “Exceptional Impact” ratings.',
   },

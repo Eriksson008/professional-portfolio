@@ -46,7 +46,7 @@ export const APPROVED_CONTEXT = {
   trackRecord: [
     "3 consecutive years of his employer's highest rating, Exceptional Impact (2023-2025)",
     '750+ commits across 6 production systems; 120+ Jira stories',
-    'led a greenfield three-service client onboarding platform',
+    'leads 7 engineers across two teams; led a greenfield three-service onboarding platform',
     'top contributor (63% of commits) on an enterprise Amazon Bedrock assistant',
   ],
   contact: {

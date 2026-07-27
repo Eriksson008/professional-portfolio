@@ -27,6 +27,11 @@ export const highlights: Highlight[] = [
     note: 'Three integrated microservices delivered in under five weeks.',
   },
   {
+    value: '7',
+    label: 'Engineers led',
+    note: 'Across two teams as acting Tech Lead, mentoring 3 of them through code review.',
+  },
+  {
     value: '3 yrs',
     label: 'Exceptional Impact rating',
     note: 'Employer’s highest performance rating, three consecutive years (2023–2025).',

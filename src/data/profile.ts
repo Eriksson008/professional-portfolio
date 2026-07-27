@@ -17,7 +17,7 @@ export const profile = {
   titleBlock: [
     { field: 'Role', value: 'Senior Software Engineer' },
     { field: 'Discipline', value: 'Backend · Full-stack · Cloud · Platform' },
-    { field: 'Leadership', value: 'Acting Tech Lead · ~1.5 yrs' },
+    { field: 'Leadership', value: 'Acting Tech Lead · 7 engineers · ~1.5 yrs' },
     { field: 'Scale', value: '750+ commits · 6 repos · 120+ stories' },
     { field: 'Recognition', value: 'Exceptional Impact · 2023–2025' },
     { field: 'Location', value: 'Austin, TX Metro Area' },
