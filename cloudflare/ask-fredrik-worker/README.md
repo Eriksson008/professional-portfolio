@@ -283,6 +283,43 @@ While any of the three env pieces is missing, every `/admin/*` request answers `
 endpoints fail closed, and `/ask` is unaffected. The full checklist with verification steps
 lives in [docs/ask-fredrik-dashboard.md](../../docs/ask-fredrik-dashboard.md).
 
+### Link previews — share `/share`, and change nothing in Access
+
+**Share `https://<hostname>/share`, not `https://<hostname>/admin/ask-fredrik/`.**
+
+`/share` is a standalone public page carrying the `og:*` / `twitter:*` tags, which bounces a
+signed-in admin to the dashboard. `share.html`, `share.css`, `share.js` and `og-ask-fredrik.png`
+are copied to the Worker root by `npm run build:admin` (that build sets `publicDir: false`, so
+they are listed explicitly in `vite.config.ts` alongside the admin icons).
+
+**This one needs no Access change at all, and must not get one.** Access here is scoped to the
+`/admin` paths only, so `/` and `/share` were already public and the wrapper is reachable as
+shipped — no Bypass policy, no new application, nothing to verify beyond the deploy. The
+dashboard behind the link stays gated by Access *and* re-validated in-Worker.
+
+That is the whole reason the wrapper points at `/admin/ask-fredrik/` rather than trying to make
+that page previewable. Open Graph tags live inside the HTML, so an unfurler would have to read
+the dashboard itself — and the gate on that path *is* the admin gate. There is no version of
+exempting it that is not "publish the admin dashboard". **Never add `/admin*` to a Bypass
+policy.**
+
+The tags on `admin/ask-fredrik/index.html` itself remain, and remain unreadable by crawlers.
+They cost nothing and are correct for any tool that renders previews after authenticating.
+
+```bash
+curl -sI https://<hostname>/share                     # 200, text/html
+curl -sI https://<hostname>/og-ask-fredrik.png        # 200, image/png
+curl -sI https://<hostname>/admin/ask-fredrik/        # still 302 to Access
+```
+
+**Why the redirect is JavaScript.** `share.js` moves people onward rather than a
+`<meta http-equiv="refresh">` or an HTTP 302, both of which several unfurlers follow — straight
+to the Access login page, losing the preview. Crawlers do not run scripts.
+
+Note also that the **portfolio** already previews the astronaut for the public page the Ask
+Fredrik assistant actually lives on. For sending "Ask Fredrik" to another person that is still
+the better link; `/share` is for sending the *dashboard* to yourself or another admin.
+
 ### Secrets (production)
 
 ```bash

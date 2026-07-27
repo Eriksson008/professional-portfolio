@@ -1,0 +1,85 @@
+/* Styling for share.html only.
+
+   A separate file rather than an inline <style> so the page survives a future
+   CSP, and system fonts rather than the Sora/IBM Plex set the site loads from
+   Google Fonts: this page is visible for about 200ms on the way to the login,
+   and a blocking font fetch to a third-party host is a poor trade for that. */
+
+:root {
+  color-scheme: dark;
+  --canvas: #000000;
+  --ink: #f4f4f5;
+  --muted: #9b9ba3;
+  --accent: #6ea8fe;
+  --card: #101014;
+  --line: rgba(244, 244, 245, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.share {
+  width: 100%;
+  max-width: 380px;
+  padding: 40px 32px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  text-align: center;
+}
+
+.share-mark {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 20px;
+  border-radius: 14px;
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.share-go {
+  display: block;
+  margin: 28px 0 12px;
+  padding: 13px 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(110, 168, 254, 0.1);
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.share-go:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.share-note {
+  font-size: 13px;
+}

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ask Fredrik — Admin</title>
+  <meta name="description" content="Private dashboard for the Ask Fredrik assistant." />
+
+  <!--
+    The share wrapper for the Ask Fredrik dashboard.
+
+    THIS ONE NEEDS NO ACCESS CHANGE, unlike the wrappers in homebase and afr.
+    Access on this Worker is scoped to the `/admin` paths only, so `/` and
+    `/share` were already public and this file is reachable as shipped. Nothing
+    was exempted to make it work, and nothing should be: the dashboard behind
+    the link stays gated, and `/admin*` must never appear in a Bypass policy.
+
+    What is public here is this page: a title, one line, and the artwork. The
+    dashboard's contents - the question log, the stats, the export - stay
+    behind Cloudflare Access and the in-Worker JWT check.
+
+    THE REDIRECT MUST STAY IN JAVASCRIPT. A `<meta http-equiv="refresh">` or an
+    HTTP 302 would be followed by several crawlers, landing them on the Access
+    login page - exactly the failure this page exists to avoid. Crawlers do not
+    run scripts. See share.js.
+
+    It is served from the Worker's root by the asset layer. The source lives in
+    the portfolio's public/ and is copied here by `npm run build:admin`, the
+    same way the admin icons and the share card are - that build sets
+    publicDir: false, so nothing arrives on its own.
+  -->
+  <meta name="robots" content="noindex, nofollow" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Ask Fredrik" />
+  <meta property="og:url" content="https://ask-fredrik.eriksson-fredrik08.workers.dev/share" />
+  <meta property="og:title" content="Ask Fredrik — Admin" />
+  <meta property="og:description" content="Private dashboard for the Ask Fredrik assistant — question log, usage stats, and export." />
+  <meta property="og:image" content="https://ask-fredrik.eriksson-fredrik08.workers.dev/og-ask-fredrik.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="An astronaut holding a helmet, lit against a dark mission-control wall of telemetry screens" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://ask-fredrik.eriksson-fredrik08.workers.dev/og-ask-fredrik.png" />
+
+  <meta name="theme-color" content="#000000" />
+  <link rel="icon" href="/admin-icons/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/admin-icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="/share.css" />
+</head>
+<body>
+  <main class="share">
+    <img class="share-mark" src="/admin-icons/icon-192.png" alt="" width="64" height="64" />
+    <h1>Ask Fredrik</h1>
+    <p>Private dashboard — question log, usage stats, and export.</p>
+    <!-- Also the no-JavaScript path: a real anchor, so the page works with the
+         script blocked or still loading. -->
+    <a class="share-go" href="/admin/ask-fredrik/">Open dashboard</a>
+    <p class="share-note">Admins only. You'll be asked to sign in.</p>
+  </main>
+  <script src="/share.js"></script>
+</body>
+</html>

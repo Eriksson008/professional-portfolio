@@ -48,6 +48,21 @@ export default defineConfig(({ mode }) => {
               resolve(__dirname, 'public/admin.webmanifest'),
               resolve(outDir, 'admin.webmanifest')
             );
+            // The admin page's og:image. It has to land at the Worker's root
+            // rather than beside the page, because the URL in the tag is
+            // absolute and points there â€” see admin/ask-fredrik/index.html.
+            // Copied explicitly for the same reason the two above are:
+            // publicDir is false, so nothing from public/ arrives on its own.
+            //
+            // The share wrapper travels with it. It is a public page that
+            // previews the dashboard and bounces a person to /admin/ask-fredrik/;
+            // Access is scoped to /admin, so /share is reachable as shipped and
+            // nothing had to be exempted for it. All three files are plain
+            // assets â€” they never enter the Vite graph, so a typo in a path
+            // here is the only way they can go missing. Keep them together.
+            for (const asset of ['og-ask-fredrik.png', 'share.html', 'share.css', 'share.js']) {
+              cpSync(resolve(__dirname, `public/${asset}`), resolve(outDir, asset));
+            }
           },
         },
       ],

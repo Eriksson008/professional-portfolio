@@ -57,6 +57,46 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-27 — Ask Fredrik got a share wrapper at `/share`, and it needed no Access change.**
+  `public/share.html` (+ `share.css`, `share.js`) is a public page carrying the tags and the
+  astronaut card; it bounces an admin to `/admin/ask-fredrik/`. **Share `/share`, not the
+  dashboard URL.** All four files are copied to the Worker root by `npm run build:admin` — that
+  build sets `publicDir: false`, so they are listed explicitly in `vite.config.ts` beside the
+  admin icons, and a typo in one of those paths is the only way they can go missing.
+
+  **Unique among the three apps: nothing was exempted.** Access here is scoped to the `/admin`
+  paths only, so `/` and `/share` were already public and the wrapper works as shipped — no
+  Bypass policy, no new application. That is also why the wrapper points *at* the dashboard
+  rather than trying to make the dashboard previewable: the gate on `/admin/ask-fredrik/` **is**
+  the admin gate, and `/admin*` must never appear in a Bypass policy. The redirect is JavaScript
+  because several unfurlers follow a `<meta refresh>` or a 302 to the login page, and no crawler
+  runs a script. Supersedes the entry below, which concluded the situation was unfixable —
+  it was unfixable *at the dashboard's own URL*, which is not the same thing.
+
+- **2026-07-27 — The Ask Fredrik dashboard got a share card, and it will stay inert.**
+  *(Superseded by the entry above — the tags on the dashboard page are still inert, but `/share`
+  now gives Ask Fredrik a working preview.)*
+  `admin/ask-fredrik/index.html` now carries `og:*`/`twitter:*` tags, and `npm run build:admin`
+  copies `public/og-ask-fredrik.png` (1200×630, the astronaut against a mission-control wall) to
+  the Worker's root via the existing `copy-admin-icons` plugin — `publicDir` is `false` for that
+  build, so nothing from `public/` arrives on its own.
+
+  **The two halves land differently, and that is the whole point.** Access here is scoped to the
+  **`/admin` paths only**, so `/og-ask-fredrik.png` is already publicly fetchable and needs no
+  bypass. But Open Graph tags live *inside* the HTML, so a preview would require an unfurler to
+  read `/admin/ask-fredrik/` — and the gate on that path *is* the admin gate. There is no version
+  of exempting it that is not "publish the admin dashboard". So unlike Homebase and AFR, this is
+  not a pending decision: **it is the correct permanent state**, and `/admin*` must never appear
+  in a Bypass policy. The tags cost nothing and are correct if the page is ever opened up.
+
+  The URLs are absolute rather than `%BASE_URL%`-relative (which resolves to `/` for this build)
+  because an unfurler holds only the tag's string. `noindex, nofollow` stays and does not
+  conflict — it is a directive to search indexers, which the unfurlers reading these tags do not
+  consult. **The public portfolio's own `og-image-v2.png` was left untouched**; it already
+  previews correctly, and the new astronaut is a richer variant of the same figure rather than a
+  replacement. If a real preview for "Ask Fredrik" is ever wanted, the target is the public root
+  (`GET /` could content-negotiate HTML against its JSON API index) — see the Worker README.
+
 - **2026-07-27 — The Worker was renamed `ask-fredrik-worker` → `ask-fredrik`, and three things did
   not follow it.** The `-worker` suffix was noise in a hostname that already ends `.workers.dev`.
 

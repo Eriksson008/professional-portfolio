@@ -21,6 +21,50 @@
     <meta name="msapplication-TileColor" content="#000000" />
     <meta name="msapplication-TileImage" content="%BASE_URL%admin-icons/icon-144.png" />
 
+    <!--
+      Share card, for when this dashboard's URL is sent in a message.
+
+      The origin is written out rather than using %BASE_URL%: that resolves to
+      "/" for this build, and an unfurler holds only the tag's string value, so
+      a root-relative path is fetched against the wrong host. og:image has to be
+      absolute or it is not an image.
+
+      `noindex, nofollow` above stays, and does not conflict. It is a directive
+      to search indexers; the unfurlers that read these tags — iMessage, Slack,
+      WhatsApp — do not consult it. This page should stay out of Google and
+      still look like something when it is sent to a phone.
+
+      NOTE: no preview is produced today. Cloudflare Access gates /admin at the
+      edge, so an unfurler is served the login page instead of this file and
+      never reads these tags. See cloudflare/ask-fredrik-worker/README.md
+      ("Link previews") for what that would take and why it has not been done.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Ask Fredrik" />
+    <meta property="og:url" content="https://ask-fredrik.eriksson-fredrik08.workers.dev/admin/ask-fredrik/" />
+    <meta property="og:title" content="Ask Fredrik — Admin" />
+    <meta
+      property="og:description"
+      content="Private dashboard for the Ask Fredrik assistant — question log, usage stats, and export."
+    />
+    <meta
+      property="og:image"
+      content="https://ask-fredrik.eriksson-fredrik08.workers.dev/og-ask-fredrik.png"
+    />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="An astronaut holding a helmet, lit against a dark mission-control wall of telemetry screens"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ask Fredrik — Admin" />
+    <meta
+      name="twitter:image"
+      content="https://ask-fredrik.eriksson-fredrik08.workers.dev/og-ask-fredrik.png"
+    />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
