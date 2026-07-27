@@ -30,6 +30,25 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-06-01",
 
+  // Preview URLs stay OFF. Cloudflare Access protects a *hostname*, and the
+  // Access application here is scoped to `ask-fredrik...workers.dev/admin` - so
+  // a preview hostname (`*-ask-fredrik...workers.dev`) is a second address for
+  // the same Worker with no Access in front of it at all.
+  //
+  // Found enabled and Public during the 2026-07-27 review, and it had been that
+  // way since the Worker was created: an unauthenticated request to a preview
+  // URL was served `/admin/ask-fredrik/` with a 200. No data leaked, because
+  // `src/access.ts` re-validates the Access JWT in-Worker and every admin API
+  // answered 401 - which is exactly the case that defence-in-depth was built
+  // for. But it left one wall standing where there should be two, and a future
+  // admin route that forgot the in-Worker check would have been a real leak.
+  //
+  // Homebase and AFR both pin this for the same reason (Homebase closed the
+  // same side door on 2026-07-16). Pinned here so a deploy can never flip it
+  // back on. If preview URLs are ever genuinely needed, enable Access for
+  // Preview URLs in the dashboard *first*.
+  "preview_urls": false,
+
   // D1 question log (D1 has a free tier). Created 2026-07-06 with
   // `npx wrangler d1 create ask-fredrik-db` (region ENAM). The id is not a
   // secret — it's unusable without account credentials. See README.md.
