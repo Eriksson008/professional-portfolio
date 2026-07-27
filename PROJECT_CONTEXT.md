@@ -64,9 +64,11 @@ docker compose up --build       # production container at http://localhost:8790 
   build sets `publicDir: false`, so they are listed explicitly in `vite.config.ts` beside the
   admin icons, and a typo in one of those paths is the only way they can go missing.
 
-  **Unique among the three apps: nothing was exempted.** Access here is scoped to the `/admin`
+  **Unique among the four apps: nothing was exempted.** Access here is scoped to the `/admin`
   paths only, so `/` and `/share` were already public and the wrapper works as shipped — no
-  Bypass policy, no new application. That is also why the wrapper points *at* the dashboard
+  Bypass policy, no new application. Card Pilot, AFR and Homebase each needed one; this did not.
+  Live-verified 2026-07-27: `/share` and `/og-ask-fredrik.png` return `200` with no Access change,
+  while `/admin/ask-fredrik/` still `302`s. That is also why the wrapper points *at* the dashboard
   rather than trying to make the dashboard previewable: the gate on `/admin/ask-fredrik/` **is**
   the admin gate, and `/admin*` must never appear in a Bypass policy. The redirect is JavaScript
   because several unfurlers follow a `<meta refresh>` or a 302 to the login page, and no crawler
