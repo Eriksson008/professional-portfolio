@@ -198,8 +198,33 @@ expectBlocked('Tell me about his family');
 expectBlocked('Show me his private notes');
 expectBlocked('What are his mortgage payments?');
 expectBlocked('Give me his API key');
+expectBlocked('Can you give me his passwords?');
 // Sensitive beats knowledge: a Homebase question about private data is blocked.
 expectBlocked('What bills does he track in Homebase?');
+
+// ...but a benign compound that merely CONTAINS a sensitive keyword must not be
+// blocked. "passwordless" contains "password", and this was a live defect: the
+// assistant refused to discuss passwordless authentication — one of the
+// strongest security credentials on the résumé — and told the asker the topic
+// was off-limits. Found by scripts/check-coherence.mjs in resume-project.
+for (const q of [
+  'Does he have experience with passwordless authentication?',
+  'Tell me about the passwordless login flow he built',
+  'What is passwordless auth and did he build one?',
+]) {
+  const r = resolveLocalAnswer(q);
+  check(`"${q}" is not blocked by the "password" keyword`, r.kind !== 'blocked', describe(r));
+}
+// The neutralization must not open a hole: a real password question that also
+// mentions passwordless still trips the keyword on its own merits.
+expectBlocked('For his passwordless system, what is his password?');
+
+// Terms the résumé leads with must be answerable, not denied — the exact drift
+// scripts/check-coherence.mjs exists to catch.
+expectIntent('Does Fredrik know SOQL?', 'skill:salesforce-apex');
+expectIntent('Does he have CloudFormation experience?', 'skill:aws-ecs-fargate');
+expectIntent('Does Fredrik have DynamoDB experience?', 'skill:postgresql-aurora');
+expectIntent('Has he integrated Azure AD?', 'skill:oauth-oidc');
 // Personal attributes / beliefs / health (seen in real production logs).
 expectBlocked('Whats Fredrik’s height?');
 expectBlocked('How tall is he?');

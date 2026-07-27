@@ -105,8 +105,14 @@ companion Cloudflare Worker in `cloudflare/ask-fredrik-worker/` has its own chec
 
 ## Privacy & public-safe content rules
 
-- **Never commit `resources/`** (gitignored) — it holds private performance reviews, an older
-  résumé, raw metrics, and a skills profile. Use them only to shape safe, public themes.
+- **There is no `resources/` directory in this repo any more — do not recreate one.** It used to
+  hold a byte-identical duplicate of the private career material (three Year End Review PDFs, the
+  pre-2024 résumé, raw metrics, skills profile). **Removed 2026-07-27.** This repository is
+  **public**, and the only thing that had ever kept those files out of it was a single `.gitignore`
+  line; a duplicate in a public working tree is exposure surface for no benefit. The canonical copy
+  lives in the sibling **private** repo at `../resume-project/resources/` — read it there when you
+  need to shape a public-safe theme, and never copy a file back into this repo.
+  *(History is clean: nothing under `resources/` was ever committed here — verified before removal.)*
 - Do not publish raw performance reviews or the old résumé PDF (the latter unless explicitly
   approved). The served résumé is `public/resume.pdf` (the public-safe one-pager).
 - **No internal system/project/product codenames.** Enterprise work stays generic (Enterprise

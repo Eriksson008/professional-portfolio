@@ -44,8 +44,33 @@ function asNeedle(keyword: string): string {
 }
 
 /** True when the question touches a sensitive/off-limits topic. */
+/**
+ * Compound terms that legitimately CONTAIN a sensitive keyword but are not
+ * sensitive questions. Neutralized before the scan so the keyword can stay a
+ * cheap substring match.
+ *
+ * "passwordless" is the motivating case and was a live defect: it contains
+ * "password", so the assistant blocked *"does he have experience with
+ * passwordless authentication?"* — refusing to discuss one of the strongest
+ * security credentials on Fredrik's résumé, and telling a recruiter the topic
+ * was off-limits. Found 2026-07-27 by scripts/check-coherence.mjs in the
+ * sibling resume-project repo.
+ *
+ * Neutralizing is not weakening: the term is replaced with a placeholder rather
+ * than deleted, so "what is his passwordless password" still trips "password"
+ * on the second word.
+ */
+const BENIGN_COMPOUNDS: Array<[RegExp, string]> = [
+  [/passwordless/g, 'pwdless'], // contains "password"
+  [/password manager/g, 'pwdmanager'], // a product category, not his credentials
+];
+
 export function isSensitiveQuestion(question: string): boolean {
-  const haystack = ` ${normalize(question)} `;
+  let normalized = normalize(question);
+  for (const [pattern, replacement] of BENIGN_COMPOUNDS) {
+    normalized = normalized.replace(pattern, replacement);
+  }
+  const haystack = ` ${normalized} `;
   return SENSITIVE_KEYWORDS.some((keyword) => haystack.includes(asNeedle(keyword)));
 }
 

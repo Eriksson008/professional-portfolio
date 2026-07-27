@@ -735,9 +735,16 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Privacy
 
-`resources/` is local-only source material (performance reviews, old résumé, RESUME-METRICS.md,
-SKILLS-PROFILE.md), gitignored and never committed. Used only to shape safe public themes. The
-site exposes only honest, defensible, public-safe content.
+**This repo no longer carries a `resources/` directory (removed 2026-07-27).** It held a
+byte-identical duplicate of the private career material — three Year End Review PDFs, the pre-2024
+résumé, `RESUME-METRICS.md`, `SKILLS-PROFILE.md`. Since this repository is **public**, the only
+thing keeping those out of it was one `.gitignore` line, and a second copy doubled the exposure
+surface for no benefit. The canonical copy now lives solely in the sibling **private** repo at
+`../resume-project/resources/`; read it there and never copy a file back. History was verified
+clean before removal — nothing under `resources/` was ever committed here. The `.gitignore` entry
+remains as a backstop.
+
+The site exposes only honest, defensible, public-safe content.
 
 ## Current Next Actions
 

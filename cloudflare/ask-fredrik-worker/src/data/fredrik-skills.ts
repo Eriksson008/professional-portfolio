@@ -251,7 +251,7 @@ export const SKILLS: SkillKnowledge[] = [
   },
   {
     name: 'AWS (ECS / Fargate)',
-    aliases: ['aws', 'ecs', 'fargate', 'amazon web services'],
+    aliases: ['aws', 'ecs', 'fargate', 'amazon web services', 'cloudformation', 'infrastructure as code', 'iac', 'secrets manager', 'load balancer', 'alb'],
     confidence: 'professional',
     publicSafe: true,
     summary:
@@ -259,9 +259,11 @@ export const SKILLS: SkillKnowledge[] = [
     relatedProjects: ['Enterprise AI Client Assist'],
     allowedAnswer:
       'Yes — Fredrik works with AWS professionally. He deployed an enterprise AI assistant on ' +
-      'ECS/Fargate behind load balancing and OIDC/Azure AD authentication, integrates AWS Bedrock ' +
-      'models, and ships with Docker and CI/CD pipelines. He supports in production what he ' +
-      'deploys.',
+      'ECS/Fargate behind an Application Load Balancer with OIDC/Azure AD authentication, ' +
+      'integrates Amazon Bedrock models, and ships with Docker and CI/CD pipelines. The ' +
+      'infrastructure is defined in CloudFormation with configuration held in Secrets ' +
+      'Manager/SSM, so the environment is code rather than console clicks. He supports in ' +
+      'production what he deploys.',
   },
   {
     name: 'Amazon Bedrock',
@@ -302,14 +304,18 @@ export const SKILLS: SkillKnowledge[] = [
   },
   {
     name: 'Salesforce Apex',
-    aliases: ['apex', 'salesforce apex'],
+    aliases: ['apex', 'salesforce apex', 'soql', 'apex trigger', 'apex triggers', 'batch apex', 'queueable apex', 'test class', 'test classes'],
     confidence: 'professional',
     publicSafe: true,
     summary: '#1 contributor on an enterprise Salesforce platform; daily Apex development.',
     relatedProjects: ['Enterprise Salesforce Platform'],
     allowedAnswer:
       'Yes — Fredrik writes Apex daily as the #1 contributor on an enterprise Salesforce ' +
-      'platform, where he has led the team since 2025 and owns releases and production support.',
+      'platform, where he has led the team since 2025 and owns releases and production support. ' +
+      'That includes Apex triggers and classes, asynchronous Batch and Queueable Apex for ' +
+      'high-volume processing, test classes, and SOQL — both writing it and tuning it, alongside ' +
+      'heap usage, to resolve large-volume data-processing failures against platform governor ' +
+      'limits.',
   },
   {
     name: 'Salesforce Lightning Web Components',
@@ -372,7 +378,7 @@ export const SKILLS: SkillKnowledge[] = [
   },
   {
     name: 'OAuth / OIDC',
-    aliases: ['oauth', 'oidc', 'openid', 'sso', 'jwt', 'authentication'],
+    aliases: ['oauth', 'oidc', 'openid', 'sso', 'jwt', 'authentication', 'azure ad', 'azuread', 'entra', 'active directory', 'passwordless', 'otp', 'identity'],
     confidence: 'professional',
     publicSafe: true,
     summary:
@@ -412,14 +418,15 @@ export const SKILLS: SkillKnowledge[] = [
   },
   {
     name: 'PostgreSQL / Aurora',
-    aliases: ['postgres', 'postgresql', 'aurora', 'rds', 'relational database'],
+    aliases: ['postgres', 'postgresql', 'aurora', 'rds', 'relational database', 'dynamodb', 'dynamo db', 'nosql', 'database'],
     confidence: 'professional',
     publicSafe: true,
-    summary: 'Professional use of PostgreSQL/Aurora as application databases on AWS.',
+    summary: 'Professional AWS data layer: PostgreSQL/Aurora application databases, plus DynamoDB.',
     allowedAnswer:
-      'Yes — Fredrik has professional experience using PostgreSQL and Aurora as application ' +
-      'databases on AWS-deployed services: schema design, queries, and supporting the data layer ' +
-      'of systems he ships.',
+      'Yes — Fredrik has professional experience with the data layer of AWS-deployed services: ' +
+      'PostgreSQL and Aurora as application databases (schema design, queries, migrations), and ' +
+      'DynamoDB behind a document-generation service he co-led through QA. In his own projects he ' +
+      'also runs SQLite via Cloudflare D1.',
   },
   {
     name: 'Elasticsearch / ELK',

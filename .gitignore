@@ -10,7 +10,10 @@ logs/
 *.log
 npm-debug.log*
 
-# Private career/source material — never commit
+# Private career/source material.
+# The resources/ directory was REMOVED from this repo on 2026-07-27 — the canonical
+# copy lives in the sibling private repo at ../resume-project/resources/. This entry
+# stays as a backstop so a stray re-creation can never be committed to a public repo.
 resources/
 _source-materials/
 *.local.pdf
