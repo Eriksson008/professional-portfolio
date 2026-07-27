@@ -88,7 +88,10 @@ if (homebase.kind === 'match') {
   check('Homebase answer says it is private', lower.includes('private'));
 }
 
-expectIntent('What is AFR Gateway?', 'project:afr-gateway');
+// Renamed from "AFR Gateway" to "App Dashboard" (2026-07-27); the old name is
+// kept as an alias so existing links and older questions still resolve.
+expectIntent('What is App Dashboard?', 'project:app-dashboard');
+expectIntent('What is AFR Gateway?', 'project:app-dashboard');
 expectIntent('Tell me about AFR', 'project:afr');
 
 const secondBrain = expectIntent('What is his second brain?', 'project:second-brain');
@@ -129,8 +132,51 @@ check(
   'Unknown-skill answer says "does not confirm"',
   k8s.kind === 'match' && k8s.answer === NOT_CONFIRMED_ANSWER
 );
-expectIntent('Is he familiar with Rust?', 'skill_not_confirmed');
 expectIntent('Has Fredrik worked with Terraform?', 'skill_not_confirmed');
+expectIntent('Does Fredrik have Kafka experience?', 'skill_not_confirmed');
+
+// Rust moved from not-confirmed to a [project]-confidence skill (2026-07-27),
+// backed by the Tauri desktop app's Rust backend. It must stay honest about
+// the level: project experience, explicitly not enterprise.
+const rust = expectIntent('Is he familiar with Rust?', 'skill:rust');
+if (rust.kind === 'match') {
+  const lower = rust.answer.toLowerCase();
+  check(
+    'Rust answer states the level explicitly',
+    lower.includes('project-level') || lower.includes('not enterprise')
+  );
+  // Falsifiable: the answer must not describe Rust as professional/production
+  // work. (An earlier version asserted !/enterprise rust/, which no natural
+  // phrasing produces — it passed no matter what the answer said.)
+  check(
+    'Rust answer never frames itself as professional or production experience',
+    !/\bprofessional\b/.test(lower) && !/\bin production\b/.test(lower)
+  );
+}
+
+// Every skill added in the 2026-07-27 repositioning routes to itself. The
+// bare 'testing' alias shipped through a green suite once precisely because
+// there was no routing test here.
+expectIntent('Does Fredrik have experience with Cloudflare Access?', 'skill:cloudflare-access');
+expectIntent('Has he built an MCP server?', 'skill:model-context-protocol-mcp');
+expectIntent('Does he know Tauri?', 'skill:tauri');
+expectIntent('Any SQLite experience?', 'skill:sqlite');
+expectIntent('What is his approach to unit testing?', 'skill:automated-testing');
+
+// ...and the testing entry must NOT swallow adjacent phrases it cannot support.
+// Its answer opens with "Yes", so these have to stay on the conservative path.
+for (const q of [
+  'Does he do penetration testing?',
+  'What is his approach to load testing?',
+  'Has he done user acceptance testing?',
+]) {
+  const r = resolveLocalAnswer(q);
+  check(
+    `"${q}" does not route to the automated-testing skill`,
+    !(r.kind === 'match' && r.intent === 'skill:automated-testing'),
+    r.kind === 'match' ? r.intent : r.kind
+  );
+}
 
 // Questions that are neither known, unknown-skill-shaped, nor sensitive fall
 // through to AI/fallback — never a fabricated claim.
@@ -183,6 +229,15 @@ for (const skill of SKILLS) {
   );
   for (const alias of skill.aliases ?? []) {
     check(`skill "${skill.name}" alias "${alias}" is normalized`, normalize(alias) === alias);
+  }
+  // Referential integrity: a project rename must not leave a dangling pointer.
+  // The 2026-07-27 "AFR Gateway" -> "App Dashboard" rename touched two of these.
+  for (const ref of skill.relatedProjects ?? []) {
+    check(
+      `skill "${skill.name}" relatedProject "${ref}" exists`,
+      PROJECTS.some((p) => p.name === ref),
+      `no project named "${ref}" in fredrik-projects.ts`
+    );
   }
 }
 for (const project of PROJECTS) {

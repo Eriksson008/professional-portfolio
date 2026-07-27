@@ -57,6 +57,62 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-27 — The phone number on `public/resume.pdf` is an accepted exception to the privacy
+  rule (user decision).** An independent review flagged that the served résumé carries
+  `(862) 225-8524` on a crawlable URL while `AGENTS.md` said "do not expose personal phone number".
+  Resolved in favor of keeping it: that PDF is the artifact uploaded to job boards and job-hunting
+  sites, where omitting a phone number costs callbacks. **The exception is scoped to that one
+  file.** The number must never enter `src/**`, `cloudflare/ask-fredrik-worker/src/**`, page copy,
+  or OG metadata — it is absent from all of them (verified 2026-07-27), and
+  `APPROVED_CONTEXT.contact` deliberately lists only email, LinkedIn, and GitHub, so the assistant
+  cannot hand it out. `AGENTS.md` now states the rule and its carve-out together.
+
+- **2026-07-27 — Public `resume.pdf` regenerated from a repositioned résumé (source of change:
+  the sibling `../resume-project` repo).** The maintained résumé package was rewritten to present
+  a senior engineer and technical lead with deep Salesforce expertise rather than a Salesforce
+  engineer — a headline line, "(Acting Tech Lead)" in the job title, bullets reordered so
+  leadership / the greenfield three-service platform / the passwordless auth design / the
+  Bedrock + Spring AI assistant come first, ATS-categorized skills, and a new **Selected Projects**
+  section. Two of those projects are this repo's own work: **Ask Fredrik** and **Homebase**.
+  `public/resume.pdf` was regenerated — still exactly one page, now built by
+  `../resume-project/resume-building/build-pdf.ps1` instead of a manual browser print. Two ATS
+  defects in the old PDF were fixed at the source: **CSS list markers never reached the PDF text
+  layer**, so the résumé extracted with zero bullets (verified: old 0, new 8), and Chrome was
+  writing `ﬁ`/`ﬂ` ligature glyphs into the text layer. On the ligatures, be precise — the old file
+  really does contain U+FB01 ×3 and U+FB02 ×1, and `pypdf` extracts `ﬁnancial` / `greenﬁeld` /
+  `workﬂows`, but `pdftotext` resolves them via the font's ToUnicode map and yields the plain
+  words. So it broke keyword matching **for parsers that don't resolve the mapping**, not for all
+  of them; `font-variant-ligatures: none` removes the extractor dependence entirely. Rationale,
+  evidence, and the keyword audit: `../resume-project/RESUME_OPTIMIZATION_REPORT.md`.
+
+- **2026-07-27 — Site content and the Ask Fredrik knowledge base repositioned to match the résumé;
+  Homebase's description corrected; AFR Gateway renamed to App Dashboard.** Regenerating the PDF
+  left the site one version behind it, so `src/data/` and the Worker knowledge base were brought
+  in line. (1) **`src/data/`**: `profile.ts` tagline and title-block no longer lead with
+  Salesforce; `skills.ts` gains an *Edge & Platform* group (Workers, D1, Access, Wrangler,
+  migrations, cron, CSP, PWA) and splits the AI group into production AI, LLM application design,
+  and AI-assisted tooling; `highlights.ts` replaces the "6 repos / AI-assisted delivery" tile with
+  the contributor-share metric; `projects.ts` adds **App Dashboard** and expands the portfolio
+  entry to cover the assistant. (2) **`src/data/projects.ts` Homebase was badly stale** — it still
+  described the *retired* Express/SQLite/Argon2id encrypted-vault app that was archived to
+  `legacy/` in the July Cloudflare rebuild. Rewritten to the real architecture (Workers + D1 +
+  Access + cron + PWA, metadata-only, no credentials stored). The same staleness existed in the
+  Worker KB. (3) **Worker KB** (`fredrik-{context,skills,projects,qa}.ts`): six new skills
+  (Cloudflare Access, Model Context Protocol, Rust, Tauri, SQLite, automated testing), all at
+  `project` confidence with answers that explicitly disclaim enterprise experience; **"AFR Gateway"
+  renamed to "App Dashboard"** with the old name kept as an alias so existing questions still
+  resolve; curated recruiter answers rewritten. (4) **A skill entry named `API gateways (Kong)`
+  was genericized** to `API gateway integration` — "Kong" is on the confidentiality never-list in
+  `../resume-project/AGENTS.md` and should never have been in a public knowledge base.
+  (5) **Independent review caught two real defects** before this landed: "63% of the codebase"
+  overstated a documented **63%-of-commits** figure (corrected everywhere, including the résumé),
+  and a bare `'testing'` alias made the assistant answer "Yes —" to *"Does he do penetration
+  testing?"*, hijacking questions that belong on the conservative not-confirmed path. Both fixed,
+  with routing tests added for all six new skills, a `relatedProjects` referential-integrity
+  invariant, and negative tests for the alias. Worker suite 424 + 54 = **478 checks**.
+  (6) **`SYSTEM_PROMPT` is 7,564 chars against a hard 8,000-char test cap** — every skill/project
+  `summary` is serialized into it on every AI call, so keep new summaries terse.
+
 - **2026-07-23 — Admin auth replaced with Cloudflare Access; admin dashboard now served by the
   Worker (user-directed brief; supersedes the 2026-07-07 token-gate design).** The manually
   pasted `ADMIN_TOKEN` bearer (sessionStorage + `Authorization` header) is fully retired.

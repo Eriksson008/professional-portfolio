@@ -4,7 +4,7 @@ export const profile = {
   role: 'Senior Software Engineer',
   location: 'Austin, TX Metro Area',
   tagline:
-    'Senior full-stack engineer and acting Tech Lead — building and owning enterprise Salesforce platforms, Java/Spring services, and React/TypeScript applications on AWS, with AI woven into the way I deliver.',
+    'Senior software engineer and acting Tech Lead — architecture and delivery across Java/Spring services, React/TypeScript applications, AWS infrastructure, and a large Salesforce platform, with AI-enabled applications shipped in production.',
   links: {
     email: 'eriksson.fredrik08@gmail.com',
     linkedin: 'https://www.linkedin.com/in/eriksson-fredrik',
@@ -16,7 +16,7 @@ export const profile = {
   // The "title block" — modeled on the title block of an engineering drawing.
   titleBlock: [
     { field: 'Role', value: 'Senior Software Engineer' },
-    { field: 'Discipline', value: 'Full-stack · Salesforce · Cloud' },
+    { field: 'Discipline', value: 'Backend · Full-stack · Cloud · Platform' },
     { field: 'Leadership', value: 'Acting Tech Lead · ~1.5 yrs' },
     { field: 'Scale', value: '750+ commits · 6 repos · 120+ stories' },
     { field: 'Recognition', value: 'Exceptional Impact · 2023–2025' },

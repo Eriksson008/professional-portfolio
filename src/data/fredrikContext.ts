@@ -61,7 +61,7 @@ export const curatedAnswers: CuratedAnswer[] = [
     question: 'What are Fredrik’s strongest projects?',
     keywords: ['project', 'built', 'portfolio piece', 'work sample', 'case stud', 'shipped'],
     answer:
-      'Three enterprise projects stand out: an Enterprise AI Client-Assist assistant (React + Spring AI/Spring Boot on AWS Bedrock, deployed on ECS/Fargate — he was the single largest contributor), a Secure Client Onboarding Portal (three integrated microservices with passwordless authentication, delivered in under five weeks as lead developer), and an Enterprise Salesforce Platform where he is the #1 contributor and now leads the team. Personal work includes Homebase (an encrypted local accounts manager), AFR (a Next.js community hub), and this portfolio itself — built with the same stack it advertises.',
+      'Three from work: a greenfield client onboarding platform he led the architecture and delivery of — three integrated microservices, roughly 16,000 lines across 144 commits in under five weeks, including a passwordless authentication flow built to enterprise CIAM and penetration-test requirements; an enterprise AI assistant where he was the single largest contributor at 63% of its commits (React, Spring AI, Amazon Bedrock, ECS/Fargate); and an enterprise Salesforce platform where he is the top contributor and has led the team since 2025. Three of his own: this portfolio and the assistant answering you, Homebase — a household app he runs in production on Cloudflare Workers and D1 with live schema migrations, a scheduled job, and 173 tests — and App Dashboard, a Tauri/Rust desktop control plane for local containerized services.',
   },
   {
     id: 'stack',
@@ -82,7 +82,7 @@ export const curatedAnswers: CuratedAnswer[] = [
       'typescript',
     ],
     answer:
-      'Frontend: React and TypeScript (plus Lightning Web Components). Backend: Java / Spring Boot and Node. Cloud: AWS — ECS/Fargate, Bedrock, load balancing, and OIDC/Azure AD auth. Platform: enterprise Salesforce (Apex, LWC, OmniStudio). Delivery: CI/CD with Copado, Jenkins, and GitHub Actions, Docker, PostgreSQL/Aurora, and Elasticsearch/ELK. He also builds enterprise AI applications and uses Codex and Claude Code for AI-assisted review, documentation, and multi-agent workflows.',
+      'Backend: Java 21 / Spring Boot, REST APIs and service-to-service integration, plus Node/Express. Frontend: React and TypeScript (and Next.js in personal projects). Cloud: AWS — ECS/Fargate, Application Load Balancer, CloudFormation, Secrets Manager, Amazon Bedrock, DynamoDB — with OIDC/Azure AD access control. Data: PostgreSQL/Aurora, DynamoDB, and Elasticsearch/ELK. Platform: an enterprise Salesforce estate he leads and is the top contributor on (Apex, Lightning Web Components, OmniStudio). Delivery: CI/CD with Jenkins, GitHub Actions, and Copado, plus Docker. In his own shipped projects he also works on Cloudflare Workers, D1, Workers AI, and Cloudflare Access, and has built with Tauri/Rust and Model Context Protocol tooling.',
   },
   {
     id: 'why-interview',
@@ -104,7 +104,7 @@ export const curatedAnswers: CuratedAnswer[] = [
     question: '',
     keywords: ['ai', 'llm', 'bedrock', 'machine learning', 'genai', 'agent', 'copilot'],
     answer:
-      'Fredrik builds enterprise AI applications. He was the single largest contributor to an internal AI client-assist assistant — a React frontend with a Spring AI / Spring Boot backend integrating an AWS Bedrock model, deployed on ECS/Fargate behind OIDC/Azure AD auth. He also uses Codex and Claude Code for AI-assisted code review, documentation, knowledge transfer, and multi-agent delivery workflows across his repositories.',
+      'Three different things, worth keeping separate. In production at work, he was the single largest contributor (137 commits, 63% of its commits) to an internal AI assistant that answers business users’ natural-language questions over enterprise data and search — a React frontend with a Spring AI / Spring Boot backend on Amazon Bedrock, deployed on ECS/Fargate behind OIDC/Azure AD auth. In his own projects, he designed and operates this portfolio’s assistant: a five-stage pipeline with rate limiting, a sensitive-topic filter, a curated matcher, a Workers AI call, and a deterministic fallback. Separately, he uses Codex and Claude Code as development tools for review and documentation — tooling, not machine-learning engineering, and he claims no productivity number for it.',
   },
   {
     id: 'experience',

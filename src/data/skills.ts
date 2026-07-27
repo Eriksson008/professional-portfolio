@@ -5,15 +5,31 @@ export interface SkillGroup {
 
 export const skillGroups: SkillGroup[] = [
   {
+    // Kept in the résumé's four tiers: production AI, personal AI-enabled apps,
+    // LLM application design as a skill, and AI-assisted tooling — never blended.
     name: 'AI / LLM Systems',
     items: [
       'LLM application development',
-      'Tool calling / RAG',
-      'Multi-agent workflows',
-      'Codex / Claude Code',
+      'Amazon Bedrock',
       'Spring AI',
-      'AWS Bedrock',
-      'AI-assisted delivery',
+      'Cloudflare Workers AI',
+      'System prompts / curated context',
+      'Output guardrails / fallback pipelines',
+      'Model Context Protocol (MCP)',
+      'Codex / Claude Code (AI-assisted development)',
+    ],
+  },
+  {
+    name: 'Edge & Platform',
+    items: [
+      'Cloudflare Workers',
+      'Cloudflare D1',
+      'Cloudflare Access',
+      'Wrangler',
+      'Schema migrations',
+      'Scheduled jobs / cron',
+      'Content Security Policy',
+      'Progressive Web Apps',
     ],
   },
   {
@@ -55,7 +71,16 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     name: 'Frontend',
-    items: ['React', 'TypeScript', 'JavaScript', 'HTML', 'CSS', 'Lightning Web Components', 'Vite'],
+    items: [
+      'React',
+      'TypeScript',
+      'JavaScript',
+      'Next.js',
+      'HTML',
+      'CSS',
+      'Lightning Web Components',
+      'Vite',
+    ],
   },
   {
     name: 'Backend & Data',
@@ -69,6 +94,7 @@ export const skillGroups: SkillGroup[] = [
       'SQL',
       'PostgreSQL / Aurora',
       'DynamoDB',
+      'SQLite',
       'Database Migrations',
       'Elasticsearch / ELK',
     ],
@@ -80,6 +106,7 @@ export const skillGroups: SkillGroup[] = [
       'Jira',
       'Agile / Scrum',
       'Code Reviews',
+      'Test Coverage',
       'Production Support',
       'Release Management',
       'Mentoring',

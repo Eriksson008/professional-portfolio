@@ -50,26 +50,33 @@ export const CURATED_ANSWERS: CuratedAnswer[] = [
     question: 'What are Fredrik’s strongest projects?',
     keywords: ['project', 'strongest', 'built', 'portfolio piece', 'work sample', 'case stud', 'shipped'],
     answer:
-      'Three enterprise projects stand out: an Enterprise AI Client Assist assistant (React + ' +
-      'Spring AI on an AWS/Bedrock-style architecture — he was the single largest contributor), a ' +
-      'Secure Internal/External Onboarding Portal (OTP email verification, session management, and ' +
-      'secure onboarding patterns, delivered as lead developer), and an enterprise Salesforce ' +
-      'platform where he is the #1 contributor and now leads the team. Personal work includes ' +
-      'Homebase (a private homeowner/home-operations dashboard concept), AFR (a content/community ' +
-      'concept), AFR Gateway (a private launcher dashboard for self-hosted apps), and this ' +
-      'portfolio itself — including the Cloudflare Worker assistant answering you now.',
+      'Three from work: a greenfield client onboarding platform he led the architecture and ' +
+      'delivery of — three integrated microservices, roughly 16,000 lines across 144 commits in ' +
+      'under five weeks, including a passwordless authentication flow built to enterprise CIAM ' +
+      'and penetration-test requirements; an enterprise AI assistant where he was the single ' +
+      'largest contributor at 63% of its commits (React, Spring AI, Amazon Bedrock, ECS/Fargate); ' +
+      'and an enterprise Salesforce platform where he is the top contributor with 470+ commits ' +
+      'and has led the team since 2025. Three of his own: this portfolio and the assistant ' +
+      'answering you now, Homebase — a household app he runs in production on Cloudflare ' +
+      'Workers and D1 with live schema migrations, a scheduled job, and 173 tests — and App ' +
+      'Dashboard, a Tauri/Rust desktop control plane for local containerized services with its ' +
+      'safety invariants under unit test. The personal ones are where he owns deployment and ' +
+      'operations end to end.',
   },
   {
     intent: 'technical_stack',
     question: 'What is Fredrik’s technical stack?',
     keywords: ['stack', 'technolog', 'languages', 'frameworks', 'tools', 'skills', 'typescript', 'react', 'spring', 'java'],
     answer:
-      'Frontend: React and TypeScript (plus Lightning Web Components). Backend: Java / Spring Boot ' +
-      'and Node. Cloud: AWS — ECS/Fargate, Bedrock, load balancing, and OIDC/Azure AD auth — plus ' +
-      'Cloudflare Workers for edge projects like this assistant. Platform: enterprise Salesforce ' +
-      '(Apex, LWC, OmniStudio). Delivery: CI/CD with Copado, Jenkins, and GitHub Actions, Docker, ' +
-      'PostgreSQL/Aurora, and Elasticsearch/ELK. He also builds enterprise AI applications and ' +
-      'uses Codex and Claude Code for AI-assisted review, documentation, and multi-agent workflows.',
+      'Backend: Java 21 / Spring Boot, REST APIs and service-to-service integration, plus ' +
+      'Node/Express. Frontend: React and TypeScript (and Next.js in personal projects). Cloud: ' +
+      'AWS — ECS/Fargate, Application Load Balancer, CloudFormation, Secrets Manager, Amazon ' +
+      'Bedrock, DynamoDB — with OIDC/Azure AD access control. Data: PostgreSQL/Aurora, DynamoDB, ' +
+      'and Elasticsearch/ELK. Platform: an enterprise Salesforce estate he leads and is the top ' +
+      'contributor on (Apex, Lightning Web Components, OmniStudio). Delivery: CI/CD with Jenkins, ' +
+      'GitHub Actions, and Copado, plus Docker. In his own shipped projects he also works on ' +
+      'Cloudflare Workers, D1, Workers AI, and Cloudflare Access, and has built with Tauri/Rust ' +
+      'and Model Context Protocol tooling.',
   },
   {
     intent: 'why_interview',
@@ -100,24 +107,31 @@ export const CURATED_ANSWERS: CuratedAnswer[] = [
     question: 'What AI experience does Fredrik have?',
     keywords: ['ai', 'llm', 'machine learning', 'genai', 'agent', 'copilot', 'artificial intelligence'],
     answer:
-      'Fredrik builds AI applications at two levels. Professionally, he was the single largest ' +
-      'contributor to an enterprise AI Client Assist assistant — a React frontend with a Spring ' +
-      'AI / Spring Boot backend integrating AWS Bedrock models, deployed on ECS/Fargate. On his ' +
-      'own infrastructure, he built the Cloudflare Workers AI assistant answering you right now, ' +
-      'including its curated matcher, safety filters, and guarded model integration. He also uses ' +
-      'Codex and Claude Code daily for AI-assisted review, documentation, and multi-agent ' +
-      'delivery workflows.',
+      'Three different things, worth keeping separate. In production at work, he was the single ' +
+      'largest contributor (137 commits, 63% of its commits) to an enterprise AI assistant that ' +
+      'answers business users’ natural-language questions over enterprise data and search — a ' +
+      'React frontend with a Spring AI / Spring Boot backend on Amazon Bedrock, deployed on ' +
+      'ECS/Fargate. In his own projects, he designed and operates the assistant answering you now: ' +
+      'a five-stage pipeline with rate limiting, a sensitive-topic filter, a curated matcher, a ' +
+      'Workers AI call, and a deterministic fallback, plus a guard that discards any model answer ' +
+      'echoing its own instructions. Separately, he uses Codex and Claude Code as development ' +
+      'tools for review and documentation — that is tooling, not machine-learning engineering, ' +
+      'and he does not claim a productivity number for it.',
   },
   {
     intent: 'cloud_experience',
     question: 'How does Fredrik use AWS and cloud?',
     keywords: ['cloud experience', 'use cloud', 'deployment', 'infrastructure', 'devops', 'ci/cd', 'cicd'],
     answer:
-      'Fredrik works with AWS daily: he deployed an enterprise AI assistant on ECS/Fargate behind ' +
-      'load balancing and OIDC/Azure AD authentication, integrates AWS Bedrock models, and ships ' +
-      'with Docker and CI/CD pipelines (Jenkins, Copado, GitHub Actions). He also builds on ' +
-      'Cloudflare’s edge platform — this portfolio’s assistant is a Cloudflare Worker with ' +
-      'Workers AI and D1 that he built and deployed himself.',
+      'Fredrik works with AWS daily: containerized services on ECS/Fargate behind an Application ' +
+      'Load Balancer, infrastructure defined in CloudFormation, configuration in Secrets ' +
+      'Manager/SSM, OIDC/Azure AD access control, Amazon Bedrock and DynamoDB, and release ' +
+      'automation in Jenkins alongside GitHub Actions and Copado. Outside work he owns the whole ' +
+      'lifecycle himself on Cloudflare’s edge platform: this assistant is a Worker he built and ' +
+      'deployed with Workers AI and D1, and his household app runs on Workers and D1 with ' +
+      'forward-only schema migrations applied to live data, a daily scheduled job, Cloudflare ' +
+      'Access identity, and GitHub Actions deploy pipelines. The enterprise experience is the ' +
+      'depth; the personal projects are where he owns the operations end to end.',
   },
   {
     intent: 'salesforce_experience',

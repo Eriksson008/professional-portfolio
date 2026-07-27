@@ -113,7 +113,15 @@ companion Cloudflare Worker in `cloudflare/ask-fredrik-worker/` has its own chec
   Salesforce Platform, AI Client-Assist Assistant, Secure Client Onboarding Portal, etc.).
 - Only use **git-verifiable or directly documented** metrics. No invented or inflated numbers,
   no efficiency percentages without a baseline.
-- Do not expose personal phone number, home address, secrets, or credentials.
+- Do not expose home address, secrets, or credentials.
+- **Phone number — accepted exception, `public/resume.pdf` only (user decision, 2026-07-27).** The
+  served résumé carries `(862) 225-8524` in its contact header deliberately: that PDF is what gets
+  uploaded to job boards and job-hunting sites, where a missing phone number costs callbacks. The
+  exception is **scoped to that one artifact**. The phone number must never appear in the site
+  source (`src/**`), the Ask Fredrik knowledge base
+  (`cloudflare/ask-fredrik-worker/src/**`), page copy, OG metadata, or any answer the assistant can
+  produce — and it is absent from all of them today (verified 2026-07-27). Do not "helpfully" add it
+  to `profile.ts` links or `APPROVED_CONTEXT.contact`.
 
 ## Docker commands
 

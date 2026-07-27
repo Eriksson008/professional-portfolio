@@ -123,7 +123,7 @@ export const SKILLS: SkillKnowledge[] = [
     confidence: 'project',
     publicSafe: true,
     summary:
-      'Integrated Workers AI in the portfolio assistant: guarded model calls, timeouts, output caps, curated fallbacks.',
+      'Workers AI in the portfolio assistant: guarded calls, timeouts, output caps, curated fallbacks.',
     relatedProjects: ['Professional Portfolio'],
     allowedAnswer:
       'Yes — this portfolio’s assistant uses Cloudflare Workers AI. Fredrik built the guarded ' +
@@ -137,13 +137,105 @@ export const SKILLS: SkillKnowledge[] = [
     confidence: 'project',
     publicSafe: true,
     summary:
-      'Project exploration: privacy-conscious question logging for the portfolio assistant (salted hashes, no raw IPs).',
-    relatedProjects: ['Professional Portfolio'],
+      'Two shipped projects: question logging here, and an app with forward-only migrations on live data.',
+    relatedProjects: ['Professional Portfolio', 'Homebase'],
     allowedAnswer:
-      'Fredrik has used Cloudflare D1 in this portfolio’s assistant for privacy-conscious ' +
-      'question logging (salted IP hashes, never raw IPs). It’s project-level exploration of the ' +
-      'platform, not deep production database experience — that side of his work is ' +
-      'PostgreSQL/Aurora on AWS.',
+      'Yes — Fredrik uses Cloudflare D1 in two shipped projects. Here it stores the assistant’s ' +
+      'question log with salted IP hashes and FIFO retention (never raw IPs). In Homebase it is ' +
+      'the production datastore, with forward-only schema migrations applied against live data ' +
+      'behind a documented recovery path. That is project-level rather than enterprise ' +
+      'experience — his enterprise database work is PostgreSQL/Aurora and DynamoDB on AWS.',
+  },
+  {
+    name: 'Cloudflare Access',
+    aliases: ['cloudflare access', 'zero trust', 'zero-trust', 'access policy'],
+    confidence: 'project',
+    publicSafe: true,
+    summary:
+      'Zero-trust gating; the identity assertion is re-validated in-Worker, not trusted at the edge.',
+    relatedProjects: ['Professional Portfolio', 'Homebase'],
+    allowedAnswer:
+      'Yes — Fredrik uses Cloudflare Access to gate the private surfaces of his own projects, and ' +
+      'notably does not stop at the edge check: this portfolio’s admin dashboard re-validates the ' +
+      'Access identity assertion inside the Worker itself — RS256 against the team key set, with ' +
+      'issuer, audience, and expiry all verified, then an email allowlist — so a request that ' +
+      'bypasses Access fails closed. It’s project-level experience; his enterprise identity work ' +
+      'is OIDC/Azure AD and passwordless OTP flows.',
+  },
+  {
+    name: 'Model Context Protocol (MCP)',
+    aliases: ['mcp', 'model context protocol', 'mcp server', 'mcp servers'],
+    confidence: 'project',
+    publicSafe: true,
+    summary:
+      'Built a TypeScript MCP server: ten tools, provider integrations, path-safety chokepoint.',
+    allowedAnswer:
+      'Yes — Fredrik has built a Model Context Protocol server: a TypeScript package exposing ten ' +
+      'tools, with external provider integrations, FFmpeg-based media processing, a provenance ' +
+      'and licensing evidence trail, and a path-safety chokepoint that rejects traversal, symlink ' +
+      'escapes, and UNC paths. It’s project-level developer-tooling work rather than enterprise ' +
+      'production experience.',
+  },
+  {
+    name: 'Rust',
+    aliases: ['rust', 'rust lang', 'rustlang'],
+    confidence: 'project',
+    publicSafe: true,
+    summary:
+      'Rust backend of a personal desktop app: orchestration, manifest validation, safety invariants.',
+    relatedProjects: ['App Dashboard'],
+    allowedAnswer:
+      'Fredrik has project-level Rust experience, not enterprise experience — he wrote the Rust ' +
+      'backend of a personal desktop app that orchestrates local containerized services: manifest ' +
+      'validation, process lifecycle, content fingerprinting, and the safety invariants that keep ' +
+      'it from ever deleting data, with 50 unit tests across the backend. He would describe it as a working ' +
+      'competence he is still deepening, not a primary language.',
+  },
+  {
+    name: 'Tauri',
+    aliases: ['tauri', 'desktop app', 'native app'],
+    confidence: 'project',
+    publicSafe: true,
+    summary:
+      'Tauri v2 desktop shell: multi-webview windows, typed IPC boundary, capability-scoped child webviews.',
+    relatedProjects: ['App Dashboard'],
+    allowedAnswer:
+      'Yes — Fredrik built a Tauri v2 desktop application: a Rust backend behind a typed IPC ' +
+      'boundary, a Next.js frontend, custom multi-webview windows with an app-owned title bar, ' +
+      'and child webviews granted zero host capabilities. Project-level experience rather than ' +
+      'enterprise production work.',
+  },
+  {
+    name: 'SQLite',
+    aliases: ['sqlite', 'sqlite3'],
+    confidence: 'project',
+    publicSafe: true,
+    summary: 'SQLite through Cloudflare D1 — schema design, forward-only migrations, and indexed pagination.',
+    relatedProjects: ['Homebase', 'Professional Portfolio'],
+    allowedAnswer:
+      'Yes, at project level — Fredrik works with SQLite through Cloudflare D1, including schema ' +
+      'design, forward-only migrations applied to live data, chronological indexes for cursor ' +
+      'pagination, and constraint/trigger-backed data invariants. His enterprise relational work ' +
+      'is PostgreSQL/Aurora.',
+  },
+  {
+    name: 'Automated testing',
+    // Deliberately NOT a bare 'testing' alias: that substring swallows
+    // "penetration testing", "load testing", "user acceptance testing" etc.,
+    // and this entry's answer opens with "Yes". Those must stay on the
+    // conservative not-confirmed path.
+    aliases: ['automated testing', 'unit test', 'unit tests', 'unit testing', 'vitest', 'test coverage', 'tdd'],
+    confidence: 'professional',
+    publicSafe: true,
+    summary:
+      'Test coverage as a review standard; personal projects test in the runtime that serves production.',
+    relatedProjects: ['Homebase', 'Professional Portfolio'],
+    allowedAnswer:
+      'Yes — professionally Fredrik reviews for test coverage and maintainability as a team ' +
+      'standard, including Apex test classes. In his own projects he goes further: Homebase runs ' +
+      '173 tests inside the same workerd runtime that serves production rather than in Node, and ' +
+      'this portfolio’s assistant carries over 400 automated checks covering its answer pipeline and ' +
+      'its authentication, all run in CI on every change.',
   },
   {
     name: 'GitHub Pages',
@@ -172,7 +264,7 @@ export const SKILLS: SkillKnowledge[] = [
       'deploys.',
   },
   {
-    name: 'AWS Bedrock',
+    name: 'Amazon Bedrock',
     aliases: ['bedrock', 'aws bedrock', 'amazon bedrock'],
     confidence: 'professional',
     publicSafe: true,
@@ -180,9 +272,10 @@ export const SKILLS: SkillKnowledge[] = [
       'Integrated Bedrock models in an enterprise AI assistant (Spring AI backend) as its largest contributor.',
     relatedProjects: ['Enterprise AI Client Assist'],
     allowedAnswer:
-      'Yes — Fredrik integrated AWS Bedrock models into an enterprise AI client-assist assistant ' +
-      'with a Spring AI / Spring Boot backend, as the project’s single largest contributor. ' +
-      'That system runs in production on ECS/Fargate.',
+      'Yes — Fredrik integrated Amazon Bedrock models into an enterprise AI client-assist ' +
+      'assistant with a Spring AI / Spring Boot backend, as the project’s single largest ' +
+      'contributor (137 commits, 63% of its commits). That system runs in production on ' +
+      'ECS/Fargate behind OIDC/Azure AD authentication.',
   },
   {
     name: 'Spring Boot / Spring AI',
@@ -264,15 +357,18 @@ export const SKILLS: SkillKnowledge[] = [
       'on every push to main.',
   },
   {
-    name: 'API gateways (Kong)',
-    aliases: ['kong', 'api gateway', 'api gateways'],
+    // Deliberately generic: naming the specific gateway product would identify
+    // the employer's internal stack, which the résumé/portfolio rules forbid.
+    name: 'API gateway integration',
+    aliases: ['api gateway', 'api gateways'],
     confidence: 'professional',
     publicSafe: true,
-    summary: 'Professional exposure to API gateway routing/auth/integration patterns, including Kong-style gateways.',
+    summary: 'Professional exposure to API gateway routing, authentication, and integration patterns.',
     allowedAnswer:
       'Fredrik has professional experience with API gateway concepts — routing, authentication, ' +
-      'and integration patterns in enterprise environments, including Kong-style gateways. It’s a ' +
-      'supporting skill in his API and integration work rather than a headline specialty.',
+      'and service-to-service integration patterns in enterprise environments. It’s a supporting ' +
+      'skill in his API and integration work rather than a headline specialty, and the specific ' +
+      'products involved are employer-internal, so they aren’t named.',
   },
   {
     name: 'OAuth / OIDC',
@@ -294,8 +390,8 @@ export const SKILLS: SkillKnowledge[] = [
     confidence: 'personal',
     publicSafe: true,
     summary:
-      'Hands-on personal infrastructure: secure private networking, remote access, and controlled access to self-hosted tools.',
-    relatedProjects: ['AFR Gateway'],
+      'Personal infrastructure: private networking, remote access, controlled access to self-hosted tools.',
+    relatedProjects: ['App Dashboard'],
     allowedAnswer:
       'Yes — Fredrik has hands-on experience with Tailscale in personal infrastructure and ' +
       'self-hosted app workflows, especially around private networking, remote access, and access ' +
@@ -352,8 +448,8 @@ export const SKILLS: SkillKnowledge[] = [
     confidence: 'professional',
     publicSafe: true,
     summary:
-      'Implements polished, accessible UIs: design-token CSS system, motion design, reduced-motion support on this site.',
-    relatedProjects: ['Professional Portfolio', 'AFR Gateway'],
+      'Polished accessible UIs: design-token CSS, motion design, reduced-motion support on this site.',
+    relatedProjects: ['Professional Portfolio', 'App Dashboard'],
     allowedAnswer:
       'Yes — Fredrik implements polished, accessible UIs. This portfolio demonstrates it ' +
       'directly: a hand-written CSS design-token system, cinematic motion design with ' +

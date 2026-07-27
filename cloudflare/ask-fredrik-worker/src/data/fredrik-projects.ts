@@ -2,7 +2,7 @@
  * Ask Fredrik — approved public-safe project knowledge.
  *
  * Every entry is publishable directly on the public portfolio site. Private
- * projects (Homebase, AFR Gateway, Second Brain) are described at the
+ * projects (Homebase, App Dashboard, Second Brain) are described at the
  * concept/architecture level ONLY — their `boundaries` list what the
  * assistant must never reveal, and the `allowedAnswer` is written to stay
  * inside those boundaries. Enterprise projects stay generic: no internal
@@ -46,19 +46,26 @@ export const PROJECTS: ProjectKnowledge[] = [
       'Cloudflare Workers',
       'Workers AI',
       'Cloudflare D1',
+      'Cloudflare Access',
     ],
     highlights: [
       'Cinematic dark art direction with a hand-written CSS design-token system',
-      '“Ask Fredrik” assistant: curated matcher, sensitive-topic filter, rate limiting, Workers AI fallback',
+      '“Ask Fredrik” assistant: five-stage answer pipeline — rate limiting, sensitive-topic filter, curated matcher, Workers AI call, deterministic fallback',
+      'A leak guard discards any model answer that echoes its own instructions or the knowledge base',
+      'Private analytics dashboard gated by Cloudflare Access and re-validated in-Worker with RS256 signature checks',
+      '400+ automated checks covering the answer pipeline and the authentication, run in CI',
       'Ships two ways from one build: GitHub Pages and a Dockerized nginx site',
-      'Résumé, projects, and contact experience aimed at recruiters',
     ],
     allowedAnswer:
       'The Professional Portfolio is the site you’re on: a Vite + React + TypeScript app with a ' +
       'cinematic dark art direction, built on a hand-written CSS design-token system and deployed ' +
-      'both to GitHub Pages and as a Dockerized nginx site. Its “Ask Fredrik” assistant — the ' +
-      'thing answering you now — is a Cloudflare Worker Fredrik built, with a curated answer ' +
-      'pipeline, sensitive-topic filtering, rate limiting, and a guarded Workers AI fallback.',
+      'both to GitHub Pages and as a Dockerized nginx site. The “Ask Fredrik” assistant — the ' +
+      'thing answering you now — is a Cloudflare Worker he built: questions route through rate ' +
+      'limiting, a sensitive-topic filter, a curated matcher, a Workers AI call, and then a ' +
+      'deterministic fallback, so an unavailable or off-topic model never produces an unsupported ' +
+      'answer. A leak guard discards any answer that echoes its own instructions. Its private ' +
+      'analytics dashboard sits behind Cloudflare Access and is re-validated inside the Worker, ' +
+      'and the whole thing carries over 400 automated checks that run in CI.',
   },
   {
     name: 'Homebase',
@@ -66,46 +73,82 @@ export const PROJECTS: ProjectKnowledge[] = [
     publicSafe: true,
     aliases: ['homebase', 'home base', 'homeowner dashboard', 'homeowner app', 'home dashboard'],
     summary:
-      'Private homeowner/personal “operating system” concept: household dashboard, bills and payments, ' +
-      'accounts, rooms, and projects.',
-    technologies: ['React', 'TypeScript'],
+      'Private household app running in production on Cloudflare Workers + D1; metadata-only records, ' +
+      'installed as a PWA, owned end to end.',
+    technologies: [
+      'Cloudflare Workers',
+      'Cloudflare D1',
+      'Cloudflare Access',
+      'Wrangler',
+      'Vitest / workerd',
+      'GitHub Actions',
+      'Service worker / PWA',
+    ],
     highlights: [
-      'Household dashboard concept: bills/payments, account manager, room planning, projects',
-      'Demonstrates product thinking and full-stack skills on personal infrastructure',
+      'Production deployment owned solo: forward-only D1 schema migrations applied to live data behind a documented recovery path',
+      'Daily scheduled job that sends one reminder summary per run, running on the edge independent of any machine being on',
+      'Cloudflare Access identity with a defense-in-depth check at the Worker, plus a self-only Content Security Policy',
+      '173 tests run inside the workerd runtime that serves production, not in Node',
+      'Deliberately stores no credentials of any kind — account records are metadata only',
     ],
     boundaries: [
       'Never reveal personal details, bill or payment details, account details, vendors, addresses, or any household data',
-      'Describe the concept and skills only',
+      'Describe the architecture, engineering practices, and skills only',
     ],
     allowedAnswer:
-      'Homebase is a private homeowner/“personal operating system” concept Fredrik builds for ' +
-      'himself: a household dashboard covering bills and payments, an account manager, room ' +
-      'planning, and home projects. It’s private by design, so its personal specifics aren’t ' +
-      'shared — what it demonstrates publicly is his product thinking and full-stack skills ' +
-      'applied to personal infrastructure.',
+      'Homebase is a private household app Fredrik designed, built, and operates himself — ' +
+      'bill scheduling, payment tracking, and metadata-only account records, installed as a phone ' +
+      'home-screen app. Architecturally it is the project where he owns the whole production ' +
+      'lifecycle himself: Cloudflare Workers and D1, forward-only schema migrations applied ' +
+      'against live data behind a documented recovery path, a daily scheduled reminder job, ' +
+      'Cloudflare Access identity with a second check at the Worker, a self-only Content Security ' +
+      'Policy, and validate/deploy pipelines in GitHub Actions. Its 173 tests run inside the same ' +
+      'runtime that serves production. The household data itself is private and never discussed; ' +
+      'by design the app stores no credentials at all.',
   },
   {
-    name: 'AFR Gateway',
+    name: 'App Dashboard',
     status: 'private',
     publicSafe: true,
-    aliases: ['afr gateway', 'app launcher', 'launcher dashboard', 'private gateway'],
+    aliases: [
+      'app dashboard',
+      'afr gateway',
+      'app launcher',
+      'launcher dashboard',
+      'private gateway',
+      // deliberately no 'desktop app' alias: that phrase belongs to the Tauri
+      // skill, and skills win alias-length ties in matchKnowledge().
+    ],
     summary:
-      'Polished private launcher dashboard for self-hosted apps: config-driven app cards, ' +
-      'environment-driven URLs, public/private app handling.',
-    technologies: ['React', 'TypeScript'],
+      'Private native desktop control plane for local containerized services: discovery, manifest ' +
+      'validation, per-service windows. Rust backend, Next.js frontend.',
+    technologies: [
+      'Tauri v2',
+      'Rust',
+      'Next.js 15',
+      'React 19',
+      'TypeScript',
+      'Docker Compose',
+    ],
     highlights: [
-      'Config-driven app cards with environment-driven URLs',
-      'Public/private app handling behind private networking',
-      'Premium, design-led UI',
+      'Rebuilds a service only when a per-app content fingerprint changes, instead of rebuilding every launch',
+      'Staged readiness contract before a window opens: compose validity, containers running, healthchecks, then an HTTP probe',
+      'Rust backend covered by 50 unit tests, including the safety invariants: no volume deletion anywhere, loopback-only URLs, path-traversal and symlink containment',
+      'Child webviews are granted zero host capabilities and are origin-locked; the frontend can only ever send an application id',
     ],
     boundaries: [
       'Never reveal internal URLs, private endpoints, or the specific apps and infrastructure behind it',
     ],
     allowedAnswer:
-      'AFR Gateway is a polished private launcher dashboard Fredrik built for his self-hosted ' +
-      'apps: config-driven app cards, environment-driven URLs, public/private app handling, and a ' +
-      'premium UI. The specific apps and endpoints behind it are private, but the project itself ' +
-      'shows his design-led frontend work and personal infrastructure skills.',
+      'App Dashboard is a private native desktop application Fredrik built to run his own local ' +
+      'containerized services: it discovers repositories, validates their manifests, rebuilds only ' +
+      'when a content fingerprint changes, waits on a staged readiness contract, and opens each ' +
+      'service in its own window. It is a Tauri v2 app — Rust backend, Next.js and React frontend ' +
+      '— and the interesting part is the safety engineering: the Rust backend carries 50 unit ' +
+      'tests covering manifest validation, compose orchestration, and discovery, including the ' +
+      'invariants that it never removes a volume, keeps URLs loopback-only, ' +
+      'path-traversal containment, and child webviews with zero host capabilities. The specific ' +
+      'apps and endpoints behind it stay private.',
   },
   {
     name: 'AFR',

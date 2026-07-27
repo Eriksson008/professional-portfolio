@@ -32,8 +32,8 @@ export const highlights: Highlight[] = [
     note: 'Employer’s highest performance rating, three consecutive years (2023–2025).',
   },
   {
-    value: '6 repos',
-    label: 'AI-assisted delivery',
-    note: 'Standardized agent-driven review, docs, and smart-commit traceability across repos.',
+    value: '63%',
+    label: 'Of an AI assistant’s commits',
+    note: 'Top contributor (137 of 217 commits) on a production assistant built with Spring AI on Amazon Bedrock.',
   },
 ];

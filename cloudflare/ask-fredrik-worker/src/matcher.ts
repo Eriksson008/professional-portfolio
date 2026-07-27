@@ -138,7 +138,7 @@ function slug(name: string): string {
 
 /**
  * Skill/project knowledge match. Both lists compete on longest matched
- * alias, so "AFR Gateway" beats the bare "AFR" project and "Workers AI"
+ * alias, so "App Dashboard" beats the bare "AFR" project and "Workers AI"
  * beats "Cloudflare Workers" when both appear. Intent ids are namespaced
  * ("skill:tailscale", "project:homebase") for D1 logging.
  */
