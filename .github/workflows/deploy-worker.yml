@@ -110,14 +110,24 @@ jobs:
 
       # Proves the deploy actually took, rather than trusting a green wrangler
       # exit. /ask is public by design; /admin/* stays behind Cloudflare Access.
+      # A flat `sleep 5` used to be enough and stopped being enough on
+      # 2026-07-27, when the Worker was renamed: a *brand new* workers.dev
+      # hostname is not routable the instant `wrangler deploy` returns, and the
+      # single request came back `error code: 1042`. The deploy had in fact
+      # succeeded. Retrying turns "the hostname is not up yet" into a wait
+      # instead of a red build, while still failing if /ask is genuinely broken.
       - name: Smoke-test the live assistant
         if: steps.creds.outputs.present == 'true'
         run: |
-          sleep 5
-          body=$(curl -sS -X POST "https://ask-fredrik.eriksson-fredrik08.workers.dev/ask" \
-            -H "Content-Type: application/json" \
-            -H "Origin: https://eriksson008.github.io" \
-            -d '{"question":"What is Fredrik'"'"'s technical stack?"}')
+          for attempt in 1 2 3 4 5 6; do
+            sleep 5
+            body=$(curl -sS -X POST "https://ask-fredrik.eriksson-fredrik08.workers.dev/ask" \
+              -H "Content-Type: application/json" \
+              -H "Origin: https://eriksson008.github.io" \
+              -d '{"question":"What is Fredrik'"'"'s technical stack?"}') || body=''
+            echo "$body" | grep -q '"answer"' && break
+            echo "attempt $attempt: no answer yet"
+          done
           echo "$body" | head -c 300; echo
           echo "$body" | grep -q '"answer"' \
             || { echo "::error::live /ask did not return an answer after deploy"; exit 1; }
