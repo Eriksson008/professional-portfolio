@@ -25,6 +25,14 @@ This is the standing process for both Claude Code and Codex in this repo — it 
 - **Trivial** (typo, tiny text/style fix, one obvious test): inspect the file, make the change, run a targeted check. No subagents.
 - **Normal** (contained feature, bug fix, focused refactor): focused exploration → one implementation owner → repo verification → independent review.
 - **Complex / high-risk** (architecture, auth, migrations, infra, cross-app or sensitive-data changes): parallel read-only investigation where useful → written plan → one owner per isolated workstream → targeted + full verification → specialist review → browser/integration evidence where applicable → explicit rollback/risk consideration.
+
+### Updating a Second Brain project note
+
+When a task updates `second-brain/02-Projects/<Project>/README.md`, follow the vault's own rules in
+`second-brain/AGENTS.md`. In particular: **`## Recent Changes` is capped at ~25 lines** — trim the
+oldest entries as you add one, and promote anything durable (an architectural choice, a security
+posture, a constraint someone would otherwise rediscover) into **Important Decisions** first. Git
+already holds the history; the note holds what lasts.
 <!-- ai-workflow:default-end -->
 
 ## What this is
