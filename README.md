@@ -257,26 +257,27 @@ professional-portfolio/
 │   ├── components/         # Nav, ConstellationHero, About, Experience, Projects, Skills, …
 │   ├── hooks/              # useSmoothProgress.ts, usePointer.ts, useVisualTier.ts (reduced-motion-aware)
 │   └── styles/             # tokens.css + app.css + constellation-hero.css (design system)
-├── public/                 # resume.pdf, favicon.svg, og-image-v2.png, .nojekyll
+├── public/                 # resume.pdf, favicons + app icons, og-image-v2.png, share.*, .nojekyll
 ├── cloudflare/
 │   └── ask-fredrik-worker/ # optional Workers Free backend for the Ask Fredrik widget (own README);
 │                           # also serves the private admin dashboard (below) behind Cloudflare Access
 ├── admin/ask-fredrik/      # private admin dashboard entry (npm run build:admin → Worker assets;
 │                           # NOT part of the public/Pages build — docs/ask-fredrik-dashboard.md)
-├── assets/                 # prototype/REFERENCE art only (earlier hero concepts); not deployed
 ├── Dockerfile              # multi-stage node build → nginx
 ├── nginx.conf              # listens on ${PORT}; SPA fallback; gzip; security headers
 ├── docker-compose.yml      # BIND_ADDR + PORT configurable host mapping (see .env.example)
-├── CLAUDE.md, PROJECT_CONTEXT.md
-└── resources/              # PRIVATE, gitignored — never committed (see below)
+└── CLAUDE.md, PROJECT_CONTEXT.md
 ```
 
 ## Privacy note
 
-`resources/` is **local-only source material** and is gitignored — it is never committed or
-published. It holds private career inputs (performance reviews, an older résumé, raw metrics,
-and a skills profile) used only to shape safe, public-facing themes. The published site exposes
-only honest, defensible, public-safe content:
+**This repository is public and holds no private career material.** The `resources/` directory
+that once mirrored it here was removed on 2026-07-27 — the canonical copy of the private inputs
+(performance reviews, an older résumé, raw metrics, a skills profile) lives only in the sibling
+**private** `../resume-project/resources/`. Those inputs are read there to shape safe,
+public-facing themes and are never copied back into this repo; `.gitignore` still lists
+`resources/` as a backstop. The published site exposes only honest, defensible, public-safe
+content:
 
 - No raw performance reviews or internal documents.
 - No internal system, project, or product codenames — enterprise work is described generically.

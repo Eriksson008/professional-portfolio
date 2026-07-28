@@ -58,6 +58,34 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-07-28 — Apple touch icons are full-bleed on purpose, and `public/` no longer ships dead
+  art.** Both Apple touch icons (`public/apple-touch-icon.png` for the portfolio,
+  `public/admin-icons/apple-touch-icon.png` for the Ask Fredrik dashboard) were regenerated at
+  180×180 RGB from new edge-to-edge source art. The previous versions had a rounded-square mask
+  baked into the image, which iOS then masked *again* — a squircle inside a squircle with dark
+  corners. iOS applies its own mask, so the artwork underneath must reach the edges. Do not
+  "helpfully" re-add rounded corners to these two files. The remaining favicons and PWA icons keep
+  the earlier framing, which is correct for their contexts (they are never OS-masked).
+
+  The same pass deleted ~4 MB of assets nothing referenced: the two 1.6 MB icon masters
+  (`portfolio-icon.png`, `admin-icons/portfolio-admin-icon.png`), the superseded `favicon.svg`
+  "FE" monogram, and eighteen undeclared icon sizes (48/72/96/128/152/167/180/256/384 in both
+  families). Nothing in any manifest, HTML head or component referenced them, and `public/` is
+  copied wholesale into the deploy, so every byte was shipped and never fetched. **The only icon
+  files that may exist are the ones a manifest or a `<link>` actually names** — `git log` holds the
+  masters if the family ever needs regenerating.
+
+- **2026-07-28 — `deploy-worker.yml` watches the `public/` files that `build:admin` copies.** The
+  Worker's trigger list covered `cloudflare/ask-fredrik-worker/**`, `src/admin/**` and
+  `vite.config.ts`, but `build:admin` runs with `publicDir: false` and hand-copies
+  `public/admin-icons/**`, `public/admin.webmanifest`, `public/og-ask-fredrik.png` and
+  `public/share.{html,css,js}` into the Worker's assets. Those paths were unwatched, so changing the
+  dashboard icon or the share card would commit, go green in CI, deploy to Pages — and leave the
+  Worker serving the old file, since Pages does not publish them either. Found while shipping the
+  new dashboard icon, which would have silently never gone live. `admin/ask-fredrik/**` was missing
+  for the same reason. **Keep the trigger list in step with the `copy-admin-icons` plugin in
+  `vite.config.ts`** — the two lists have no automated link.
+
 - **2026-07-28 — System appearance now governs every web surface without changing the astronaut
   identity.** The public portfolio, Ask Fredrik launcher/dashboard and public `/share` wrapper use
   intentional semantic Light and Dark Mode palettes selected by `prefers-color-scheme`; there is no

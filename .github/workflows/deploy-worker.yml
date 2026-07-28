@@ -19,6 +19,19 @@ on:
     paths:
       - 'cloudflare/ask-fredrik-worker/**'
       - 'src/admin/**' # the admin dashboard is built INTO the Worker's assets
+      - 'admin/ask-fredrik/**' # …and this is its HTML entry point
+      # `build:admin` runs with publicDir:false and hand-copies exactly these
+      # out of public/ (see the copy-admin-icons plugin in vite.config.ts).
+      # They are Worker-served assets that happen to live under public/, so a
+      # change to one only reaches production if it triggers THIS workflow —
+      # deploy.yml (Pages) does not publish them. Keep this list in step with
+      # that plugin.
+      - 'public/admin-icons/**'
+      - 'public/admin.webmanifest'
+      - 'public/og-ask-fredrik.png'
+      - 'public/share.html'
+      - 'public/share.css'
+      - 'public/share.js'
       - 'vite.config.ts'
       - '.github/workflows/deploy-worker.yml'
   workflow_dispatch:
