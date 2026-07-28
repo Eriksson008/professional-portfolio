@@ -1,54 +1,72 @@
 /* ============================================================
-   Design tokens — luxury black & white glassmorphism.
-   Near-black surfaces, soft-white text, silver secondary,
-   translucent white-bordered glass. One restrained cool accent.
+   Design tokens - system-aware monochrome mission control.
+   Light appearance uses warm-white paper and mineral glass;
+   dark appearance preserves the original black/silver system.
+   The astronaut hero, finale, and navigation remain cinematic
+   dark anchors in either appearance.
    ============================================================ */
 :root {
-  /* Surfaces — true black through near-black with a cold undertone */
-  --black: #000000;
-  --ink: #030305;
-  --ink-2: #07080c;
+  /* Surfaces */
+  --black: #f4f4f1;
+  --ink: #eeeee9;
+  --ink-2: #e7e7e2;
 
-  /* Glass — translucent white film over black; borders are white hairlines */
-  --panel: rgba(255, 255, 255, 0.045);
-  --panel-2: rgba(8, 10, 14, 0.62);
-  --line: rgba(255, 255, 255, 0.12);
-  --line-soft: rgba(255, 255, 255, 0.07);
-  --line-strong: rgba(255, 255, 255, 0.22);
+  /* Glass */
+  --panel: rgba(255, 255, 255, 0.74);
+  --panel-2: rgba(255, 255, 255, 0.94);
+  --panel-hover: rgba(17, 19, 24, 0.06);
+  --panel-wash: rgba(17, 19, 24, 0.035);
+  --panel-highlight: rgba(255, 255, 255, 0.92);
+  --panel-fade-solid: rgba(255, 255, 255, 0.94);
+  --panel-fade-clear: rgba(255, 255, 255, 0);
+  --nav-background: rgba(0, 0, 0, 0.92);
+  --line: rgba(17, 19, 24, 0.14);
+  --line-soft: rgba(17, 19, 24, 0.08);
+  --line-strong: rgba(17, 19, 24, 0.24);
 
   /* Text */
-  --text: #f7f7f5;
-  --muted: #b6bac5;
-  --faint: #7c828e;
+  --text: #111318;
+  --muted: #505864;
+  --faint: #69717c;
 
-  /* Silver — labels, hairlines, resting states */
-  --silver: #b6bac5;
-  --silver-2: #8d93a3;
-  --silver-line: rgba(182, 186, 197, 0.26);
-  --silver-wash: rgba(182, 186, 197, 0.08);
+  /* Silver - labels, hairlines, resting states */
+  --silver: #59616c;
+  --silver-2: #69717c;
+  --silver-line: rgba(61, 68, 78, 0.28);
+  --silver-wash: rgba(61, 68, 78, 0.08);
 
-  /* Accent — soft white light. Primary actions are white on black. */
-  --accent: #f7f7f5;
-  --accent-bright: #ffffff;
-  --accent-wash: rgba(255, 255, 255, 0.08);
-  --accent-line: rgba(255, 255, 255, 0.22);
-  --on-accent: #060709;
+  /* Accent - black ink on light, soft white light on dark. */
+  --accent: #111318;
+  --accent-bright: #000000;
+  --accent-wash: rgba(17, 19, 24, 0.08);
+  --accent-line: rgba(17, 19, 24, 0.22);
+  --on-accent: #ffffff;
 
-  /* Cool accent — faint cyan-blue, used sparingly (live markers, key figures) */
-  --ice: #8ec5ff;
-  --ice-line: rgba(142, 197, 255, 0.35);
-  --ice-wash: rgba(142, 197, 255, 0.08);
+  /* Cool accent - used sparingly for live markers and key figures. */
+  --ice: #245f94;
+  --ice-line: rgba(36, 95, 148, 0.34);
+  --ice-wash: rgba(36, 95, 148, 0.09);
 
-  /* Ambient glow — cool white-blue halo behind glass */
-  --glow: rgba(180, 200, 220, 0.22);
-  --glow-soft: rgba(180, 200, 220, 0.1);
+  /* Ambient glow */
+  --glow: rgba(55, 88, 118, 0.16);
+  --glow-soft: rgba(55, 88, 118, 0.08);
 
-  /* Elevation — deep soft shadows + inner top light so glass lifts off black */
-  --shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.55), 0 32px 90px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  /* Elevation */
+  --shadow: 0 16px 46px rgba(22, 26, 32, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  --shadow-lift: 0 2px 8px rgba(22, 26, 32, 0.1), 0 26px 70px rgba(22, 26, 32, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
 
-  color-scheme: dark;
+  --heading-highlight: #111318;
+  --heading-low: #5d6570;
+
+  --danger: #a53030;
+  --danger-line: rgba(165, 48, 48, 0.34);
+  --danger-wash: rgba(165, 48, 48, 0.08);
+  --warning: #8a5a16;
+  --warning-line: rgba(138, 90, 22, 0.34);
+  --warning-wash: rgba(138, 90, 22, 0.08);
+
+  color-scheme: light;
 
   /* Type */
   --font-display: 'Sora', system-ui, sans-serif;
@@ -64,4 +82,93 @@
 
   /* Motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --black: #000000;
+    --ink: #030305;
+    --ink-2: #07080c;
+
+    --panel: rgba(255, 255, 255, 0.045);
+    --panel-2: rgba(8, 10, 14, 0.62);
+    --panel-hover: rgba(255, 255, 255, 0.07);
+    --panel-wash: rgba(255, 255, 255, 0.025);
+    --panel-highlight: rgba(255, 255, 255, 0.35);
+    --panel-fade-solid: rgba(8, 10, 14, 0.85);
+    --panel-fade-clear: rgba(8, 10, 14, 0);
+    --nav-background: rgba(0, 0, 0, 0.5);
+    --line: rgba(255, 255, 255, 0.12);
+    --line-soft: rgba(255, 255, 255, 0.07);
+    --line-strong: rgba(255, 255, 255, 0.22);
+
+    --text: #f7f7f5;
+    --muted: #b6bac5;
+    --faint: #7c828e;
+
+    --silver: #b6bac5;
+    --silver-2: #8d93a3;
+    --silver-line: rgba(182, 186, 197, 0.26);
+    --silver-wash: rgba(182, 186, 197, 0.08);
+
+    --accent: #f7f7f5;
+    --accent-bright: #ffffff;
+    --accent-wash: rgba(255, 255, 255, 0.08);
+    --accent-line: rgba(255, 255, 255, 0.22);
+    --on-accent: #060709;
+
+    --ice: #8ec5ff;
+    --ice-line: rgba(142, 197, 255, 0.35);
+    --ice-wash: rgba(142, 197, 255, 0.08);
+
+    --glow: rgba(180, 200, 220, 0.22);
+    --glow-soft: rgba(180, 200, 220, 0.1);
+
+    --shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.55), 0 32px 90px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+    --heading-highlight: #ffffff;
+    --heading-low: #b6bac5;
+
+    --danger: #ffb4b4;
+    --danger-line: rgba(255, 140, 140, 0.46);
+    --danger-wash: rgba(255, 140, 140, 0.08);
+    --warning: #ffd28c;
+    --warning-line: rgba(255, 210, 140, 0.5);
+    --warning-wash: rgba(255, 210, 140, 0.08);
+
+    color-scheme: dark;
+  }
+}
+
+/* The opening film, closing film, and navigation are one uninterrupted black
+   mission-control frame. They intentionally do not invert with the document. */
+.hero,
+.finale,
+.nav {
+  --black: #000000;
+  --ink: #030305;
+  --ink-2: #07080c;
+  --panel: rgba(255, 255, 255, 0.045);
+  --panel-2: rgba(8, 10, 14, 0.62);
+  --panel-hover: rgba(255, 255, 255, 0.07);
+  --panel-highlight: rgba(255, 255, 255, 0.35);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-soft: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.22);
+  --text: #f7f7f5;
+  --muted: #b6bac5;
+  --faint: #7c828e;
+  --silver: #b6bac5;
+  --silver-2: #8d93a3;
+  --accent: #f7f7f5;
+  --accent-bright: #ffffff;
+  --accent-wash: rgba(255, 255, 255, 0.08);
+  --on-accent: #060709;
+  --glow: rgba(180, 200, 220, 0.22);
+  --glow-soft: rgba(180, 200, 220, 0.1);
+  --heading-highlight: #ffffff;
+  --heading-low: #b6bac5;
+  color-scheme: dark;
 }

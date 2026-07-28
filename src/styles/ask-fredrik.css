@@ -24,7 +24,7 @@
   padding: 0.72rem 1.25rem;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-pill);
-  background: rgba(3, 3, 5, 0.85);
+  background: var(--panel-2);
   color: var(--text);
   font-family: var(--font-mono);
   font-size: 0.82rem;
@@ -49,7 +49,7 @@
 }
 .af-launcher:hover {
   border-color: var(--accent-bright);
-  background: rgba(10, 12, 16, 0.95);
+  background: var(--ink-2);
   box-shadow: var(--shadow-lift);
 }
 .af-dot {
@@ -104,7 +104,7 @@
     90deg,
     transparent,
     var(--line-strong) 30%,
-    rgba(255, 255, 255, 0.35) 50%,
+    var(--panel-highlight) 50%,
     var(--line-strong) 70%,
     transparent
   );
@@ -178,11 +178,11 @@
 }
 .af-log-shell::before {
   top: 0;
-  background: linear-gradient(to bottom, rgba(8, 10, 14, 0.85), rgba(8, 10, 14, 0));
+  background: linear-gradient(to bottom, var(--panel-fade-solid), var(--panel-fade-clear));
 }
 .af-log-shell::after {
   bottom: 0;
-  background: linear-gradient(to top, rgba(8, 10, 14, 0.85), rgba(8, 10, 14, 0));
+  background: linear-gradient(to top, var(--panel-fade-solid), var(--panel-fade-clear));
 }
 .af-log-shell.is-faded-top::before,
 .af-log-shell.is-faded-bottom::after {
@@ -269,7 +269,7 @@
   flex: none;
   padding: 0.8rem 1.25rem 0.95rem;
   border-top: 1px solid var(--line-soft);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--panel-wash);
 }
 .af-tray-label {
   font-family: var(--font-mono);
@@ -325,7 +325,7 @@
   padding: 0.62rem 0.95rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--panel-wash);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 0.9rem;

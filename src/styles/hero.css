@@ -191,7 +191,7 @@
   font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 1.04;
-  background: linear-gradient(180deg, #ffffff 30%, var(--silver) 130%);
+  background: linear-gradient(180deg, var(--heading-highlight) 30%, var(--heading-low) 130%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

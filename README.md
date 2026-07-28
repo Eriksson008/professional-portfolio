@@ -36,6 +36,28 @@ npm run lint         # ESLint
 npm run format       # Prettier
 ```
 
+## Appearance and PWA assets
+
+The portfolio, its public Ask Fredrik share page, and the private Ask Fredrik dashboard follow
+`prefers-color-scheme` automatically. There is no saved preference or manual toggle. The shared
+semantic palettes live in `src/styles/tokens.css`; admin states are completed in
+`src/styles/admin.css`, and the standalone share page has its own small token set in
+`public/share.css`. The astronaut hero, navigation and finale remain black cinematic anchors in
+both appearances, so switching to Light Mode never flattens or recolors their film imagery.
+
+Test Light and Dark Mode by changing the operating-system setting or emulating
+`prefers-color-scheme` in browser developer tools. Check the portfolio, the Ask Fredrik launcher,
+`/share`, and `/admin/ask-fredrik/` at desktop, tablet and phone widths.
+
+The portfolio and Ask Fredrik intentionally use separate icon families so they remain
+distinguishable. Transparent browser favicons live at `public/favicon-*.png` and
+`public/admin-icons/favicon-*.png`; opaque 180px Home Screen compositions live at the corresponding
+`apple-touch-icon.png` paths. Each manifest declares separate 192px/512px standard icons and
+192px/512px padded maskable icons. Manifest colors stay black as stable install/startup fallbacks
+for the branded astronaut plates; live browser chrome is selected by media-aware `theme-color`
+metadata. There is no service worker or offline promise. Existing iPhone Home Screen entries may
+need to be removed and added again to refresh cached icons or manifest metadata.
+
 ## Astronaut hero
 
 The landing page opens on a **black-and-white astronaut film scrubbed by scroll**: the hero pins
@@ -77,7 +99,8 @@ How it works (`src/components/AstronautHero.tsx` + `src/styles/hero.css`):
   **visor HUD** assembles in the hold: corner brackets drift inward, then the four monospace
   telemetry labels (all figures verifiable elsewhere on the page) slide in one segment at a
   time; the scroll cue retires mid-film. Scrolling back up reverses everything except the cue.
-- **Palette.** Pure black (`#000`–`#07080c`) with warm-white text (`#f7f7f5`), silver secondary
+- **Cinematic palette.** The hero, navigation and finale remain pure black (`#000`–`#07080c`)
+  with warm-white text (`#f7f7f5`), silver secondary
   (`#b6bac5`), and white-alpha glass surfaces (bg `rgba(255,255,255,0.045)`, 1 px border
   `rgba(255,255,255,0.12)`, `backdrop-filter: blur(18px)`, radius 22 px). No colorful gradients,
   no neon; a cool `#8ec5ff` accent exists in tokens for sparing use.

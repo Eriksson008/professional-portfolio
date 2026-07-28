@@ -2,6 +2,7 @@
   "name": "Fredrik Eriksson Portfolio",
   "short_name": "Portfolio",
   "description": "Professional portfolio for Fredrik Eriksson, Senior Software Engineer.",
+  "id": ".",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

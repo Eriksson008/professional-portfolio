@@ -12,7 +12,9 @@
 }
 
 html {
+  min-height: 100%;
   -webkit-text-size-adjust: 100%;
+  background: var(--ink);
 }
 
 body {
@@ -27,6 +29,11 @@ body {
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+#admin-root {
+  min-height: 100vh;
+  background: transparent;
 }
 
 button {
@@ -400,7 +407,23 @@ button {
   color: var(--text);
   font-family: var(--font-body);
   font-size: 0.85rem;
-  color-scheme: dark;
+  color-scheme: inherit;
+  caret-color: var(--ice);
+}
+.admin-field input::placeholder {
+  color: var(--faint);
+}
+.admin-field input:disabled,
+.admin-field select:disabled {
+  color: var(--faint);
+  cursor: not-allowed;
+  opacity: 1;
+}
+.admin-field input:-webkit-autofill,
+.admin-field select:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  box-shadow: 0 0 0 1000px var(--ink-2) inset;
+  caret-color: var(--ice);
 }
 .admin-field input:focus,
 .admin-field select:focus {
@@ -451,8 +474,8 @@ button {
   border-radius: var(--radius-card);
 }
 .admin-state--error {
-  color: #ffb4b4;
-  border-color: rgba(255, 140, 140, 0.4);
+  color: var(--danger);
+  border-color: var(--danger-line);
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -499,7 +522,7 @@ button {
   background: var(--accent-wash);
 }
 .admin-table tr.is-blocked {
-  background: rgba(255, 140, 140, 0.05);
+  background: var(--danger-wash);
 }
 .admin-td-time {
   white-space: nowrap;
@@ -573,14 +596,14 @@ button {
   color: var(--muted);
 }
 .admin-badge--blocked {
-  border-color: rgba(255, 140, 140, 0.5);
-  color: #ffb4b4;
-  background: rgba(255, 140, 140, 0.08);
+  border-color: var(--danger-line);
+  color: var(--danger);
+  background: var(--danger-wash);
 }
 .admin-badge--rate_limited {
-  border-color: rgba(255, 210, 140, 0.5);
-  color: #ffd28c;
-  background: rgba(255, 210, 140, 0.08);
+  border-color: var(--warning-line);
+  color: var(--warning);
+  background: var(--warning-wash);
 }
 
 /* Pager */

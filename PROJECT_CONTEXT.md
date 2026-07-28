@@ -25,8 +25,9 @@ is set to "GitHub Actions".
 
 - React 18 + TypeScript, built with Vite 5
 - Hand-written CSS with a design-token system (`src/styles/tokens.css` + `app.css` +
-  `premium.css` + `hero.css` + `finale.css` + `ask-fredrik.css`) — **dark-only** (no theme
-  toggle) as of 2026-07-02, **pure black/white/glass** as of 2026-07-03
+  `premium.css` + `hero.css` + `finale.css` + `ask-fredrik.css`) — system-aware warm-paper Light
+  Mode and black/silver Dark Mode, with the hero, navigation and finale held as dark cinematic
+  anchors and no manual theme toggle
 - framer-motion (LazyMotion/domAnimation, `m.*`) for section transitions; **no WebGL/WebGPU**
   (the three + R3F layer was removed 2026-07-03 with the astronaut-video hero — single ~80 KB gz
   bundle again)
@@ -56,6 +57,23 @@ docker compose up --build       # production container at http://localhost:8790 
   static host (Netlify, S3/CloudFront, nginx). `public/.nojekyll` included.
 
 ## Important Decisions
+
+- **2026-07-28 — System appearance now governs every web surface without changing the astronaut
+  identity.** The public portfolio, Ask Fredrik launcher/dashboard and public `/share` wrapper use
+  intentional semantic Light and Dark Mode palettes selected by `prefers-color-scheme`; there is no
+  stored override or hydration script. Root, overscroll, form controls, panels, dashboard states and
+  media-aware browser chrome now follow the same selection. The hero, navigation and finale retain
+  their original black mission-control palette in both modes, and no film or astronaut asset is
+  filtered or recolored. The old 2026-07-02 dark-only decision remains useful history but is
+  superseded for document surfaces.
+
+  Portfolio and Ask Fredrik retain separate icon families. Transparent 16px/32px favicons serve tabs
+  and bookmarks; opaque Apple touch icons and branded standard PWA icons serve installed contexts;
+  separately padded 192px/512px maskable files remain declared only as `purpose: maskable`. Both
+  manifests now have stable IDs and retain black install/startup fallback colors. Runtime metadata
+  publishes light and dark theme colors. No service worker exists, so neither surface advertises
+  offline use. iOS may require removing and re-adding an existing Home Screen entry to refresh its
+  cached icon or manifest.
 
 - **2026-07-27 — Ask Fredrik got a share wrapper at `/share`, and it needed no Access change.**
   `public/share.html` (+ `share.css`, `share.js`) is a public page carrying the tags and the

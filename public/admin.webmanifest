@@ -2,6 +2,7 @@
   "name": "Portfolio Admin",
   "short_name": "Admin",
   "description": "Private portfolio administration dashboard.",
+  "id": "admin/ask-fredrik/",
   "start_url": "admin/ask-fredrik/",
   "scope": "admin/ask-fredrik/",
   "display": "standalone",

@@ -6,13 +6,29 @@
    and a blocking font fetch to a third-party host is a poor trade for that. */
 
 :root {
-  color-scheme: dark;
-  --canvas: #000000;
-  --ink: #f4f4f5;
-  --muted: #9b9ba3;
-  --accent: #6ea8fe;
-  --card: #101014;
-  --line: rgba(244, 244, 245, 0.14);
+  color-scheme: light;
+  --canvas: #f4f4f1;
+  --ink: #111318;
+  --muted: #555d68;
+  --accent: #245f94;
+  --accent-wash: rgba(36, 95, 148, 0.09);
+  --card: #ffffff;
+  --line: rgba(17, 19, 24, 0.14);
+  --shadow: 0 18px 52px rgba(22, 26, 32, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --canvas: #000000;
+    --ink: #f4f4f5;
+    --muted: #9b9ba3;
+    --accent: #8ec5ff;
+    --accent-wash: rgba(142, 197, 255, 0.1);
+    --card: #101014;
+    --line: rgba(244, 244, 245, 0.14);
+    --shadow: none;
+  }
 }
 
 * {
@@ -38,6 +54,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--card);
+  box-shadow: var(--shadow);
   text-align: center;
 }
 
@@ -68,7 +85,7 @@ p {
   padding: 13px 20px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: rgba(110, 168, 254, 0.1);
+  background: var(--accent-wash);
   color: var(--accent);
   font-size: 15px;
   font-weight: 600;

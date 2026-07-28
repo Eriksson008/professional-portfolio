@@ -10,12 +10,14 @@
 /* Anchor gliding is JS-driven (useAnchorGlide) — CSS smooth scrolling would
    fight the per-frame scrollTo calls and is unreliable for hash jumps. */
 html {
+  min-height: 100%;
   -webkit-text-size-adjust: 100%;
   background-color: var(--black);
 }
 
 body {
   margin: 0;
+  min-height: 100%;
   background-color: var(--black);
   color: var(--text);
   font-family: var(--font-body);
@@ -23,6 +25,18 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+#root {
+  min-height: 100%;
+  background: var(--black);
+}
+
+/* The first rendered surface is the black astronaut film in every appearance.
+   Keep the empty hydration shell black so Light Mode cannot flash around it. */
+#root:empty {
+  min-height: 100vh;
+  background: #000000;
 }
 
 /* Film grain — imperceptible, but the black stops feeling like flat pixels. */
@@ -129,7 +143,7 @@ img {
 .btn:hover {
   border-color: var(--line-strong);
   color: var(--accent-bright);
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--panel-hover);
   transform: translateY(-1px);
 }
 .btn-primary {
@@ -161,8 +175,9 @@ img {
   position: sticky;
   top: 0;
   z-index: 100;
+  color: var(--text);
   border-bottom: 1px solid transparent;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--nav-background);
   transition:
     border-color 0.25s var(--ease),
     background 0.25s var(--ease);
@@ -310,7 +325,7 @@ img {
   max-width: 18ch;
   /* Silver→white sheen: editorial weight without adding another hue. */
   color: var(--text);
-  background: linear-gradient(180deg, #ffffff 20%, var(--silver) 125%);
+  background: linear-gradient(180deg, var(--heading-highlight) 20%, var(--heading-low) 125%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
