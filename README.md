@@ -171,6 +171,29 @@ This stays on your private LAN / tailnet — it is **not** exposed to the public
 - **Tailscale ACLs** must permit your user/device to reach this host and port.
 - Leave `BIND_ADDR=127.0.0.1` (the default) whenever you don't need remote access.
 
+## Sharing a link
+
+**The portfolio itself is public and previews correctly as-is:**
+
+```
+https://eriksson008.github.io/professional-portfolio/
+```
+
+It serves `og-image-v2.png` (the astronaut) from static HTML on GitHub Pages — no Access, no
+wrapper, nothing to remember.
+
+**The private Ask Fredrik dashboard needs its wrapper URL:**
+
+```
+https://ask-fredrik.eriksson-fredrik08.workers.dev/share
+```
+
+Sending the dashboard URL itself previews as nothing and always will — the gate on
+`/admin/ask-fredrik/` *is* the admin gate, so it must never be bypassed. `/share` is a public page
+that carries the tags and bounces an admin to the dashboard; because Access here is scoped to
+`/admin` only, it needed no Access change at all. Verified against every major crawler on
+2026-07-27. See `cloudflare/ask-fredrik-worker/README.md` › "Link previews".
+
 ## Deployment
 
 ### GitHub Pages (primary)
