@@ -190,14 +190,18 @@ docker compose up --build       # production container at http://localhost:8790 
   checks for no gain.
 
 - **2026-07-27 — The phone number on `public/resume.pdf` is an accepted exception to the privacy
-  rule (user decision).** An independent review flagged that the served résumé carries
-  `(862) 225-8524` on a crawlable URL while `AGENTS.md` said "do not expose personal phone number".
+  rule (user decision).** An independent review flagged that the served résumé carries a phone
+  number on a crawlable URL while `AGENTS.md` said "do not expose personal phone number".
   Resolved in favor of keeping it: that PDF is the artifact uploaded to job boards and job-hunting
   sites, where omitting a phone number costs callbacks. **The exception is scoped to that one
   file.** The number must never enter `src/**`, `cloudflare/ask-fredrik-worker/src/**`, page copy,
   or OG metadata — it is absent from all of them (verified 2026-07-27), and
   `APPROVED_CONTEXT.contact` deliberately lists only email, LinkedIn, and GitHub, so the assistant
-  cannot hand it out. `AGENTS.md` now states the rule and its carve-out together.
+  cannot hand it out. `AGENTS.md` now states the rule and its carve-out together. **Amended
+  2026-07-29:** this file and `AGENTS.md` had both been printing the number verbatim while
+  documenting the rule about it. Redacted — the canonical value lives only in the private sibling
+  repo, and `check-coherence.mjs` now scans this repo's Markdown for it as well, not just `src/**`
+  and the knowledge base.
 
 - **2026-07-27 — Public `resume.pdf` regenerated from a repositioned résumé (source of change:
   the sibling `../resume-project` repo).** The maintained résumé package was rewritten to present

@@ -121,13 +121,19 @@ companion Cloudflare Worker in `cloudflare/ask-fredrik-worker/` has its own chec
   no efficiency percentages without a baseline.
 - Do not expose home address, secrets, or credentials.
 - **Phone number — accepted exception, `public/resume.pdf` only (user decision, 2026-07-27).** The
-  served résumé carries `(862) 225-8524` in its contact header deliberately: that PDF is what gets
+  served résumé carries a phone number in its contact header deliberately: that PDF is what gets
   uploaded to job boards and job-hunting sites, where a missing phone number costs callbacks. The
-  exception is **scoped to that one artifact**. The phone number must never appear in the site
-  source (`src/**`), the Ask Fredrik knowledge base
-  (`cloudflare/ask-fredrik-worker/src/**`), page copy, OG metadata, or any answer the assistant can
-  produce — and it is absent from all of them today (verified 2026-07-27). Do not "helpfully" add it
-  to `profile.ts` links or `APPROVED_CONTEXT.contact`.
+  exception is **scoped to that one artifact**. The number must never appear in the site source
+  (`src/**`), the Ask Fredrik knowledge base (`cloudflare/ask-fredrik-worker/src/**`), page copy, OG
+  metadata, any answer the assistant can produce, **or in this repository's own documentation** — and
+  it is absent from all of them. Do not "helpfully" add it to `profile.ts` links or
+  `APPROVED_CONTEXT.contact`.
+  - **This paragraph used to print the number while explaining the rule** (fixed 2026-07-29). This
+    repo is public, so plaintext in a tracked Markdown file is more harvestable than the same digits
+    inside a compressed PDF text layer — `grep` finds the Markdown and cannot find the PDF. The
+    canonical value lives in the **private** `../resume-project/AGENTS.md`; refer to it, never
+    restate it. The sibling's `scripts/check-coherence.mjs` now scans this repo's Markdown for it,
+    not just `src/**` and the knowledge base.
 
 ## Automation (added 2026-07-27)
 
