@@ -311,7 +311,7 @@ export const SKILLS: SkillKnowledge[] = [
     relatedProjects: ['Enterprise Salesforce Platform'],
     allowedAnswer:
       'Yes — Fredrik writes Apex daily as the #1 contributor on an enterprise Salesforce ' +
-      'platform, where he has led the team since 2025 and owns releases and production support. ' +
+      'platform, where he led the team from 2025 and owned releases and production support. ' +
       'That includes Apex triggers and classes, asynchronous Batch and Queueable Apex for ' +
       'high-volume processing, test classes, and SOQL — both writing it and tuning it, alongside ' +
       'heap usage, to resolve large-volume data-processing failures against platform governor ' +
@@ -326,7 +326,7 @@ export const SKILLS: SkillKnowledge[] = [
     relatedProjects: ['Enterprise Salesforce Platform'],
     allowedAnswer:
       'Yes — Fredrik builds Lightning Web Components professionally on an enterprise Salesforce ' +
-      'platform, alongside Apex and OmniStudio. He is the platform’s #1 contributor and leads its ' +
+      'platform, alongside Apex and OmniStudio. He is the platform’s #1 contributor and led its ' +
       'team.',
   },
   {
@@ -337,8 +337,8 @@ export const SKILLS: SkillKnowledge[] = [
     summary: 'Owns Copado deployments and release coordination on an enterprise Salesforce platform.',
     relatedProjects: ['Enterprise Salesforce Platform'],
     allowedAnswer:
-      'Yes — Fredrik owns Copado deployments and release coordination for an enterprise ' +
-      'Salesforce platform, as part of his acting Tech Lead responsibilities.',
+      'Yes — Fredrik owned Copado deployments and release coordination for an enterprise ' +
+      'Salesforce platform, as part of his acting Technical Lead responsibilities.',
   },
   {
     name: 'Jenkins',

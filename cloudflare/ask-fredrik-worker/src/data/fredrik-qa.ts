@@ -21,6 +21,37 @@ export interface CuratedAnswer {
 }
 
 export const CURATED_ANSWERS: CuratedAnswer[] = [
+  // NOTE ON ORDER: matchCuratedKeywords scores by keyword COUNT and breaks ties by array
+  // position, so a generic one-word keyword in an earlier entry beats a specific phrase in a
+  // later one. role_fit's 'role' matched "why did he leave his last role?" and won on the tie,
+  // sending a departure question to the role-fit answer. This entry therefore sits FIRST. It
+  // steals nothing: every keyword here is a multi-word 'why ...' phrase.
+  {
+    // Deliberately steers to a live conversation. The real reasons are private, and any version
+    // an assistant gives either reads as a complaint about a former employer or invites a
+    // follow-up it cannot handle. Redirects to the record instead, then to what he wants next.
+    intent: 'role_change_reason',
+    question: 'Why is Fredrik looking for a new role?',
+    keywords: [
+      'why is he looking',
+      'why did he leave',
+      'why he left',
+      'reason for leaving',
+      'why leaving',
+      'why move on',
+      'why change roles',
+      'looking for a new',
+      'new role',
+      'new opportunity',
+      'move on from',
+    ],
+    answer:
+      'Fredrik would rather cover that with you directly than through a portfolio assistant. ' +
+      'What the record shows: three consecutive “Exceptional Impact” ratings, 750+ commits across ' +
+      '6 production systems, and a year and a half of acting Technical Lead responsibility across ' +
+      'two teams. He is looking for a role where that level of ownership comes with the matching ' +
+      'title and scope, and where he can keep building and operating platforms end to end.',
+  },
   {
     intent: 'strengths',
     question: 'What does Fredrik do well?',
@@ -29,9 +60,9 @@ export const CURATED_ANSWERS: CuratedAnswer[] = [
       'Fredrik’s core strength is end-to-end ownership of enterprise systems: he designs, builds, ' +
       'ships, and then supports what he ships. He works across the full stack — React/TypeScript ' +
       'frontends, Java/Spring Boot services, AWS deployment architecture, and enterprise Salesforce ' +
-      '— and has carried acting Tech Lead responsibilities for roughly the last year and a half: ' +
+      '— and carried acting Technical Lead responsibilities for roughly a year and a half: ' +
       'design decisions, code review, mentoring, and release ownership. That ownership earned his ' +
-      'employer’s highest performance rating, “Exceptional Impact,” three consecutive years ' +
+      'employer’s highest performance designation, “Exceptional Impact,” three consecutive years ' +
       '(2023–2025).',
   },
   {
@@ -40,10 +71,40 @@ export const CURATED_ANSWERS: CuratedAnswer[] = [
     keywords: ['role', 'suited', 'fit', 'position', 'looking for', 'open to', 'seniority'],
     answer:
       'Fredrik is best suited for Senior Software Engineer, Full-Stack, Backend, Salesforce ' +
-      'Engineer, Cloud / Application Engineer, and Tech Lead-track roles. He is strongest where ' +
+      'Engineer, Cloud / Application Engineer, and technical-leadership-track roles. He is strongest where ' +
       'teams need someone who can own a platform — building features, running CI/CD and releases ' +
       '(Copado, Jenkins), handling production support, and leading other engineers — rather than ' +
       'working a single narrow layer.',
+  },
+  {
+    // Claims the timing/scheduling phrasings so they resolve to one fixed answer instead of
+    // reaching the model, which has no basis for answering them. Keyword-only by design:
+    // `question` is empty, so it never appears as a suggested chip. Points at the résumé and the
+    // contact details, which are authoritative for anything it does not state.
+    intent: 'availability',
+    question: '',
+    keywords: [
+      'available',
+      'availability',
+      'start date',
+      'when can he start',
+      'how soon',
+      'notice period',
+      'open to work',
+      'job hunting',
+      'currently employed',
+      'employed now',
+      'still working',
+      'unemployed',
+      'out of work',
+      'on the market',
+    ],
+    answer:
+      'Start dates and timing are best covered with Fredrik directly — he is glad to talk through ' +
+      'those in a conversation rather than here. He is based in the Austin, TX metro area and open ' +
+      'to Senior Software Engineer, technical-leadership-track, platform, backend/full-stack, and ' +
+      'AI-enabled application roles. His role history and dates are on the résumé linked from this ' +
+      'portfolio, and he can be reached at eriksson.fredrik08@gmail.com or on LinkedIn.',
   },
   {
     intent: 'strongest_projects',
@@ -54,9 +115,11 @@ export const CURATED_ANSWERS: CuratedAnswer[] = [
       'delivery of — three integrated microservices, roughly 16,000 lines across 144 commits in ' +
       'under five weeks, including a passwordless authentication flow built to enterprise CIAM ' +
       'and penetration-test requirements; an enterprise AI assistant where he was the single ' +
-      'largest contributor at 63% of its commits (React, Spring AI, Amazon Bedrock, ECS/Fargate); ' +
+      'largest contributor at 63% of its commits — Salesforce records streamed into Elasticsearch ' +
+      'and answered over with Spring AI on Amazon Bedrock, so business users could reach client ' +
+      'detail without a Salesforce read-only license; ' +
       'and an enterprise Salesforce platform where he is the top contributor with 470+ commits ' +
-      'and has led the team since 2025. Three of his own: this portfolio and the assistant ' +
+      'and led the team from 2025. Three of his own: this portfolio and the assistant ' +
       'answering you now, Homebase — a household app he runs in production on Cloudflare ' +
       'Workers and D1 with live schema migrations, a scheduled job, and 173 tests — and App ' +
       'Dashboard, a Tauri/Rust desktop control plane for local containerized services with its ' +
@@ -72,7 +135,7 @@ export const CURATED_ANSWERS: CuratedAnswer[] = [
       'Node/Express. Frontend: React and TypeScript (and Next.js in personal projects). Cloud: ' +
       'AWS — ECS/Fargate, Application Load Balancer, CloudFormation, Secrets Manager, Amazon ' +
       'Bedrock, DynamoDB — with OIDC/Azure AD access control. Data: PostgreSQL/Aurora, DynamoDB, ' +
-      'and Elasticsearch/ELK. Platform: an enterprise Salesforce estate he leads and is the top ' +
+      'and Elasticsearch/Logstash/Kibana (ELK). Platform: an enterprise Salesforce estate he led and is the top ' +
       'contributor on (Apex, Lightning Web Components, OmniStudio). Delivery: CI/CD with Jenkins, ' +
       'GitHub Actions, and Copado, plus Docker. In his own shipped projects he also works on ' +
       'Cloudflare Workers, D1, Workers AI, and Cloudflare Access, and has built with Tauri/Rust ' +
@@ -87,8 +150,8 @@ export const CURATED_ANSWERS: CuratedAnswer[] = [
       'Jira stories delivered, top contributor on two production codebases, and “Exceptional ' +
       'Impact” — his employer’s highest rating — three years running (2023–2025). He combines ' +
       'senior hands-on delivery (React, Spring Boot, AWS, Salesforce, enterprise AI applications) ' +
-      'with real leadership: he currently leads a platform team, owns releases and production ' +
-      'support, and mentors other engineers. Every number he claims is documented; the résumé on ' +
+      'with real leadership: he led a platform team, owned releases and production ' +
+      'support, and mentored other engineers. Every number he claims is documented; the résumé on ' +
       'this site mirrors the same facts.',
   },
   {
@@ -96,12 +159,13 @@ export const CURATED_ANSWERS: CuratedAnswer[] = [
     question: 'What leadership experience does Fredrik have?',
     keywords: ['lead', 'leadership', 'mentor', 'manage', 'team', 'tech lead', 'code review'],
     answer:
-      'Fredrik has carried acting Tech Lead responsibilities for roughly the last year and a half, ' +
-      'leading 7 engineers across two teams and mentoring 3 of them: design decisions, code review, ' +
-      'onboarding, release ownership, and translating business needs into technical plans. The ' +
-      'Salesforce platform he leads serves about 250 Group Insurance users. He owns ' +
-      'Copado deployments, release coordination, and production support, and his leadership was ' +
-      'part of what earned three consecutive “Exceptional Impact” ratings.',
+      'Fredrik carried acting Technical Lead responsibilities for roughly a year and a half — from ' +
+      '2025 until the role concluded in June 2026 — leading 7 engineers across two teams and ' +
+      'mentoring 3 of them: design decisions, code review, onboarding, release ownership, and ' +
+      'translating business needs into technical plans. The Salesforce platform he led serves about ' +
+      '250 Group Insurance users. He owned Copado deployments, release coordination, and production ' +
+      'support, and his leadership was part of what earned three consecutive “Exceptional Impact” ' +
+      'ratings.',
   },
   {
     intent: 'ai_experience',
@@ -139,9 +203,9 @@ export const CURATED_ANSWERS: CuratedAnswer[] = [
     question: 'What Salesforce experience does Fredrik have?',
     keywords: ['salesforce', 'omnistudio', 'crm'],
     answer:
-      'Fredrik is the #1 contributor on an enterprise Salesforce platform and has led its team ' +
-      'since 2025. He works in Apex, Lightning Web Components, and OmniStudio, owns Copado ' +
-      'deployments and release coordination, and handles production support and data fixes for ' +
+      'Fredrik is the #1 contributor on an enterprise Salesforce platform and led its team from ' +
+      '2025. He works in Apex, Lightning Web Components, and OmniStudio, owned Copado ' +
+      'deployments and release coordination, and handled production support and data fixes for ' +
       'business-critical delivery — work that contributed to three consecutive “Exceptional ' +
       'Impact” ratings.',
   },

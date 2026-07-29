@@ -23,9 +23,11 @@ export function Experience() {
         ))}
       </ol>
       <p className="footnote">
-        Title progression reflects responsibilities held; “acting Tech Lead” denotes scope of
+        Genesis Corp was the employer of record from February 2022 to June 2023, with all work
+        performed on assignment inside the same Group Insurance technology organization; direct
+        employment ran from June 2023 to June 2026. “Acting Technical Lead” denotes scope of
         ownership rather than an officially conferred title. Recognized with the employer’s highest
-        performance rating, “Exceptional Impact,” for 2023, 2024, and 2025.
+        performance designation, “Exceptional Impact,” for 2023, 2024, and 2025.
       </p>
     </Section>
   );

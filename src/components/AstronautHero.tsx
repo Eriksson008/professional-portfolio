@@ -33,7 +33,7 @@ const telemetry = [
   { value: 'Exceptional ×3', label: 'Reviews' },
   { value: '750+', label: 'Commits' },
   { value: '120+', label: 'Stories' },
-  { value: 'Acting Tech Lead', label: 'Senior Software Engineer' },
+  { value: 'Acting Technical Lead', label: 'Senior Software Engineer' },
 ] as const;
 
 /**
@@ -209,7 +209,7 @@ export function AstronautHero() {
             <h1 className="hero-name">{profile.name}</h1>
             <p className="hero-sub">
               Senior Software Engineer building AI, cloud, Salesforce, and enterprise systems —
-              acting Tech Lead on an enterprise platform team.
+              acting Technical Lead experience on an enterprise platform team.
             </p>
             <div className="hero-ctas">
               <a className="btn btn-primary" href="#projects">

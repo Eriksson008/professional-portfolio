@@ -29,7 +29,7 @@ export const highlights: Highlight[] = [
   {
     value: '7',
     label: 'Engineers led',
-    note: 'Across two teams as acting Tech Lead, mentoring 3 of them through code review.',
+    note: 'Across two teams as acting Technical Lead, mentoring 3 of them through code review.',
   },
   {
     value: '3 yrs',

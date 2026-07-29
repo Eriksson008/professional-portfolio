@@ -1,7 +1,7 @@
 # Professional Portfolio — Fredrik Eriksson
 
 A production-oriented personal portfolio for **Fredrik Eriksson**, Senior Software Engineer
-and acting Tech Lead. Built as a real React/TypeScript application — the repo itself is meant
+with acting Technical Lead experience. Built as a real React/TypeScript application — the repo itself is meant
 to demonstrate the engineering it describes — and shipped as a lightweight, Dockerized static
 site.
 

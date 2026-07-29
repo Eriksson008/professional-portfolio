@@ -6,13 +6,16 @@ export interface TimelineEntry {
   current?: boolean;
 }
 
+// Employment history reflects the verified employer record (2026-07-29): Genesis Corp was the
+// employer of record February 2022 – June 2023 while on assignment inside the Group Insurance
+// technology organization; direct employment ran June 2023 – June 2026. The role has ended —
+// no entry here may be marked `current`, and no copy may imply present employment.
 export const timeline: TimelineEntry[] = [
   {
-    period: '2025 — Present',
-    title: 'Leading the enterprise Salesforce platform team — acting Tech Lead',
+    period: '2025 — June 2026',
+    title: 'Acting Technical Lead — enterprise Salesforce platform team',
     detail:
-      'Carry acting Tech Lead-level responsibilities: design ownership, code review, mentoring and onboarding junior developers, release ownership, and production support for an enterprise platform.',
-    current: true,
+      'Carried acting Technical Lead responsibilities: design ownership, code review, mentoring and onboarding junior developers, release ownership, and production support for an enterprise platform. An acting scope, not a formally held title.',
   },
   {
     period: '2024',
@@ -21,10 +24,16 @@ export const timeline: TimelineEntry[] = [
       'Grew into senior-level ownership across enterprise Salesforce, Java/Spring Boot services, React applications, and AWS deployment — contributing to design decisions, code reviews, and mentoring.',
   },
   {
-    period: '2022',
-    title: 'Associate Software Engineer — Group Insurance Technology',
+    period: 'June 2023',
+    title: 'Converted to direct employment — Group Insurance Technology',
     detail:
-      'Joined the Group Insurance platform teams, building and supporting enterprise Salesforce and full-stack functionality.',
+      'Moved from the consulting assignment onto the company payroll in the same organization, continuing on the same platforms and teams.',
+  },
+  {
+    period: 'February 2022 — June 2023',
+    title: 'Software Engineer (consultant, Genesis Corp) — Group Insurance Technology',
+    detail:
+      'Joined the Group Insurance platform teams on assignment through Genesis Corp, the employer of record for this period, building and supporting enterprise Salesforce and full-stack functionality.',
   },
   {
     period: '2022',
@@ -36,7 +45,7 @@ export const timeline: TimelineEntry[] = [
     period: '2020 — 2021',
     title: 'Mechanical Engineer — WTEC',
     detail:
-      'Project management and design for a fabrication facility — AutoCAD mechanical drawings, cable simulations, specification sheets, and site planning.',
+      'Project management and design for a fabrication facility — AutoCAD mechanical drawings, cable simulations, specification sheets, and site planning. February 2020 – November 2021.',
   },
   {
     period: '2020',

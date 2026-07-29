@@ -226,7 +226,7 @@ export function AstronautFinale() {
             </p>
             <p className="finale-roles">
               Open to Senior Software Engineer, Salesforce Engineer, Backend, Full-Stack, Cloud /
-              Application Engineer, and Tech Lead-track opportunities.
+              Application Engineer, and technical-leadership-track opportunities.
             </p>
             <div className="finale-actions">
               <a

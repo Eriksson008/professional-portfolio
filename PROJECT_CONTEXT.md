@@ -9,6 +9,23 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
+**2026-07-29 — employment status updated across the whole surface.** A verified legal-employer
+report reset the résumé's employment facts, and this repo was brought into line in the same pass:
+the Prudential role **ended June 2026**, so nothing on the site may read as current employment. The
+timeline in `src/data/experience.ts` was restructured into the real sequence (Genesis Corp
+consultant February 2022 – June 2023 → direct employment June 2023 → Senior Software Engineer 2024 →
+acting Technical Lead 2025 – June 2026) and **no entry is marked `current`**. All copy is past tense,
+"acting Tech Lead" is now "**Acting Technical Lead**" everywhere, and the AI Client-Assist case study
+gained the real architecture: Salesforce → Logstash → Elasticsearch, answered over by Spring AI with
+Claude Sonnet 4.5 on Amazon Bedrock, so business users reached client detail without consuming a
+Salesforce read-only license. The internal project name is deliberately **not** used. `public/resume.pdf`
+was republished (1 page). The Ask Fredrik knowledge base (frontend + Worker) was updated in the same
+pass so the live assistant cannot contradict the PDF a recruiter just downloaded — **the Worker needs
+a deploy for those answers to go live** (push to `main` triggers `deploy-worker.yml`). Verified: lint
+clean, 21 site tests, 457 + 54 Worker checks, `npm run build` clean, cross-repo coherence check
+coherent. Canonical facts and the job-board action list live in the sibling repo
+(`../resume-project/AGENTS.md`, `../resume-project/EMPLOYMENT-HISTORY-UPDATE.md`).
+
 Active. As of 2026-06-30 the site was **rebuilt from a no-build static site into a Vite + React +
 TypeScript app** and **Dockerized** (multi-stage build → nginx, port 8790). Content is migrated
 into typed data modules and reflects the same git-verifiable metrics and sanitized case studies

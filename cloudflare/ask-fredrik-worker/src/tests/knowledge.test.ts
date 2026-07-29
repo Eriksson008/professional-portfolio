@@ -294,7 +294,7 @@ for (const leaked of [
 for (const clean of [
   'Yes — React is one of Fredrik’s primary professional technologies.',
   'Fredrik has professional experience with AWS and project experience with Cloudflare Workers.',
-  'He works as a Senior Software Engineer and acting Tech Lead.',
+  'He works as a Senior Software Engineer with acting Technical Lead experience.',
   FALLBACK_ANSWER,
   NOT_CONFIRMED_ANSWER,
 ]) {

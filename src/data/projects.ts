@@ -19,8 +19,8 @@ export const projects: Project[] = [
     kind: 'Enterprise',
     confidential: true,
     summary:
-      'An enterprise Salesforce platform supporting Group Insurance business workflows, with ongoing feature delivery and weekly production releases.',
-    role: '#1 contributor — 470+ commits over ~2 years — now leading the platform team.',
+      'An enterprise Salesforce platform supporting Group Insurance business workflows, with continuous feature delivery and recurring production releases.',
+    role: '#1 contributor — 470+ commits over ~2 years — led the platform team from 2025.',
     bullets: [
       'Built Apex classes, triggers, and test classes alongside LWC, OmniScripts, and FlexCards for business-facing workflows.',
       'Scaled the platform to new product lines, extending the data model and workflows for additional business cases.',
@@ -36,14 +36,23 @@ export const projects: Project[] = [
     kind: 'Enterprise',
     confidential: true,
     summary:
-      'A secure internal AI assistant that lets business users query enterprise information in natural language, backed by a managed large language model.',
+      'A secure internal AI assistant that let business users ask natural-language questions about client detail — reaching that information without consuming a Salesforce read-only license, by answering over an Elasticsearch index rather than the CRM itself.',
     role: 'Single largest contributor — 137 of 217 commits (63% of all commits) across frontend, backend, and cloud.',
     bullets: [
-      'Built the React interface and Spring AI / Spring Boot backend integrating an Amazon Bedrock model.',
-      'Connected search and logging via Elasticsearch/ELK for retrieval over enterprise data.',
-      'Deployed on AWS ECS/Fargate behind an Application Load Balancer with ALB OIDC / Azure AD authentication.',
+      'Integrated the enterprise Salesforce platform with an ELK stack: Logstash pipelines streamed client and policy records out of Salesforce into Elasticsearch indices, making the data queryable outside the CRM, with Kibana for operational visibility.',
+      'Built the Spring AI / Spring Boot backend that retrieves from those Elasticsearch indices and reasons over the retrieved records with Claude Sonnet 4.5 on Amazon Bedrock, so answers stay grounded in indexed data rather than model recall.',
+      'Built the React interface, and deployed on AWS ECS/Fargate behind an Application Load Balancer with ALB OIDC / Azure AD authentication and Jenkins CI/CD.',
     ],
-    tags: ['React', 'Spring AI', 'Amazon Bedrock', 'ECS / Fargate', 'OIDC / Azure AD', 'ELK'],
+    tags: [
+      'React',
+      'Spring AI',
+      'Amazon Bedrock',
+      'Claude Sonnet 4.5',
+      'Elasticsearch / Logstash / Kibana',
+      'Salesforce integration',
+      'ECS / Fargate',
+      'OIDC / Azure AD',
+    ],
   },
   {
     id: 'onboarding-portal',

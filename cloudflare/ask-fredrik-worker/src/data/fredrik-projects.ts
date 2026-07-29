@@ -243,19 +243,19 @@ export const PROJECTS: ProjectKnowledge[] = [
     aliases: ['salesforce platform', 'salesforce modernization'],
     summary:
       'Enterprise Salesforce engineering: Apex, LWC, OmniStudio, Copado releases, production support. ' +
-      '#1 contributor; leads the team.',
+      '#1 contributor; led the team from 2025.',
     technologies: ['Apex', 'Lightning Web Components', 'OmniStudio', 'Copado'],
     highlights: [
-      '#1 contributor; has led the team since 2025',
-      'Owns Copado deployments, release coordination, and production support',
+      '#1 contributor; led the team from 2025 to June 2026',
+      'Owned Copado deployments, release coordination, and production support',
       'Business-critical delivery and data fixes',
     ],
     boundaries: [
       'No internal system names, client names, URLs, or confidential architecture details — high-level only',
     ],
     allowedAnswer:
-      'Fredrik is the #1 contributor on an enterprise Salesforce platform and has led its team ' +
-      'since 2025: Apex, Lightning Web Components, and OmniStudio development, Copado deployments ' +
+      'Fredrik is the #1 contributor on an enterprise Salesforce platform and led its team from ' +
+      '2025: Apex, Lightning Web Components, and OmniStudio development, Copado deployments ' +
       'and release coordination, and production support for business-critical delivery.',
   },
 ];

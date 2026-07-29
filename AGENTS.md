@@ -38,7 +38,7 @@ already holds the history; the note holds what lasts.
 ## What this is
 
 **Professional Portfolio** — a production-oriented personal portfolio for Fredrik Eriksson
-(Senior Software Engineer / acting Tech Lead). It is a **Vite + React + TypeScript** single-page
+(Senior Software Engineer / acting Technical Lead). It is a **Vite + React + TypeScript** single-page
 app, styled with a hand-written CSS design-token system and shipped as a **Dockerized static
 site served by nginx on port 8790** (localhost-only by default). It supports the résumé (same
 person, same facts, same confidentiality rules).
