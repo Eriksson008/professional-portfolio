@@ -181,10 +181,12 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
 - [ ] **Add the free Cloudflare WAF rate rule for `/ask`** (dashboard: zone → Security → WAF →
   Rate limiting rules) — hard quota protection; the Worker's in-memory limiter is per-isolate
   best-effort only.
-- [ ] **Consider Cloudflare Web Analytics** on the live site (free, cookieless, one script tag)
-  for visitor-level insight to complement the D1 question log.
-
 ### Done
+- [x] **Cloudflare Web Analytics live on the portfolio — 2026-08-04.** Web Analytics site
+  registered in the Cloudflare account for hostname `eriksson008.github.io`; the beacon is
+  injected from `src/main.tsx` gated on `import.meta.env.PROD` (dev sessions never report;
+  the beacon token is public by design). Reviewer-verified: the beacon finds its config via
+  the `script[data-cf-beacon]` fallback when injected as a module script.
 - [x] **Cloudflare Access setup completed + admin live on the Worker — 2026-07-23.** Access
   enabled on the production `workers.dev` URL (Domains → Restricted), app path-scoped to
   `/admin` (destination `ask-fredrik.eriksson-fredrik08.workers.dev/admin`), Allow

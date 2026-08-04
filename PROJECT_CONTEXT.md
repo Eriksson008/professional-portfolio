@@ -75,6 +75,22 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-08-04 — Cloudflare Web Analytics enabled (closes the AGENTS.md TODO).** A Web
+  Analytics site was registered in the Cloudflare account for hostname
+  `eriksson008.github.io` (free, cookieless RUM beacon) and the snippet is injected from
+  `src/main.tsx` rather than `index.html`, gated on `import.meta.env.PROD` so `npm run dev`
+  sessions never count as visitors. The Docker/`preview` builds *do* report (host
+  `localhost`, filterable in the dashboard) — a hostname guard was considered and rejected
+  because it would silently kill analytics on any future custom-domain move. The beacon
+  token in the bundle is a public site identifier (like a GA measurement ID), not a
+  credential. Independent review verified against the live `beacon.min.js` source that
+  dynamic module injection is safe: `document.currentScript` is null for module scripts,
+  but the beacon falls back to `document.querySelector('script[data-cf-beacon]')`, the CDN
+  serves `Access-Control-Allow-Origin: *` for the CORS-mode module fetch, and
+  `window.__cfBeacon` guards double-load. Note for wrangler work: the wrangler OAuth token
+  has no RUM scope, so Web Analytics sites must be created in the dashboard (or with a
+  purpose-made API token), not via wrangler's stored auth.
+
 - **2026-07-28 — Apple touch icons are full-bleed on purpose, and `public/` no longer ships dead
   art.** Both Apple touch icons (`public/apple-touch-icon.png` for the portfolio,
   `public/admin-icons/apple-touch-icon.png` for the Ask Fredrik dashboard) were regenerated at
