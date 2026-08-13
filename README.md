@@ -76,9 +76,9 @@ How it works (`src/components/AstronautHero.tsx` + `src/styles/hero.css`):
   playing backwards. The film occupies the first 78% of the runway; the rest is a hold on the
   settled frame. The served files are **all-intra re-encodes** (a keyframe every frame,
   `ffmpeg -g 1`) — seeking a normal-GOP encode stutters because every scrub position decodes
-  from the last keyframe: `astronaut-hero-scrub.mp4` (1080p, ~5.5 MB) on ≥720 px viewports,
-  `astronaut-hero-scrub-sm.mp4` (720p, ~3 MB) on phones. The original film is kept out of the
-  served bundle as `media-src/astronaut-hero-source.mp4`.
+  from the last keyframe: `astronaut-hero-scrub.mp4` (1440p, ~9.1 MB) on ≥720 px viewports,
+  `astronaut-hero-scrub-sm.mp4` (720p, ~3.3 MB) on phones. The 4K production master is kept out
+  of the served bundle as `media-src/astronaut-hero-source.mp4`.
 - **Everything is choreographed from one variable.** The component publishes the smoothed
   progress as a CSS custom property (`--p`) on the hero; `hero.css` derives a per-segment eased
   window (`--t`) from it and drives opacity + `translate` + blur — so every segment moves
@@ -148,17 +148,19 @@ a full-width 16:9 band above the stacked content on phones.
   still (`astronaut-finale-poster.jpg`); the CTA content never depends on the film.
 - **Encodes.** Served files are **all-intra re-encodes** (a keyframe every frame, `ffmpeg
   -g 1`) like the hero's — seeking a normal-GOP encode stutters: `astronaut-finale-scrub.mp4`
-  (1080p, ~3.8 MB, crf 26) on ≥720 px viewports, `astronaut-finale-scrub-sm.mp4` (720p,
-  ~2.1 MB, crf 27) on phones. Their source, `media-src/astronaut-finale-source.mp4` (~3 MB,
-  kept out of the served bundle), is a 1080p lanczos upscale of the original 720p clip, cleaned
-  and re-encoded with ffmpeg:
-  `-vf "delogo=…,gradfun=1.2:16,scale=1920:1080:flags=lanczos,unsharp=5:5:0.25:5:5:0"
-  -c:v libx264 -crf 17 -preset slow -pix_fmt yuv420p -movflags +faststart -an` —
-  `gradfun` debands the dark gradients, `faststart` fronts the moov atom for streaming, `-an`
-  strips the (silent) audio track. If the source is ever replaced, regenerate both scrub
-  encodes (`-c:v libx264 -g 1 -crf 26|27 -preset slow -pix_fmt yuv420p -movflags +faststart
-  -an`, sm adds `-vf scale=1280:720:flags=lanczos`) and the poster from the last frame
-  (`ffmpeg -sseof -0.1 -i <file> -frames:v 1 -q:v 3`).
+  (1440p, ~6.1 MB, crf 26) on ≥720 px viewports, `astronaut-finale-scrub-sm.mp4` (720p,
+  ~2.3 MB, crf 27) on phones. Its 4K production master lives at
+  `media-src/astronaut-finale-source.mp4`, outside the served bundle. Both films use the same
+  pipeline: scale with Lanczos to 2560×1440 or 1280×720, then
+  `-c:v libx264 -g 1 -keyint_min 1 -sc_threshold 0 -crf 26|27 -preset slow -pix_fmt yuv420p
+  -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart -an`.
+  Extract posters from the first source frame or the final scrub-visible frame (frame 191 at
+  7.958333 s; the component intentionally caps seeking at `duration - 0.05`) after scaling to
+  2560×1440. Posters must match the film exactly so the fallback-to-video transition never flashes.
+
+The two social-card delivery images remain 1200×630 PNGs. Their 4800×2520 production masters live
+at `media-src/og-image-v2-source.png` and `media-src/og-ask-fredrik-source.png`; regenerate with a
+Lanczos downscale to 1200×630 and strip the unused alpha channel (`format=rgb24`).
 
 ## Docker
 

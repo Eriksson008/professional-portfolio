@@ -6,7 +6,7 @@ import { GLIDE_SPRING, HERO_SPRING_DESKTOP, clamp01, debugGlide } from './scroll
 
 // The scrub encodes are all-intra (a keyframe every frame) so seeking is
 // instant at any scroll position; the original GOP encode stutters.
-// Phones get a 720p variant (~3 MB vs ~6 MB).
+// Phones get a 720p variant (~3.3 MB vs ~9.1 MB for the 1440p desktop encode).
 const VIDEO_SRC = `${import.meta.env.BASE_URL}media/astronaut-hero-scrub.mp4`;
 const VIDEO_SRC_SM = `${import.meta.env.BASE_URL}media/astronaut-hero-scrub-sm.mp4`;
 /** Final frame — the settled helmet; what mobile / reduced-motion / failure show. */

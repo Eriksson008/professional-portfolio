@@ -9,6 +9,13 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
+**2026-08-13 — cinematic media refreshed from true 4K masters.** The hero and finale keep their
+existing eight-second scroll choreography but now derive from 3840×2160 production masters. The
+served desktop encodes are 2560×1440 all-intra H.264; phones retain 1280×720 derivatives. Exact
+scrub-visible-frame posters and both social cards were regenerated from high-resolution masters.
+The release also refreshes the Worker's public Ask Fredrik social card through the existing
+`deploy-worker.yml` path.
+
 **2026-07-29 — employment status updated across the whole surface.** A verified legal-employer
 report reset the résumé's employment facts, and this repo was brought into line in the same pass:
 the Prudential role **ended June 2026**, so nothing on the site may read as current employment. The
@@ -20,8 +27,8 @@ gained the real architecture: Salesforce → Logstash → Elasticsearch, answere
 Claude Sonnet 4.5 on Amazon Bedrock, so business users reached client detail without consuming a
 Salesforce read-only license. The internal project name is deliberately **not** used. `public/resume.pdf`
 was republished (1 page). The Ask Fredrik knowledge base (frontend + Worker) was updated in the same
-pass so the live assistant cannot contradict the PDF a recruiter just downloaded — **the Worker needs
-a deploy for those answers to go live** (push to `main` triggers `deploy-worker.yml`). Verified: lint
+pass so the live assistant cannot contradict the PDF a recruiter just downloaded. Pushes to `main`
+that touch the Worker surface deploy it through `deploy-worker.yml`. Verified: lint
 clean, 21 site tests, 457 + 54 Worker checks, `npm run build` clean, cross-repo coherence check
 coherent. Canonical facts and the job-board action list live in the sibling repo
 (`../resume-project/AGENTS.md`, `../resume-project/EMPLOYMENT-HISTORY-UPDATE.md`).
@@ -74,6 +81,17 @@ docker compose up --build       # production container at http://localhost:8790 
   static host (Netlify, S3/CloudFront, nginx). `public/.nojekyll` included.
 
 ## Important Decisions
+
+- **2026-08-13 — Astronaut media now has a 4K-master → optimized-derivative pipeline.** Both
+  eight-second films were replaced with true 3840×2160, 24 fps, 193-frame BT.709 masters while
+  preserving the existing scroll timelines and delivery names. Viewports ≥720 px receive 2560×1440
+  all-intra H.264 encodes (hero ~9.1 MB, finale ~6.1 MB); phones retain 1280×720 derivatives
+  (~3.3/~2.3 MB) to protect transfer and decode cost. The three 2560×1440 posters are extracted from
+  the exact first or final scrub-visible frame (frame 191, because seeking caps at
+  `duration - 0.05`), preventing a fallback/video flash. The two 1200×630 social cards now derive
+  from tracked 4800×2520 masters with unused alpha stripped. Production masters live only under
+  `media-src/`; `public/` holds optimized delivery assets. All seven files in `public/media/` remain
+  referenced, so none were removed.
 
 - **2026-08-04 — Cloudflare Web Analytics enabled (closes the AGENTS.md TODO).** A Web
   Analytics site was registered in the Cloudflare account for hostname
@@ -546,6 +564,8 @@ docker compose up --build       # production container at http://localhost:8790 
 
 - **2026-07-06 — Astronaut finale: scroll-scrubbed cinematic contact section (branch
   `ask-fredrik-v1`, user-directed brief; replaces the Contact Transmission glass panel).**
+  *(The asset recipe in this historical entry was superseded on 2026-08-13 by the 4K-master
+  pipeline documented in Important Decisions and README.)*
   Section 06 is now `src/components/AstronautFinale.tsx` + `src/styles/finale.css`
   (Contact.tsx deleted, its links/notes all preserved): an 8 s black-and-white **light-reveal
   film scrubbed by scroll, bookending the hero's signature mechanic** — as the section rises
@@ -900,9 +920,6 @@ The site exposes only honest, defensible, public-safe content.
 
 ## Current Next Actions
 
-- **Manually spot-check the astronaut hero:** test on a real phone and with OS reduced-motion on
-  (desktop is verified; mobile/reduced-motion were code-reviewed in the session that built the
-  hero).
 - **Media follow-ups:** add a webm encode next to the mp4 for better compression
   (`ffmpeg -i astronaut-video.mp4 -c:v libvpx-vp9 -crf 38 -b:v 0 -an astronaut-video.webm`).
 - Validate the live OG social preview and confirm the public résumé download link.

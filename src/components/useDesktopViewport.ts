@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-/** True on ≥720px viewports — the breakpoint that picks the 1080p film encodes. */
+/** True on ≥720px viewports — the breakpoint that picks the 1440p film encodes. */
 export function useDesktopViewport() {
   const [desktop, setDesktop] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(min-width: 720px)').matches
