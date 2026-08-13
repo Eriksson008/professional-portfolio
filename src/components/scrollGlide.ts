@@ -80,6 +80,23 @@ export function createFrameScheduler(
 export const inFlowMediaProgress = (top: number, height: number, viewportHeight: number) =>
   height > 0 ? clamp01((viewportHeight - top) / height) : 1;
 
+/**
+ * Progress through a sticky media runway. The media reaches the viewport's
+ * bottom edge at progress zero, remains visible while the runway travels,
+ * and releases only after progress one.
+ */
+export const stickyMediaProgress = (
+  runwayTop: number,
+  runwayHeight: number,
+  mediaHeight: number,
+  viewportHeight: number,
+  targetTravel = runwayHeight - mediaHeight
+) => {
+  const travel = Math.min(runwayHeight - mediaHeight, targetTravel);
+  const stickyTop = viewportHeight - mediaHeight;
+  return travel > 0 ? clamp01((stickyTop - runwayTop) / travel) : 1;
+};
+
 const lastLog: Record<string, number> = {};
 
 /**

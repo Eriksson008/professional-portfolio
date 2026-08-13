@@ -11,6 +11,7 @@ import {
   inFlowMediaProgress,
   mediaFrameDuration,
   startVideoFrameDebug,
+  stickyMediaProgress,
 } from './scrollGlide';
 
 // All-intra re-encodes (a keyframe every frame, ffmpeg -g 1) like the hero's —
@@ -44,7 +45,7 @@ const REVEAL_END = 0.18;
  * Closing scene: the contact section (sheet 06) staged as a cinematic
  * ending that mirrors the hero's mechanic — the light-reveal film is
  * scrubbed by scroll. On desktop the scene **pins** (sticky under a
- * 200vh runway): the composition holds still while scroll plays it out
+ * extended runway): the composition holds still while scroll plays it out
  * in phases — eyebrow, then headline and body, then the astronaut
  * lighting out of black on the right, then the CTAs, then a held beat
  * before the section unpins toward the footer. Scrolling back rewinds
@@ -57,9 +58,9 @@ const REVEAL_END = 0.18;
  * tall enough to fit the scene (see finale.css); everywhere else —
  * phones, short windows — the section stays in-flow: the text phases
  * map onto the section's travel through the viewport and the film onto
- * its own band's travel, so the reveal happens where the film actually
- * is. measure() detects which mode is active from the section's own
- * height, so JS and CSS can't disagree.
+ * its own media travel (extended into a sticky runway on phones and
+ * tablets). measure() reads the finale container's computed sticky
+ * state, so JS and CSS can't disagree about which mode is active.
  *
  * The subject drifts across the frame during the reveal, so the film is
  * shown whole (16:9, never cover-cropped) as its own object: CTA column
@@ -86,6 +87,8 @@ export function AstronautFinale() {
   const scrub = !reduced && !failed;
 
   const sectionRef = useRef<HTMLElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
+  const mediaRunwayRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -101,9 +104,11 @@ export function AstronautFinale() {
   useEffect(() => {
     if (!scrub) return;
     const section = sectionRef.current;
+    const sticky = stickyRef.current;
+    const mediaRunway = mediaRunwayRef.current;
     const media = mediaRef.current;
     const video = videoRef.current;
-    if (!section || !media || !video) return;
+    if (!section || !sticky || !mediaRunway || !media || !video) return;
 
     let lastP = '';
 
@@ -116,7 +121,7 @@ export function AstronautFinale() {
       const rect = section.getBoundingClientRect();
       const vh = window.innerHeight;
       const runway = rect.height - vh;
-      if (runway > vh * 0.5) {
+      if (getComputedStyle(sticky).position === 'sticky') {
         // Pinned: one progress through the runway; the film occupies
         // its middle stretch so text lands first and the end holds.
         const target = clamp01(-rect.top / runway);
@@ -128,7 +133,18 @@ export function AstronautFinale() {
         // phones it now sits below the content.
         raw.set(travel(rect.top, vh));
         const mediaRect = media.getBoundingClientRect();
-        filmRaw.set(inFlowMediaProgress(mediaRect.top, mediaRect.height, vh));
+        const mediaRunwayRect = mediaRunway.getBoundingClientRect();
+        filmRaw.set(
+          mediaRunwayRect.height > mediaRect.height
+            ? stickyMediaProgress(
+                mediaRunwayRect.top,
+                mediaRunwayRect.height,
+                mediaRect.height,
+                vh,
+                vh * (desktop ? 1.716 : 2.028)
+              )
+            : inFlowMediaProgress(mediaRect.top, mediaRect.height, vh)
+        );
       }
     };
 
@@ -137,9 +153,12 @@ export function AstronautFinale() {
     const syncVideo = (force = false) => {
       const dur = video.duration;
       if (!Number.isFinite(dur) || dur <= 0 || video.seeking) return;
-      // Once normal scrolling reaches the endpoint, land exactly on the
-      // scrub-visible final frame instead of leaving the spring one frame shy.
-      const progress = filmRaw.get() >= 1 ? 1 : clamp01(filmSmooth.get());
+      // Stay on the smoothed playhead all the way to the endpoint. Snapping
+      // from the raw target made the last several seconds jump at once when
+      // a short scroll reached one. Round only the final source-frame interval
+      // so the settled state still lands on the exact scrub-visible poster.
+      const smoothed = clamp01(filmSmooth.get());
+      const progress = smoothed >= 1 - FRAME / (dur - 0.05) ? 1 : smoothed;
       const t = progress * (dur - 0.05);
       if (force || Math.abs(t - video.currentTime) > FRAME) video.currentTime = t;
     };
@@ -274,12 +293,12 @@ export function AstronautFinale() {
   return (
     <section
       id="contact"
-      className="finale"
+      className={scrub ? 'finale is-scrub' : 'finale'}
       ref={sectionRef}
       aria-label="Contact"
       data-pinned-reveal=""
     >
-      <div className="finale-sticky">
+      <div className="finale-sticky" ref={stickyRef}>
         <div className="wrap finale-inner">
           <div className="finale-panel">
             <p className="sheet-mark">
@@ -346,21 +365,23 @@ export function AstronautFinale() {
             </p>
           </div>
 
-          <div className="finale-media" ref={mediaRef} aria-hidden="true">
-            {scrub ? (
-              <video
-                ref={videoRef}
-                src={videoSrc}
-                muted
-                playsInline
-                preload="metadata"
-                tabIndex={-1}
-                onError={() => setFailed(true)}
-              />
-            ) : (
-              <img src={POSTER_SRC} alt="" loading="lazy" />
-            )}
-            <div className="finale-scrim" />
+          <div className="finale-media-runway" ref={mediaRunwayRef}>
+            <div className="finale-media" ref={mediaRef} aria-hidden="true">
+              {scrub ? (
+                <video
+                  ref={videoRef}
+                  src={videoSrc}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  tabIndex={-1}
+                  onError={() => setFailed(true)}
+                />
+              ) : (
+                <img src={POSTER_SRC} alt="" loading="lazy" />
+              )}
+              <div className="finale-scrim" />
+            </div>
           </div>
         </div>
       </div>

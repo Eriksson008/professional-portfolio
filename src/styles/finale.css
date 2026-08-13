@@ -9,7 +9,7 @@
    all render the fully settled scene.
 
    On tall-enough desktop viewports the scene pins (sticky under
-   a 200vh runway) while the phases play; elsewhere it stays
+   an extended runway) while the phases play; elsewhere it stays
    in-flow and the same ramps follow the section's travel. The
    film is shown whole (16:9, never cover-cropped) because the
    subject drifts across the frame during the reveal. Desktop:
@@ -73,6 +73,10 @@
   --t: clamp(0, calc((var(--fp, 1) - 0.06) / 0.24), 1);
   opacity: var(--t);
   transform: translateY(calc((1 - var(--fp, 1)) * 28px));
+}
+
+.finale-media-runway {
+  min-width: 0;
 }
 .finale-media video,
 .finale-media img {
@@ -169,16 +173,17 @@
   }
 }
 
-/* --- Pin: tall-enough desktop viewports get a 200vh runway ---
+/* --- Pin: tall-enough desktop viewports get a 386vh runway ---
    The scene holds still while scroll plays the phases; the JS
-   detects this mode from the section's own height, so the height
-   gate below is the single switch. Short windows (where the pinned
-   scene couldn't fit) keep the in-flow behavior above. --- */
+   detects this mode from this container's computed sticky position,
+   so the gate below is the single switch. With the film occupying 60% of
+   the runway, 386vh gives it the opening hero's ~172vh of physical
+   scroll travel. Short windows keep the in-flow behavior above. --- */
 @media (min-width: 880px) and (min-height: 720px) {
-  .finale {
-    height: 200vh;
+  .finale.is-scrub {
+    height: 386vh;
   }
-  .finale-sticky {
+  .finale.is-scrub .finale-sticky {
     position: sticky;
     top: 0;
     height: 100vh;
@@ -188,7 +193,12 @@
 }
 
 /* --- Mobile: content first, film band beneath as the quiet exit --- */
-@media (max-width: 879px) {
+@media (max-width: 879px), (max-height: 719px) {
+  .finale.is-scrub .finale-sticky {
+    /* `clip` preserves the edge treatment without creating the overflow
+       container that would disable the media's sticky runway. */
+    overflow: clip;
+  }
   .finale-scrim {
     /* Feather the band into the black above (content) and below (footer). */
     background: linear-gradient(
@@ -202,9 +212,24 @@
   .finale-inner {
     padding-block: 4.5rem 0;
   }
-  .finale-media {
-    /* Escape the wrap gutters so the film band runs edge to edge. */
+  .finale.is-scrub .finale-media-runway {
+    /* The opening phone hero plays its film across 202.8vh of scroll
+       (260vh runway travel × 0.78). Add one media height so this runway's
+       sticky travel matches it exactly. */
+    height: calc(202.8vh + 56.25vw);
     margin-inline: calc(var(--gutter) * -1);
     margin-top: 2.5rem;
+  }
+  .finale.is-scrub .finale-media {
+    position: sticky;
+    top: calc(100vh - 56.25vw);
+    top: calc(100dvh - 56.25vw);
+  }
+}
+
+@media (min-width: 720px) and (max-width: 879px), (min-width: 880px) and (max-height: 719px) {
+  .finale.is-scrub .finale-media-runway {
+    /* The opening hero's >=720px runway gives the film 171.6vh. */
+    height: calc(171.6vh + 56.25vw);
   }
 }

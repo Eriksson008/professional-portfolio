@@ -9,6 +9,19 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
+**2026-08-13 — finale pacing correction implemented locally, pending release.** The closing
+eight-second film no longer races through 540 px on desktop or one ~211 px phone band: its physical
+scrub travel now matches the opening hero (1,544.4 px each at 1440×900; within 0.5% at phone/tablet
+measurements). Phones/tablets hold the 16:9 film band in a memory-safe sticky runway after the
+contact content, while reduced-motion and failed-video fallbacks skip the extended runway entirely.
+The old raw-progress endpoint shortcut was also removed; only the last source-frame interval rounds
+to the exact 7.991667 s scrub endpoint, so no multi-second jump bypasses the spring. Browser checks
+covered forward/reverse/end seeking, desktop/tablet/phone/short-window layouts, reduced motion,
+overflow, and console errors. Canvas remains unnecessary: at this true 24 fps/193-frame cadence it
+could make selection deterministic and recover at most the 32 frames missed in the controlled
+Option A sweep, but cannot make motion smoother than the source cadence and materially increases
+network, memory, request count, and maintenance cost.
+
 **2026-08-13 — scroll-video Option A released and live-verified.** The astronaut hero and
 finale retain Framer Motion plus all-intra H.264, but raw geometry and sprung render/seek work are
 now coalesced to one animation-frame callback; the finale's two springs can no longer double-render
@@ -130,7 +143,9 @@ docker compose up --build       # production container at http://localhost:8790 
   `duration - 0.05`), preventing a fallback/video flash. The two 1200×630 social cards now derive
   from tracked 4800×2520 masters with unused alpha stripped. Production masters live only under
   `media-src/`; `public/` holds optimized delivery assets. All seven files in `public/media/` remain
-  referenced, so none were removed.
+  referenced, so none were removed. The closing film's physical scroll distance mirrors the opening
+  film; do not shorten its progress ramp merely to reach the page-end frame. Canvas/image sequences
+  remain a precision fallback, not a cadence upgrade: the 24 fps masters still contain 193 frames.
 
 - **2026-08-04 — Cloudflare Web Analytics enabled (closes the AGENTS.md TODO).** A Web
   Analytics site was registered in the Cloudflare account for hostname
