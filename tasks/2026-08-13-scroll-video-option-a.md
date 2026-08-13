@@ -96,4 +96,8 @@ on every raw scroll event instead of being coalesced to the browser paint cadenc
   with no remaining blockers and confirmed no privacy, secret, chatbot, or mobile regressions.
 - Real iPhone Safari/Home Screen behavior remains a post-release device check. If optimized MP4 is
   still visibly insufficient there, evaluate Option B: a progressively loaded, memory-windowed
-  canvas/frame sequence. No commit, push, or deployment was performed in this task's scope.
+  canvas/frame sequence.
+- Released in commit `89a7d83`. Pages run `31740234369`, Worker deploy run `31740234210`, and
+  Worker test run `31740234416` passed. Cache-busted live requests confirmed the published bundle
+  names both medium tiers and both live MP4s are byte-for-byte SHA-256 matches to the committed
+  assets.

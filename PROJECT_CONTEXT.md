@@ -9,18 +9,21 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
-**2026-08-13 — scroll-video Option A implemented and verified locally.** The astronaut hero and
+**2026-08-13 — scroll-video Option A released and live-verified.** The astronaut hero and
 finale retain Framer Motion plus all-intra H.264, but raw geometry and sprung render/seek work are
 now coalesced to one animation-frame callback; the finale's two springs can no longer double-render
 within a paint and ≥720 px uses the established tighter overdamped response. A new 1080p middle
 tier serves 720–1199 px (hero ~5.8 MB, finale ~4.0 MB), while phones keep 720p and ≥1200 px keeps
 1440p. Controlled Chromium sweeps with the same 1440p assets improved the finale from 136 to 161
 distinct presented frames (~18%) and the hero from 137 to 143; no long tasks or runtime errors were
-observed. Development builds now expose `requestVideoFrameCallback` telemetry. Real iPhone Safari
-remains the post-release check, and canvas/frame sequences remain Option B only if optimized MP4 is
-still visibly insufficient. This change is not yet committed or deployed.
+observed. Development builds now expose `requestVideoFrameCallback` telemetry. Released in commit
+`89a7d83`: Pages run `31740234369`, Worker deploy run `31740234210`, and Worker test run
+`31740234416` all passed. The live bundle names both medium-tier assets and both live MP4s are
+byte-for-byte SHA-256 matches to the committed files. Real iPhone Safari remains the post-release
+check, and canvas/frame sequences remain Option B only if optimized MP4 is still visibly
+insufficient.
 
-**2026-08-13 — Ask Fredrik consistency and iPhone cinematic controls fixed locally.** The
+**2026-08-13 — Ask Fredrik consistency and iPhone cinematic controls released.** The
 assistant now deterministically maps the ~16K highlight to the greenfield three-service client
 onboarding platform (not this portfolio) and truthfully explains that it receives only the current
 question: the visible transcript is page-session UI state, while `sessionId` and D1 analytics are
@@ -29,7 +32,8 @@ regressions. The iPhone media path keeps the WebKit seek-paint primer but hides 
 self-pauses it, the in-flow finale reaches its final scrub-visible frame within normal document
 scroll, and the mobile launcher now has a 44 px target with 20 px plus safe-area edge spacing.
 Verified locally at phone, tablet, desktop, and reduced-motion settings; a real iPhone Safari/Home
-Screen check remains after release. This change is not yet committed or deployed.
+Screen check remains. Released with `89a7d83` through the successful Worker workflow above; live
+requests returned `highlight_16k` and `conversation_memory` with the intended deterministic answers.
 
 **2026-08-13 — cinematic media refreshed from true 4K masters.** The hero and finale keep their
 existing eight-second scroll choreography but now derive from 3840×2160 production masters. The

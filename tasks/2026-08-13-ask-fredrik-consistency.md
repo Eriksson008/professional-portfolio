@@ -112,4 +112,7 @@ Competing hypotheses checked:
   user changes were preserved.
 - Real iPhone Safari/Home Screen media behavior remains a post-release device check because local
   Chromium emulation cannot prove WebKit decoder semantics.
-- No commit, push, or deployment was performed in this task's scope.
+- Released in commit `89a7d83`. Worker deploy run `31740234210` and Worker test run `31740234416`
+  passed, including the workflow's live `/ask` smoke test. Direct live requests for the two reported
+  topics resolved to `highlight_16k` and `conversation_memory` with the intended deterministic
+  answers.
