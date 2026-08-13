@@ -77,3 +77,6 @@ last frame as soon as that short ramp reaches one, which makes the finale race a
   applies below 720 px viewport height and caps the film mapping to 171.6vh; 1024×650 measured
   1,115.4 px versus the hero's 1,116.18 px and reached 7.991667 s. Re-review confirmed the blocker
   resolved with no new blocking findings.
+- Released in commit `f1a8ca9`. GitHub Pages run `31742959209` passed. A cache-busted live Chromium
+  check at 1440×900 measured 1,544.4 px for both films, 3.96 s at the finale midpoint, and the exact
+  7.991667 s endpoint while paused and not seeking; no overflow or console errors were present.

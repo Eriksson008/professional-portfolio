@@ -9,7 +9,7 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
-**2026-08-13 — finale pacing correction implemented locally, pending release.** The closing
+**2026-08-13 — finale pacing correction released and live-verified.** The closing
 eight-second film no longer races through 540 px on desktop or one ~211 px phone band: its physical
 scrub travel now matches the opening hero (1,544.4 px each at 1440×900; within 0.5% at phone/tablet
 measurements). Phones/tablets hold the 16:9 film band in a memory-safe sticky runway after the
@@ -20,7 +20,9 @@ covered forward/reverse/end seeking, desktop/tablet/phone/short-window layouts, 
 overflow, and console errors. Canvas remains unnecessary: at this true 24 fps/193-frame cadence it
 could make selection deterministic and recover at most the 32 frames missed in the controlled
 Option A sweep, but cannot make motion smoother than the source cadence and materially increases
-network, memory, request count, and maintenance cost.
+network, memory, request count, and maintenance cost. Released in commit `f1a8ca9`; Pages run
+`31742959209` passed. A cache-busted live Chromium check measured exactly 1,544.4 px for both films,
+3.96 s at the finale midpoint, and the 7.991667 s endpoint while paused with no console errors.
 
 **2026-08-13 — scroll-video Option A released and live-verified.** The astronaut hero and
 finale retain Framer Motion plus all-intra H.264, but raw geometry and sprung render/seek work are
