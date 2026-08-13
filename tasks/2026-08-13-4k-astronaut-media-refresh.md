@@ -85,5 +85,10 @@ were generated only at their 1200×630 delivery size.
   stale generated index/audit files and unrelated user-owned vault changes; they were not modified.
 - Independent read-only review: no blocking correctness, deployment, privacy, media-reference, or
   runtime findings. Documentation cleanup from the review was applied before staging.
-- Deployment/live verification: pending the authorized push; append evidence after both workflows
-  and live assets are verified.
+- Deployment/live verification: commit `c2fc7e4` pushed to `main`; Pages run `31734481197` and
+  Worker run `31734481239` completed successfully. The Worker workflow also passed its live `/ask`
+  smoke test. Cache-busted requests to both live origins returned 200 and byte-for-byte SHA-256
+  matches for the sampled desktop/mobile videos, poster, and both social cards; `ffprobe` confirmed
+  their live dimensions and frame metadata. A fresh live browser session loaded the 2560×1440 hero
+  with no media error or overflow. One unrelated Google Fonts Sora request returned 404; the site
+  fell back normally and the issue predates/is outside this media-only release.

@@ -14,7 +14,9 @@ existing eight-second scroll choreography but now derive from 3840×2160 product
 served desktop encodes are 2560×1440 all-intra H.264; phones retain 1280×720 derivatives. Exact
 scrub-visible-frame posters and both social cards were regenerated from high-resolution masters.
 The release also refreshes the Worker's public Ask Fredrik social card through the existing
-`deploy-worker.yml` path.
+`deploy-worker.yml` path. Live-verified after commit `c2fc7e4`: Pages and Worker workflows passed,
+the Worker passed its `/ask` smoke test, and sampled media/social assets from both live origins were
+byte-for-byte SHA-256 matches for the new outputs.
 
 **2026-07-29 — employment status updated across the whole surface.** A verified legal-employer
 report reset the résumé's employment facts, and this repo was brought into line in the same pass:
