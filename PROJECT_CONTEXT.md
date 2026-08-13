@@ -101,7 +101,8 @@ is set to "GitHub Actions".
 - Typed content modules in `src/data/` as the single source of truth
 - Docker: multi-stage node build → nginx (Alpine), serves on port 8790; host exposure
   configurable via `BIND_ADDR` (default `127.0.0.1`, localhost-only) and `PORT` (see `.env.example`)
-- ESLint (flat config) + Prettier; no tests (static content site)
+- ESLint (flat config) + Prettier; Node's built-in test runner covers component helpers, responsive
+  media boundaries/scheduling, admin utilities, browser metadata, and Ask Fredrik fallback routing
 
 ## Local Development
 

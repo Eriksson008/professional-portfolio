@@ -17,6 +17,8 @@ npm-debug.log*
 resources/
 _source-materials/
 *.local.pdf
+# Legacy portfolio résumé is retained only in the private sibling repo.
+public/resume-old.pdf
 
 # Env / secrets
 .env

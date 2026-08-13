@@ -33,6 +33,7 @@ npm run dev          # dev server with HMR at http://localhost:8790
 npm run build        # type-check + production build to dist/
 npm run preview      # serve the built dist/ at http://localhost:8790
 npm run lint         # ESLint
+npm test             # Node test runner (component helpers, media scheduling, static fallback)
 npm run format       # Prettier
 ```
 
@@ -125,26 +126,27 @@ hero was removed with this redesign, returning the site to a single small JS bun
 The site closes the way it opens: section 06 (`src/components/AstronautFinale.tsx` +
 `src/styles/finale.css`) is a cinematic contact scene whose 8 s black-and-white **light-reveal
 film is scrubbed by scroll**, mirroring the hero's mechanic. On desktop viewports tall enough
-to fit the scene (≥880×720) it **pins like the hero**: the section is a 230vh runway whose
+to fit the scene (≥880×720) it **pins like the hero**: the section is a 386vh runway whose
 sticky inner holds the CTA column and film still on screen while scrolling lights the
-astronaut out of black (film completes at 80% of the runway, the rest is a lit hold before it
-unpins toward the footer; scrolling back re-darkens it). Everywhere else — phones, short
-windows — the section stays **in-flow** and progress maps onto its travel through the viewport
-(reveal completes when the section top reaches 18% of the viewport); `measure()` picks the
-formula from the section's own rendered height, so the CSS media query is the single switch
-and JS can never disagree with it. The pin doesn't touch the Ask Fredrik widget (`position:
-fixed`, higher stacking context), and `overflow: hidden` lives on the sticky element rather
-than the section, since an overflow-hidden ancestor would defeat `position: sticky`. The
-subject drifts across the frame during the reveal, so the film is shown whole (16:9, never
-cover-cropped): CTA column on the left, film bleeding to the right viewport edge on desktop;
-a full-width 16:9 band above the stacked content on phones.
+astronaut out of black. The film occupies progress 0.18–0.78, giving it the same 171.6vh of
+physical scroll travel as the opening desktop hero, with text before it and a lit hold after it;
+scrolling back re-darkens it. On viewports below 880 px, the contact content stays **in-flow** while
+the edge-to-edge 16:9 film band below it holds in its own sticky runway. Short desktop windows keep
+the desktop two-column composition but give its right-column film the same sticky runway instead
+of pinning the whole scene. That media travel matches the opening film: 202.8vh on phones and
+171.6vh at ≥720 px. `measure()` reads the finale container's computed sticky state, so JS follows
+the same responsive mode as CSS. The pin doesn't touch the Ask Fredrik widget (`position: fixed`,
+higher stacking context). The subject drifts across the frame during the reveal, so the film remains
+a 16:9 object: CTA column on the left and film bleeding to the right viewport edge in desktop grid
+layouts; an edge-to-edge band after the stacked content below 880 px.
 
 - **Scrub discipline** (same as the hero): scroll geometry and the two spring subscriptions are
   each coalesced to one animation-frame callback. Scroll only moves the targets of overdamped
   framer-motion springs (the tighter `HERO_SPRING_DESKTOP` on ≥720 px; `GLIDE_SPRING` on phones),
   whose sprung values seek `video.currentTime` (never `play()`ed for playback); seeks land only on whole-frame deltas and never while one is in
-  flight; the decode pipeline is primed with one muted play → pause so mobile browsers paint
-  seeks. Decorative only: `aria-hidden`, muted, `playsInline`, no controls.
+  flight; the decode pipeline is invisibly primed with one guarded muted play → pause so mobile
+  browsers paint seeks without visible autonomous playback. Decorative only: `aria-hidden`, muted,
+  `playsInline`, no controls.
 - **Lazy.** The film sits at the page's end, so it loads `preload="metadata"` until an
   IntersectionObserver sees the section within two viewports, then flips to `auto` + primes.
 - **Fallbacks.** `prefers-reduced-motion` and load failure both render the lit final-frame
@@ -259,10 +261,9 @@ professional-portfolio/
 ├── .github/workflows/      # deploy.yml — build + publish to GitHub Pages on push to main
 ├── src/
 │   ├── main.tsx, App.tsx
-│   ├── data/               # profile, experience, skills, projects, highlights + constellation.ts
-│   ├── components/         # Nav, ConstellationHero, About, Experience, Projects, Skills, …
-│   ├── hooks/              # useSmoothProgress.ts, usePointer.ts, useVisualTier.ts (reduced-motion-aware)
-│   └── styles/             # tokens.css + app.css + constellation-hero.css (design system)
+│   ├── data/               # profile, experience, skills, projects, highlights, Ask Fredrik context
+│   ├── components/         # astronaut hero/finale, sections, Ask Fredrik, shared motion/media helpers
+│   └── styles/             # tokens, app, premium, hero, finale, Ask Fredrik, and admin CSS
 ├── public/                 # resume.pdf, favicons + app icons, og-image-v2.png, share.*, .nojekyll
 ├── cloudflare/
 │   └── ask-fredrik-worker/ # optional Workers Free backend for the Ask Fredrik widget (own README);
