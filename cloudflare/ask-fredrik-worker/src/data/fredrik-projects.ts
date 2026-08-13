@@ -219,8 +219,8 @@ export const PROJECTS: ProjectKnowledge[] = [
     publicSafe: true,
     aliases: ['onboarding portal', 'client onboarding', 'onboarding'],
     summary:
-      'Secure internal/external onboarding portal: passwordless OTP authentication, session management. ' +
-      'Fredrik led development.',
+      'Greenfield 3-service onboarding platform: ~16K net authored lines/144 commits/<5 weeks; ' +
+      'passwordless OTP. Fredrik led development.',
     technologies: ['React', 'Spring Boot', 'OTP email verification', 'JWT/RS256 sessions'],
     highlights: [
       'Led development; delivered as lead developer',

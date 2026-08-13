@@ -3,11 +3,33 @@
 ## Purpose
 
 A production-oriented personal portfolio for Fredrik Eriksson (Senior Software Engineer / acting
-Tech Lead) that showcases work, skills, and experience and *supports* the résumé. Conservative,
+Tech Lead) that showcases work, skills, and experience and _supports_ the résumé. Conservative,
 credible enterprise tone (no hype words). The repo is intentionally built with the same stack it
 advertises, so it doubles as a work sample.
 
 ## Current Status
+
+**2026-08-13 — scroll-video Option A implemented and verified locally.** The astronaut hero and
+finale retain Framer Motion plus all-intra H.264, but raw geometry and sprung render/seek work are
+now coalesced to one animation-frame callback; the finale's two springs can no longer double-render
+within a paint and ≥720 px uses the established tighter overdamped response. A new 1080p middle
+tier serves 720–1199 px (hero ~5.8 MB, finale ~4.0 MB), while phones keep 720p and ≥1200 px keeps
+1440p. Controlled Chromium sweeps with the same 1440p assets improved the finale from 136 to 161
+distinct presented frames (~18%) and the hero from 137 to 143; no long tasks or runtime errors were
+observed. Development builds now expose `requestVideoFrameCallback` telemetry. Real iPhone Safari
+remains the post-release check, and canvas/frame sequences remain Option B only if optimized MP4 is
+still visibly insufficient. This change is not yet committed or deployed.
+
+**2026-08-13 — Ask Fredrik consistency and iPhone cinematic controls fixed locally.** The
+assistant now deterministically maps the ~16K highlight to the greenfield three-service client
+onboarding platform (not this portfolio) and truthfully explains that it receives only the current
+question: the visible transcript is page-session UI state, while `sessionId` and D1 analytics are
+not conversational memory. Worker and static-fallback matchers have parity and exact-prompt
+regressions. The iPhone media path keeps the WebKit seek-paint primer but hides and immediately
+self-pauses it, the in-flow finale reaches its final scrub-visible frame within normal document
+scroll, and the mobile launcher now has a 44 px target with 20 px plus safe-area edge spacing.
+Verified locally at phone, tablet, desktop, and reduced-motion settings; a real iPhone Safari/Home
+Screen check remains after release. This change is not yet committed or deployed.
 
 **2026-08-13 — cinematic media refreshed from true 4K masters.** The hero and finale keep their
 existing eight-second scroll choreography but now derive from 3840×2160 production masters. The
@@ -84,11 +106,22 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-08-13 — Ask Fredrik is intentionally stateless, and capability/meta questions are
+  deterministic.** The answering pipeline receives only the current question. The browser's visible
+  transcript is ephemeral page-session state; `sessionId` supports grouping/rate limiting and D1 is
+  a best-effort analytics log, neither is queried as conversational memory. Questions about prior
+  prompts and public headline metrics such as ~16K therefore stay in curated Worker and frontend
+  fallback intents instead of being left to generative inference. This avoids false memory claims,
+  metric misattribution, and API/fallback drift without increasing prompt-injection or retention
+  surface.
+
 - **2026-08-13 — Astronaut media now has a 4K-master → optimized-derivative pipeline.** Both
   eight-second films were replaced with true 3840×2160, 24 fps, 193-frame BT.709 masters while
-  preserving the existing scroll timelines and delivery names. Viewports ≥720 px receive 2560×1440
-  all-intra H.264 encodes (hero ~9.1 MB, finale ~6.1 MB); phones retain 1280×720 derivatives
-  (~3.3/~2.3 MB) to protect transfer and decode cost. The three 2560×1440 posters are extracted from
+  preserving the existing scroll timelines. **Amended by Option A on 2026-08-13:** viewports ≥1200 px
+  receive 2560×1440 all-intra H.264 encodes (hero ~9.1 MB, finale ~6.1 MB), 720–1199 px receive
+  1920×1080 derivatives (~5.8/~4.0 MB), and phones retain 1280×720 derivatives (~3.3/~2.3 MB) to
+  protect transfer and decode cost. Scroll geometry and seek painting are animation-frame-coalesced;
+  keep Framer Motion rather than adding GSAP. The three 2560×1440 posters are extracted from
   the exact first or final scrub-visible frame (frame 191, because seeking caps at
   `duration - 0.05`), preventing a fallback/video flash. The two 1200×630 social cards now derive
   from tracked 4800×2520 masters with unused alpha stripped. Production masters live only under
@@ -99,7 +132,7 @@ docker compose up --build       # production container at http://localhost:8790 
   Analytics site was registered in the Cloudflare account for hostname
   `eriksson008.github.io` (free, cookieless RUM beacon) and the snippet is injected from
   `src/main.tsx` rather than `index.html`, gated on `import.meta.env.PROD` so `npm run dev`
-  sessions never count as visitors. The Docker/`preview` builds *do* report (host
+  sessions never count as visitors. The Docker/`preview` builds _do_ report (host
   `localhost`, filterable in the dashboard) — a hostname guard was considered and rejected
   because it would silently kill analytics on any future custom-domain move. The beacon
   token in the bundle is a public site identifier (like a GA measurement ID), not a
@@ -115,7 +148,7 @@ docker compose up --build       # production container at http://localhost:8790 
   art.** Both Apple touch icons (`public/apple-touch-icon.png` for the portfolio,
   `public/admin-icons/apple-touch-icon.png` for the Ask Fredrik dashboard) were regenerated at
   180×180 RGB from new edge-to-edge source art. The previous versions had a rounded-square mask
-  baked into the image, which iOS then masked *again* — a squircle inside a squircle with dark
+  baked into the image, which iOS then masked _again_ — a squircle inside a squircle with dark
   corners. iOS applies its own mask, so the artwork underneath must reach the edges. Do not
   "helpfully" re-add rounded corners to these two files. The remaining favicons and PWA icons keep
   the earlier framing, which is correct for their contexts (they are never OS-masked).
@@ -167,16 +200,16 @@ docker compose up --build       # production container at http://localhost:8790 
   paths only, so `/` and `/share` were already public and the wrapper works as shipped — no
   Bypass policy, no new application. Card Pilot, AFR and Homebase each needed one; this did not.
   Live-verified 2026-07-27: `/share` and `/og-ask-fredrik.png` return `200` with no Access change,
-  while `/admin/ask-fredrik/` still `302`s. That is also why the wrapper points *at* the dashboard
+  while `/admin/ask-fredrik/` still `302`s. That is also why the wrapper points _at_ the dashboard
   rather than trying to make the dashboard previewable: the gate on `/admin/ask-fredrik/` **is**
   the admin gate, and `/admin*` must never appear in a Bypass policy. The redirect is JavaScript
   because several unfurlers follow a `<meta refresh>` or a 302 to the login page, and no crawler
   runs a script. Supersedes the entry below, which concluded the situation was unfixable —
-  it was unfixable *at the dashboard's own URL*, which is not the same thing.
+  it was unfixable _at the dashboard's own URL_, which is not the same thing.
 
 - **2026-07-27 — The Ask Fredrik dashboard got a share card, and it will stay inert.**
-  *(Superseded by the entry above — the tags on the dashboard page are still inert, but `/share`
-  now gives Ask Fredrik a working preview.)*
+  _(Superseded by the entry above — the tags on the dashboard page are still inert, but `/share`
+  now gives Ask Fredrik a working preview.)_
   `admin/ask-fredrik/index.html` now carries `og:*`/`twitter:*` tags, and `npm run build:admin`
   copies `public/og-ask-fredrik.png` (1200×630, the astronaut against a mission-control wall) to
   the Worker's root via the existing `copy-admin-icons` plugin — `publicDir` is `false` for that
@@ -184,8 +217,8 @@ docker compose up --build       # production container at http://localhost:8790 
 
   **The two halves land differently, and that is the whole point.** Access here is scoped to the
   **`/admin` paths only**, so `/og-ask-fredrik.png` is already publicly fetchable and needs no
-  bypass. But Open Graph tags live *inside* the HTML, so a preview would require an unfurler to
-  read `/admin/ask-fredrik/` — and the gate on that path *is* the admin gate. There is no version
+  bypass. But Open Graph tags live _inside_ the HTML, so a preview would require an unfurler to
+  read `/admin/ask-fredrik/` — and the gate on that path _is_ the admin gate. There is no version
   of exempting it that is not "publish the admin dashboard". So unlike Homebase and AFR, this is
   not a pending decision: **it is the correct permanent state**, and `/admin*` must never appear
   in a Bypass policy. The tags cost nothing and are correct if the page is ever opened up.
@@ -201,20 +234,20 @@ docker compose up --build       # production container at http://localhost:8790 
 - **2026-07-27 — The Worker was renamed `ask-fredrik-worker` → `ask-fredrik`, and three things did
   not follow it.** The `-worker` suffix was noise in a hostname that already ends `.workers.dev`.
 
-  **Cloudflare has no rename operation.** The name is the Worker's identity *and* its `workers.dev`
+  **Cloudflare has no rename operation.** The name is the Worker's identity _and_ its `workers.dev`
   hostname, so this was a deploy under the new name followed by a delete of the old Worker. What did
   not move by itself, in descending order of how quietly it fails:
 
   1. **The `ADMIN_ALLOWED_EMAILS` secret.** Secrets are stored per script name. The new Worker starts
      with none, and `src/access.ts` fails closed — every admin endpoint returns 503 and it reads
      exactly like a code regression. Re-set with `wrangler secret put`.
-  2. **The Cloudflare Access application's destination**, because Access protects a *hostname*. The
-     `Ask Fredrik` application was given the new destination alongside the old one *before* the
+  2. **The Cloudflare Access application's destination**, because Access protects a _hostname_. The
+     `Ask Fredrik` application was given the new destination alongside the old one _before_ the
      deploy, so `/admin` was never briefly unprotected. It was **edited, not recreated** — a new
      application would have issued a new AUD and invalidated `ACCESS_APP_AUD` in `wrangler.jsonc`.
   3. **The `VITE_ASK_FREDRIK_API_URL` GitHub Actions repository variable**, which is not in this
      repository at all. It bakes the Worker's `/ask` URL into the portfolio bundle at build time, so
-     until it is updated *and the Pages build re-runs*, the published widget still calls the old
+     until it is updated _and the Pages build re-runs_, the published widget still calls the old
      hostname. This is the one that survives a green CI run on both repos.
 
   The D1 database moved for free: it is bound by id, and the id belongs to the database rather than
@@ -261,12 +294,12 @@ docker compose up --build       # production container at http://localhost:8790 
   Homebase's description corrected; AFR Gateway renamed to App Dashboard.** Regenerating the PDF
   left the site one version behind it, so `src/data/` and the Worker knowledge base were brought
   in line. (1) **`src/data/`**: `profile.ts` tagline and title-block no longer lead with
-  Salesforce; `skills.ts` gains an *Edge & Platform* group (Workers, D1, Access, Wrangler,
+  Salesforce; `skills.ts` gains an _Edge & Platform_ group (Workers, D1, Access, Wrangler,
   migrations, cron, CSP, PWA) and splits the AI group into production AI, LLM application design,
   and AI-assisted tooling; `highlights.ts` replaces the "6 repos / AI-assisted delivery" tile with
   the contributor-share metric; `projects.ts` adds **App Dashboard** and expands the portfolio
   entry to cover the assistant. (2) **`src/data/projects.ts` Homebase was badly stale** — it still
-  described the *retired* Express/SQLite/Argon2id encrypted-vault app that was archived to
+  described the _retired_ Express/SQLite/Argon2id encrypted-vault app that was archived to
   `legacy/` in the July Cloudflare rebuild. Rewritten to the real architecture (Workers + D1 +
   Access + cron + PWA, metadata-only, no credentials stored). The same staleness existed in the
   Worker KB. (3) **Worker KB** (`fredrik-{context,skills,projects,qa}.ts`): six new skills
@@ -278,8 +311,8 @@ docker compose up --build       # production container at http://localhost:8790 
   `../resume-project/AGENTS.md` and should never have been in a public knowledge base.
   (5) **Independent review caught two real defects** before this landed: "63% of the codebase"
   overstated a documented **63%-of-commits** figure (corrected everywhere, including the résumé),
-  and a bare `'testing'` alias made the assistant answer "Yes —" to *"Does he do penetration
-  testing?"*, hijacking questions that belong on the conservative not-confirmed path. Both fixed,
+  and a bare `'testing'` alias made the assistant answer "Yes —" to _"Does he do penetration
+  testing?"_, hijacking questions that belong on the conservative not-confirmed path. Both fixed,
   with routing tests added for all six new skills, a `relatedProjects` referential-integrity
   invariant, and negative tests for the alias. Worker suite 424 + 54 = **478 checks**.
   (6) **`SYSTEM_PROMPT` is 7,564 chars against a hard 8,000-char test cap** — every skill/project
@@ -385,7 +418,7 @@ docker compose up --build       # production container at http://localhost:8790 
   "Sr. Software Engineer" label was tried, then dropped once the readout was made desktop-only).
   Reduced-motion/static heroes fade it in on `.is-settled`. Video, scrub springs,
   runway, and mobile scroll behavior untouched. All old `.hud-corner/.hud-tick/.hud-label` markup
-  + CSS removed. Lint + build green.
+  - CSS removed. Lint + build green.
 - **2026-07-07 — Desktop hero scrub smoothness (mouse-wheel), mobile untouched (user-directed
   brief).** The soft shared `GLIDE_SPRING` (26/14/1.1, ~1.5–2 s tail) feels great under a
   trackpad's continuous deltas but disconnected/stuttery under a mouse wheel's chunky notches
@@ -397,7 +430,7 @@ docker compose up --build       # production container at http://localhost:8790 
   **Runway 360vh → 320vh on desktop only** (`@media (min-width: 720px)`; mobile stays 360vh) so
   each wheel notch moves the film enough to feel connected. (3) **Compositor isolation** on
   desktop: `translateZ(0)`/`will-change` on the scrubbed `<video>` and `will-change: transform,
-  filter` on the four blurred identity lines, so the per-frame seek repaint and the animated
+filter` on the four blurred identity lines, so the per-frame seek repaint and the animated
   `blur()` reveal rasterize on their own GPU layers instead of thrashing the hero. Video encoding
   was already scrub-optimal (all-intra, 193/193 keyframes — every seek decodes independently);
   the whole-frame seek throttle (`> 1/24 s`, skip while `seeking`) is unchanged. Lint + build
@@ -413,7 +446,7 @@ docker compose up --build       # production container at http://localhost:8790 
   (2) **Hero composition adjusted to the new film's framing**: the regenerated film settles on
   a frame-filling helmet with the visor centered at ≈(56%, 41%) of the 16:9 image (the old one
   settled smaller and centered), so the visor HUD moved/resized (`left: 56%`, `width:
-  min(44vw, 58vh)`, `aspect-ratio: 1.35` — inset on the glass, labels no longer float
+min(44vw, 58vh)`, `aspect-ratio: 1.35` — inset on the glass, labels no longer float
   off-visor), the ambient glow re-anchored to (56%, 41%) at `min(50vw, 76vh)`, the bottom
   scrim deepened (0.82 → 0.88) under the identity panel (the new settled frame has a bright
   suit at the bottom), and the phone `object-position` pan widened 30→50% ⇒ **24→58%** so the
@@ -548,7 +581,7 @@ docker compose up --build       # production container at http://localhost:8790 
   with screen recording).** The first scrub cut revealed the astronaut "in passing" — the
   section kept scrolling while the film lit, so the lit scene was only fully visible at the
   footer. Fix: on desktop viewports that fit the scene (`min-width: 880px` + `min-height:
-  720px`) the section is now a **230vh runway with a sticky inner** (the hero's pattern): text
+720px`) the section is now a **230vh runway with a sticky inner** (the hero's pattern): text
   and film hold still on screen while scroll scrubs the light up (film completes at 80% of the
   runway, then a lit hold, then it unpins toward the footer). Phones and short windows keep
   the in-flow travel-based scrub; `measure()` auto-detects the active mode from the section's
@@ -566,8 +599,8 @@ docker compose up --build       # production container at http://localhost:8790 
 
 - **2026-07-06 — Astronaut finale: scroll-scrubbed cinematic contact section (branch
   `ask-fredrik-v1`, user-directed brief; replaces the Contact Transmission glass panel).**
-  *(The asset recipe in this historical entry was superseded on 2026-08-13 by the 4K-master
-  pipeline documented in Important Decisions and README.)*
+  _(The asset recipe in this historical entry was superseded on 2026-08-13 by the 4K-master
+  pipeline documented in Important Decisions and README.)_
   Section 06 is now `src/components/AstronautFinale.tsx` + `src/styles/finale.css`
   (Contact.tsx deleted, its links/notes all preserved): an 8 s black-and-white **light-reveal
   film scrubbed by scroll, bookending the hero's signature mechanic** — as the section rises
@@ -762,7 +795,7 @@ docker compose up --build       # production container at http://localhost:8790 
   no blur to mask it). **Tagline + CTAs are now part of the opening identity** — visible within
   ~2.6s, no longer gated behind 88% of the 700vh scroll; the identity bookend still fades them
   out mid-scroll (now completing by ~0.13 so light never crosses readable text; `visibility:
-  hidden` while faded so invisible CTAs can't be clicked) and returns them with the settled map.
+hidden` while faded so invisible CTAs can't be clicked) and returns them with the settled map.
   **Hero core:** WebGL `CoreOrb` (faint wireframe icosahedron + tilted counter-rotating orbital
   dust ring, forming over ~3s; the particle shell also settles inward on load) in the existing
   lazy chunk, over a **CSS-only fallback orb** (`HeroCoreFallback`: halo, glass core, two
@@ -836,7 +869,7 @@ docker compose up --build       # production container at http://localhost:8790 
   SVG connector lines draw between related nodes via `stroke-dashoffset`. The centered identity
   fades out mid-scroll so the constellation owns the screen, then returns with the CTA
   (`View Projects` / `Read Experience`). Inspired by igloo.inc's (Awwwards SOTD) award-style
-  *feel* — lerp-smoothed scroll, cursor-reactive 2.5D parallax, monospace decode-scramble on
+  _feel_ — lerp-smoothed scroll, cursor-reactive 2.5D parallax, monospace decode-scramble on
   metric values and the name, a subtle chromatic-aberration accent, hover-to-highlight connector
   edges — reproduced in **pure React/CSS/SVG, no WebGL/GSAP, no new dependencies** (the restraint
   is itself an engineering-taste signal on GitHub Pages). No autoplay sound (deliberate).

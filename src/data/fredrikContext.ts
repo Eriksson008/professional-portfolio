@@ -109,6 +109,43 @@ export const curatedAnswers: CuratedAnswer[] = [
       'Start dates and timing are best covered with Fredrik directly — he is glad to talk through those in a conversation rather than here. He is based in the Austin, TX metro area and open to Senior Software Engineer, technical-leadership-track, platform, backend/full-stack, and AI-enabled application roles. His role history and dates are on the one-page résumé available from the Contact section, and he can be reached at eriksson.fredrik08@gmail.com or on LinkedIn.',
   },
   {
+    id: 'conversation-memory',
+    question: '',
+    keywords: [
+      'conversation history',
+      'chat history',
+      'history saved',
+      'save history',
+      'saved history',
+      'remember this conversation',
+      'remember our conversation',
+      'remember my questions',
+      'last prompt',
+      'last two prompts',
+      'previous prompt',
+      'previous question',
+      'earlier prompt',
+      'what did i ask',
+      'what have i asked',
+    ],
+    answer:
+      'I don’t receive earlier messages when answering, so I can’t recall or list previous prompts. The transcript remains visible during this page session, and questions may be logged for portfolio analytics as disclosed, but those logs are not used as conversational memory.',
+  },
+  {
+    id: 'greenfield-lines',
+    question: '',
+    keywords: [
+      '16k',
+      '16 000',
+      '16k lines',
+      '16 000 lines',
+      'lines of code highlight',
+      'greenfield platform',
+    ],
+    answer:
+      'The ~16K figure is not the size of this portfolio. It refers to a greenfield client onboarding platform where Fredrik led architecture and delivery: three integrated microservices, roughly 16,000 net lines authored across 144 commits in under five weeks. The stack included Node/Express with React/TypeScript, Spring Boot/Java 21, and PostgreSQL/Aurora on AWS ECS/Fargate. Generated, lock, and minified files are excluded from the metric.',
+  },
+  {
     id: 'projects',
     question: 'What are Fredrik’s strongest projects?',
     keywords: ['project', 'built', 'portfolio piece', 'work sample', 'case stud', 'shipped'],

@@ -20,6 +20,7 @@
 .af-launcher {
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   gap: 0.55rem;
   padding: 0.72rem 1.25rem;
   border: 1px solid var(--line-strong);
@@ -388,9 +389,9 @@
 /* ---- Small screens: bottom sheet ---- */
 @media (max-width: 560px) {
   .af-root {
-    right: 0.75rem;
-    bottom: 0.75rem;
-    left: 0.75rem;
+    right: calc(var(--gutter) + env(safe-area-inset-right, 0px));
+    bottom: calc(var(--gutter) + env(safe-area-inset-bottom, 0px));
+    left: calc(var(--gutter) + env(safe-area-inset-left, 0px));
     align-items: stretch;
   }
   .af-launcher {

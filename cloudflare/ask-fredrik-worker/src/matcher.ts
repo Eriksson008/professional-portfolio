@@ -5,9 +5,10 @@
  * resolveLocalAnswer() in this order:
  *   1. isSensitiveQuestion       blocks salary/private/confidential questions
  *   2. curated exact match       canonical recruiter questions (fredrik-qa)
- *   3. knowledge match           skill/project aliases (fredrik-skills/-projects)
- *   4. curated keyword scoring   common recruiter phrasings (fredrik-qa)
- *   5. not-confirmed detector    "experience with X?" where X is unknown →
+ *   3. memory capability match   prevents named knowledge stealing recall questions
+ *   4. knowledge match           skill/project aliases (fredrik-skills/-projects)
+ *   5. curated keyword scoring   common recruiter phrasings (fredrik-qa)
+ *   6. not-confirmed detector    "experience with X?" where X is unknown →
  *                                conservative refusal instead of AI guessing
  *
  * Deliberately simple keyword/alias matching — no NLP, no fuzzy scoring.
@@ -117,6 +118,16 @@ export function matchCuratedKeywords(question: string): IntentMatch | null {
     }
   }
   return best ? best.match : null;
+}
+
+/** Match keywords for one curated intent without changing global scoring order. */
+function matchCuratedIntentKeywords(question: string, intent: string): IntentMatch | null {
+  const entry = CURATED_ANSWERS.find((candidate) => candidate.intent === intent);
+  if (!entry) return null;
+  const haystack = ` ${normalize(question)} `;
+  return entry.keywords.some((keyword) => haystack.includes(asNeedle(keyword)))
+    ? { intent: entry.intent, answer: entry.answer }
+    : null;
 }
 
 /** Longest alias (name included) of `entry` found in the padded haystack, or 0. */
@@ -238,8 +249,9 @@ export type LocalResolution =
  * The full pre-AI pipeline in one call (shared by the Worker and the test
  * script so tests exercise exactly what production runs). Order matters:
  * sensitive first (safety), curated exact next (canonical questions keep
- * their curated answers), then specific skill/project knowledge, then broad
- * curated keywords, then the conservative not-confirmed refusal.
+ * their curated answers), then the memory-capability guard before any named
+ * skill/project, then knowledge, broad curated keywords, and finally the
+ * conservative not-confirmed refusal.
  */
 export function resolveLocalAnswer(question: string): LocalResolution {
   if (isSensitiveQuestion(question)) {
@@ -247,6 +259,9 @@ export function resolveLocalAnswer(question: string): LocalResolution {
   }
   const exact = matchCuratedExact(question);
   if (exact) return { kind: 'match', ...exact };
+
+  const memory = matchCuratedIntentKeywords(question, 'conversation_memory');
+  if (memory) return { kind: 'match', ...memory };
 
   const knowledge = matchKnowledge(question);
   if (knowledge) return { kind: 'match', ...knowledge };

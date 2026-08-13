@@ -29,8 +29,8 @@ export const GLIDE_SPRING: SpringOptions = {
  * disconnected/stuttery scrub on desktop (a trackpad's continuous deltas hide
  * it — hence mobile feels fine). This firms the response to a ~0.7s settle so
  * the film tracks the wheel, while staying overdamped (ζ ≈ 1.29) so a scrubbed
- * film never overshoots and plays backwards. Used only on ≥720px in the hero;
- * mobile and the finale keep GLIDE_SPRING.
+ * film never overshoots and plays backwards. Used on ≥720px for the hero and
+ * finale; phones keep the softer GLIDE_SPRING for touch input.
  */
 export const HERO_SPRING_DESKTOP: SpringOptions = {
   stiffness: 60,
@@ -40,6 +40,45 @@ export const HERO_SPRING_DESKTOP: SpringOptions = {
 };
 
 export const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+/** Source-frame duration; keep seek thresholds tied to verified asset cadence. */
+export const mediaFrameDuration = (fps: number) => (fps > 0 ? 1 / fps : 0);
+
+export interface FrameScheduler {
+  schedule: () => void;
+  cancel: () => void;
+}
+
+/** Coalesce any number of callers into one callback on the next display frame. */
+export function createFrameScheduler(
+  callback: () => void,
+  requestFrame: (callback: FrameRequestCallback) => number = requestAnimationFrame,
+  cancelFrame: (handle: number) => void = cancelAnimationFrame
+): FrameScheduler {
+  let handle = 0;
+  return {
+    schedule() {
+      if (handle !== 0) return;
+      handle = requestFrame(() => {
+        handle = 0;
+        callback();
+      });
+    },
+    cancel() {
+      if (handle === 0) return;
+      cancelFrame(handle);
+      handle = 0;
+    },
+  };
+}
+
+/**
+ * In-flow film progress: start when the band enters the viewport and finish
+ * when it is fully visible. Unlike a viewport-percentage endpoint, this can
+ * always reach 1 before the document footer stops normal scrolling.
+ */
+export const inFlowMediaProgress = (top: number, height: number, viewportHeight: number) =>
+  height > 0 ? clamp01((viewportHeight - top) / height) : 1;
 
 const lastLog: Record<string, number> = {};
 
@@ -54,4 +93,47 @@ export function debugGlide(label: string, raw: number, smooth: number) {
   if (now - (lastLog[label] ?? 0) < 200) return;
   lastLog[label] = now;
   console.debug(`[glide:${label}] raw=${raw.toFixed(3)} smooth=${smooth.toFixed(3)}`);
+}
+
+/** Dev-only evidence of what paused seeking actually presents; no production callback is started. */
+export function startVideoFrameDebug(label: string, video: HTMLVideoElement): () => void {
+  if (!import.meta.env.DEV || typeof video.requestVideoFrameCallback !== 'function')
+    return () => {};
+
+  let callbackId = 0;
+  let windowStarted = performance.now();
+  let previousNow = 0;
+  let presented = 0;
+  let gapsOver50Ms = 0;
+  let intervalTotal = 0;
+  let intervalCount = 0;
+
+  const inspect: VideoFrameRequestCallback = (now) => {
+    if (previousNow > 0) {
+      const interval = now - previousNow;
+      intervalTotal += interval;
+      intervalCount += 1;
+      if (interval > 50) gapsOver50Ms += 1;
+    }
+    previousNow = now;
+    presented += 1;
+
+    if (now - windowStarted >= 2000) {
+      const quality = video.getVideoPlaybackQuality?.();
+      const average = intervalCount > 0 ? intervalTotal / intervalCount : 0;
+      console.debug(
+        `[video:${label}] presented=${presented} avg=${average.toFixed(1)}ms gaps>50=${gapsOver50Ms}` +
+          (quality ? ` dropped=${quality.droppedVideoFrames}` : '')
+      );
+      windowStarted = now;
+      presented = 0;
+      gapsOver50Ms = 0;
+      intervalTotal = 0;
+      intervalCount = 0;
+    }
+    callbackId = video.requestVideoFrameCallback(inspect);
+  };
+
+  callbackId = video.requestVideoFrameCallback(inspect);
+  return () => video.cancelVideoFrameCallback(callbackId);
 }

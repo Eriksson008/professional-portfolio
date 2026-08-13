@@ -1,13 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import { profile } from '../data/profile';
-import { useDesktopViewport } from './useDesktopViewport';
-import { GLIDE_SPRING, HERO_SPRING_DESKTOP, clamp01, debugGlide } from './scrollGlide';
+import { useVideoMediaTier } from './useDesktopViewport';
+import {
+  GLIDE_SPRING,
+  HERO_SPRING_DESKTOP,
+  clamp01,
+  createFrameScheduler,
+  debugGlide,
+  mediaFrameDuration,
+  startVideoFrameDebug,
+} from './scrollGlide';
 
 // The scrub encodes are all-intra (a keyframe every frame) so seeking is
 // instant at any scroll position; the original GOP encode stutters.
-// Phones get a 720p variant (~3.3 MB vs ~9.1 MB for the 1440p desktop encode).
+// Large desktops get 1440p, medium viewports 1080p, and phones 720p so
+// transfer/decode pressure scales without giving up the GOP-1 seek behavior.
 const VIDEO_SRC = `${import.meta.env.BASE_URL}media/astronaut-hero-scrub.mp4`;
+const VIDEO_SRC_MD = `${import.meta.env.BASE_URL}media/astronaut-hero-scrub-md.mp4`;
 const VIDEO_SRC_SM = `${import.meta.env.BASE_URL}media/astronaut-hero-scrub-sm.mp4`;
 /** Final frame — the settled helmet; what mobile / reduced-motion / failure show. */
 const POSTER_SRC = `${import.meta.env.BASE_URL}media/astronaut-hero-poster.jpg`;
@@ -23,8 +33,9 @@ const FILM_END = 0.78;
 /** Scroll progress past which the scroll cue has done its job. */
 const SETTLE_AT = 0.5;
 
-/** One frame of the 24fps film — seeking finer than this is wasted decode. */
-const FRAME = 1 / 24;
+const VIDEO_FPS = 24;
+/** One verified source frame — seeking finer than this is wasted decode. */
+const FRAME = mediaFrameDuration(VIDEO_FPS);
 
 /** Mission telemetry — a bulleted readout on the settled visor (desktop only;
     hidden on phones where it crowds the portrait frame). All figures are
@@ -59,7 +70,10 @@ const telemetry = [
  */
 export function AstronautHero() {
   const reduced = useReducedMotion();
-  const desktop = useDesktopViewport();
+  const mediaTier = useVideoMediaTier();
+  const desktop = mediaTier !== 'small';
+  const videoSrc =
+    mediaTier === 'large' ? VIDEO_SRC : mediaTier === 'medium' ? VIDEO_SRC_MD : VIDEO_SRC_SM;
   const [failed, setFailed] = useState(false);
   const [settled, setSettled] = useState(false);
   const scrub = !reduced && !failed;
@@ -98,14 +112,15 @@ export function AstronautHero() {
 
     // Seek only on whole-frame deltas, and never while a seek is in
     // flight — queueing sub-frame seeks just thrashes the decoder.
-    const syncVideo = () => {
+    const syncVideo = (force = false) => {
       const dur = video.duration;
       if (!Number.isFinite(dur) || dur <= 0 || video.seeking) return;
       const t = Math.min(1, clamp01(smooth.get()) / FILM_END) * (dur - 0.05);
-      if (Math.abs(t - video.currentTime) > FRAME) video.currentTime = t;
+      if (force || Math.abs(t - video.currentTime) > FRAME) video.currentTime = t;
     };
 
-    const render = (v: number) => {
+    const render = () => {
+      const v = smooth.get();
       const shown = clamp01(v);
       // Skip the style write (and its recalc) when the change is invisible.
       const p = shown.toFixed(3);
@@ -122,47 +137,92 @@ export function AstronautHero() {
     // instead of springing through the whole film from frame one.
     measure();
     smooth.jump(raw.get());
-    render(smooth.get());
+    render();
 
-    const unsubscribe = smooth.on('change', render);
-    const onScroll = measure;
+    const measureScheduler = createFrameScheduler(measure);
+    const renderScheduler = createFrameScheduler(render);
+    const unsubscribe = smooth.on('change', renderScheduler.schedule);
+    const onScroll = measureScheduler.schedule;
     const onMetadata = () => {
       measure();
-      syncVideo();
+      renderScheduler.schedule();
     };
+    const stopVideoDebug = startVideoFrameDebug('hero', video);
 
-    // Mobile browsers don't paint seeks on a never-played video — prime the
-    // decode pipeline with one muted play → pause (allowed without a gesture
-    // because the video is muted + playsInline).
+    // WebKit has historically needed one muted inline playback start before
+    // currentTime seeks repaint. Keep that warm-up, but hide it and stop on
+    // the first `playing` event so no autonomous frames are ever presented.
+    let active = true;
     let primed = false;
+    let priming = false;
+    let revealTimer: number | undefined;
+    const revealAtTarget = () => {
+      if (!active) return;
+      if (video.seeking) {
+        video.addEventListener('seeked', revealAtTarget, { once: true });
+        return;
+      }
+      video.style.visibility = '';
+    };
+    const haltPlayback = () => {
+      if (!active) return;
+      video.pause();
+      syncVideo(true);
+      if (priming) {
+        priming = false;
+        if (revealTimer !== undefined) window.clearTimeout(revealTimer);
+        revealAtTarget();
+      }
+    };
     const prime = () => {
       if (primed) return;
       primed = true;
-      const p = video.play();
-      if (p) {
-        p.then(() => video.pause()).catch(() => {
-          primed = false;
-        });
-      }
+      priming = true;
+      video.style.visibility = 'hidden';
+      revealTimer = window.setTimeout(haltPlayback, 1000);
+      const promise = video.play();
+      promise?.then(haltPlayback).catch(() => {
+        if (!active) return;
+        primed = false;
+        haltPlayback();
+      });
+    };
+    const pauseWhenHidden = () => {
+      if (document.hidden) haltPlayback();
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     video.addEventListener('loadedmetadata', onMetadata);
     video.addEventListener('loadedmetadata', prime);
+    video.addEventListener('playing', haltPlayback);
+    window.addEventListener('pagehide', haltPlayback);
+    document.addEventListener('visibilitychange', pauseWhenHidden);
     // A skipped-while-seeking frame could leave the film a step behind at
     // rest — re-check once each seek lands.
-    video.addEventListener('seeked', syncVideo);
+    const onSeeked = renderScheduler.schedule;
+    video.addEventListener('seeked', onSeeked);
     prime();
     return () => {
+      active = false;
+      video.pause();
       unsubscribe();
+      measureScheduler.cancel();
+      renderScheduler.cancel();
+      stopVideoDebug();
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
       video.removeEventListener('loadedmetadata', onMetadata);
       video.removeEventListener('loadedmetadata', prime);
-      video.removeEventListener('seeked', syncVideo);
+      video.removeEventListener('playing', haltPlayback);
+      window.removeEventListener('pagehide', haltPlayback);
+      document.removeEventListener('visibilitychange', pauseWhenHidden);
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('seeked', revealAtTarget);
+      if (revealTimer !== undefined) window.clearTimeout(revealTimer);
+      video.style.visibility = 'hidden';
     };
-  }, [scrub, raw, smooth]);
+  }, [scrub, desktop, mediaTier, raw, smooth]);
 
   return (
     <section
@@ -180,7 +240,7 @@ export function AstronautHero() {
           {scrub && (
             <video
               ref={videoRef}
-              src={desktop ? VIDEO_SRC : VIDEO_SRC_SM}
+              src={videoSrc}
               poster={START_SRC}
               muted
               playsInline

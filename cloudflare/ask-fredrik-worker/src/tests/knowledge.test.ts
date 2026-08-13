@@ -187,6 +187,41 @@ check(
   describe(openEnded)
 );
 
+// Reported live inconsistency: these used to fall through to a stateless model, producing
+// different answers across identical prompts and even inventing conversation memory.
+for (const q of [
+  'can you tell me about your 16k lines of code under your highlights ?',
+  'What are the 16,000 lines about?',
+  'Explain the lines of code highlight',
+]) {
+  const r = expectIntent(q, 'highlight_16k');
+  if (r.kind === 'match') {
+    check(
+      `"${q}" distinguishes the metric from the portfolio`,
+      /not the size of this portfolio/i.test(r.answer)
+    );
+    check(`"${q}" explains the verified metric`, /144 commits/i.test(r.answer));
+  }
+}
+
+for (const q of [
+  'Do you have history saved?',
+  'what was my last two prompts',
+  'Can you remember our conversation?',
+]) {
+  const r = expectIntent(q, 'conversation_memory');
+  if (r.kind === 'match') {
+    check(`"${q}" states the actual model context`, /don’t receive earlier messages/i.test(r.answer));
+    check(`"${q}" denies log-backed memory`, /not used as conversational memory/i.test(r.answer));
+  }
+}
+
+for (const q of ['What did I ask about React?', 'Can you remember our conversation about Homebase?']) {
+  expectIntent(q, 'conversation_memory');
+}
+
+expectIntent('How many lines of code are in Homebase?', 'project:homebase');
+
 // ---------------------------------------------------------------------------
 // 5. Sensitive/private topics are blocked before anything else.
 // ---------------------------------------------------------------------------
@@ -324,6 +359,10 @@ check('prompt forbids inferring/inventing', prompt.includes('Do not infer, inven
 check('prompt lists Tailscale', prompt.includes('Tailscale'));
 check('prompt lists Homebase', prompt.includes('Homebase'));
 check('prompt marks confidence levels', prompt.includes('[professional]') && prompt.includes('[personal]'));
+check(
+  'prompt forbids fabricated conversation memory',
+  prompt.includes('Never claim memory')
+);
 check('prompt stays compact (< 8000 chars)', prompt.length < 8000, `length ${prompt.length}`);
 const promptLower = prompt.toLowerCase();
 for (const leak of ['password:', 'api key =', 'home address:', 'ssn', 'begin rsa']) {

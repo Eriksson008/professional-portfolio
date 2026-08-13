@@ -1,4 +1,6 @@
-import { curatedAnswers, unknownAnswer } from '../data/fredrikContext';
+import { matchStaticAnswer } from './matchStaticAnswer';
+
+export { matchStaticAnswer } from './matchStaticAnswer';
 
 export interface AskFredrikResult {
   answer: string;
@@ -22,43 +24,6 @@ const apiUrl: string | undefined = import.meta.env.VITE_ASK_FREDRIK_API_URL;
  */
 const sessionId: string | undefined =
   typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : undefined;
-
-/** Lowercase, strip punctuation/diacritic quotes, collapse whitespace. */
-function normalize(question: string): string {
-  return question
-    .toLowerCase()
-    .replace(/[’']/g, '')
-    .replace(/[^a-z0-9\s/+#.-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-/**
- * Keyword scoring over the curated answers: one point per matched phrase,
- * with an exact suggested-question match trumping everything. Ties keep
- * the earliest (most recruiter-relevant) entry.
- */
-export function matchStaticAnswer(question: string): string {
-  const normalized = ` ${normalize(question)} `;
-  if (normalized.trim() === '') return unknownAnswer;
-
-  let best: { score: number; answer: string } | null = null;
-  for (const entry of curatedAnswers) {
-    if (entry.question && normalize(entry.question) === normalized.trim()) {
-      return entry.answer;
-    }
-    let score = 0;
-    for (const keyword of entry.keywords) {
-      // Pad single short words so "ai" can't match inside "maintain".
-      const needle = keyword.length <= 4 && !keyword.includes(' ') ? ` ${keyword} ` : keyword;
-      if (normalized.includes(needle)) score += 1;
-    }
-    if (score > 0 && (best === null || score > best.score)) {
-      best = { score, answer: entry.answer };
-    }
-  }
-  return best ? best.answer : unknownAnswer;
-}
 
 /**
  * Ask a question. Static curated answers by default; if an API URL is

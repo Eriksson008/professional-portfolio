@@ -11,15 +11,15 @@ business logic.
 
 ## Tech stack
 
-| Layer        | Choice                                                                |
-| ------------ | --------------------------------------------------------------------- |
-| Framework    | React 18 + TypeScript                                                 |
-| Build tool   | Vite 5                                                                 |
-| Styling      | Hand-written CSS with a design-token system                            |
-| Motion       | framer-motion (LazyMotion) for section transitions; no WebGL/WebGPU    |
-| Content      | Typed data modules (`src/data/`) as source of truth                    |
-| Container    | Multi-stage Docker build → nginx (Alpine)                              |
-| Tooling      | ESLint (flat config) + Prettier                                        |
+| Layer      | Choice                                                              |
+| ---------- | ------------------------------------------------------------------- |
+| Framework  | React 18 + TypeScript                                               |
+| Build tool | Vite 5                                                              |
+| Styling    | Hand-written CSS with a design-token system                         |
+| Motion     | framer-motion (LazyMotion) for section transitions; no WebGL/WebGPU |
+| Content    | Typed data modules (`src/data/`) as source of truth                 |
+| Container  | Multi-stage Docker build → nginx (Alpine)                           |
+| Tooling    | ESLint (flat config) + Prettier                                     |
 
 No backend, no database, no auth — it is a static site by design.
 
@@ -69,15 +69,17 @@ theme.
 
 How it works (`src/components/AstronautHero.tsx` + `src/styles/hero.css`):
 
-- **Scroll drives the film.** A scroll listener only moves the target of an overdamped
+- **Scroll drives the film.** A passive scroll listener schedules at most one geometry read per
+  display frame, which only moves the target of an overdamped
   framer-motion spring (`GLIDE_SPRING` in `src/components/scrollGlide.ts`); the sprung progress
-  is what seeks `video.currentTime` (never `play()`), so the film trails the finger with real
+  schedules at most one paint/seek per display frame and is what seeks `video.currentTime`, so the film trails the finger with real
   momentum and keeps gliding into place after scrolling stops — without ever overshooting and
   playing backwards. The film occupies the first 78% of the runway; the rest is a hold on the
   settled frame. The served files are **all-intra re-encodes** (a keyframe every frame,
   `ffmpeg -g 1`) — seeking a normal-GOP encode stutters because every scrub position decodes
-  from the last keyframe: `astronaut-hero-scrub.mp4` (1440p, ~9.1 MB) on ≥720 px viewports,
-  `astronaut-hero-scrub-sm.mp4` (720p, ~3.3 MB) on phones. The 4K production master is kept out
+  from the last keyframe: `astronaut-hero-scrub.mp4` (1440p, ~9.1 MB) on ≥1200 px viewports,
+  `astronaut-hero-scrub-md.mp4` (1080p, ~5.8 MB) from 720–1199 px, and
+  `astronaut-hero-scrub-sm.mp4` (720p, ~3.3 MB) below 720 px. The 4K production master is kept out
   of the served bundle as `media-src/astronaut-hero-source.mp4`.
 - **Everything is choreographed from one variable.** The component publishes the smoothed
   progress as a CSS custom property (`--p`) on the hero; `hero.css` derives a per-segment eased
@@ -137,9 +139,10 @@ subject drifts across the frame during the reveal, so the film is shown whole (1
 cover-cropped): CTA column on the left, film bleeding to the right viewport edge on desktop;
 a full-width 16:9 band above the stacked content on phones.
 
-- **Scrub discipline** (same as the hero): scroll only moves the targets of overdamped
-  framer-motion springs (`GLIDE_SPRING`), whose sprung values seek `video.currentTime` (never
-  `play()`ed for playback); seeks land only on whole-frame deltas and never while one is in
+- **Scrub discipline** (same as the hero): scroll geometry and the two spring subscriptions are
+  each coalesced to one animation-frame callback. Scroll only moves the targets of overdamped
+  framer-motion springs (the tighter `HERO_SPRING_DESKTOP` on ≥720 px; `GLIDE_SPRING` on phones),
+  whose sprung values seek `video.currentTime` (never `play()`ed for playback); seeks land only on whole-frame deltas and never while one is in
   flight; the decode pipeline is primed with one muted play → pause so mobile browsers paint
   seeks. Decorative only: `aria-hidden`, muted, `playsInline`, no controls.
 - **Lazy.** The film sits at the page's end, so it loads `preload="metadata"` until an
@@ -147,13 +150,14 @@ a full-width 16:9 band above the stacked content on phones.
 - **Fallbacks.** `prefers-reduced-motion` and load failure both render the lit final-frame
   still (`astronaut-finale-poster.jpg`); the CTA content never depends on the film.
 - **Encodes.** Served files are **all-intra re-encodes** (a keyframe every frame, `ffmpeg
-  -g 1`) like the hero's — seeking a normal-GOP encode stutters: `astronaut-finale-scrub.mp4`
-  (1440p, ~6.1 MB, crf 26) on ≥720 px viewports, `astronaut-finale-scrub-sm.mp4` (720p,
-  ~2.3 MB, crf 27) on phones. Its 4K production master lives at
+-g 1`) like the hero's — seeking a normal-GOP encode stutters: `astronaut-finale-scrub.mp4`
+  (1440p, ~6.1 MB, crf 26) on ≥1200 px viewports,
+  `astronaut-finale-scrub-md.mp4` (1080p, ~4.0 MB, crf 26) from 720–1199 px, and
+  `astronaut-finale-scrub-sm.mp4` (720p, ~2.3 MB, crf 27) below 720 px. Its 4K production master lives at
   `media-src/astronaut-finale-source.mp4`, outside the served bundle. Both films use the same
-  pipeline: scale with Lanczos to 2560×1440 or 1280×720, then
+  pipeline: scale with Lanczos to 2560×1440, 1920×1080, or 1280×720, then
   `-c:v libx264 -g 1 -keyint_min 1 -sc_threshold 0 -crf 26|27 -preset slow -pix_fmt yuv420p
-  -colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart -an`.
+-colorspace bt709 -color_primaries bt709 -color_trc bt709 -movflags +faststart -an`.
   Extract posters from the first source frame or the final scrub-visible frame (frame 191 at
   7.958333 s; the component intentionally caps seeking at `duration - 0.05`) after scaling to
   2560×1440. Posters must match the film exactly so the fallback-to-video transition never flashes.
@@ -186,7 +190,7 @@ PORT=9000 docker compose up --build   # → http://localhost:9000
 By default the container is published to `127.0.0.1` only (localhost). To reach it from your
 phone or another device, set `BIND_ADDR=0.0.0.0` in `.env`, then it is reachable at:
 
-- LAN:       `http://<host-ip>:8790`
+- LAN: `http://<host-ip>:8790`
 - Tailscale: `http://<tailscale-ip>:8790`
 
 This stays on your private LAN / tailnet — it is **not** exposed to the public internet. Notes:
@@ -214,7 +218,7 @@ https://ask-fredrik.eriksson-fredrik08.workers.dev/share
 ```
 
 Sending the dashboard URL itself previews as nothing and always will — the gate on
-`/admin/ask-fredrik/` *is* the admin gate, so it must never be bypassed. `/share` is a public page
+`/admin/ask-fredrik/` _is_ the admin gate, so it must never be bypassed. `/share` is a public page
 that carries the tags and bounces an admin to the dashboard; because Access here is scoped to
 `/admin` only, it needed no Access change at all. Verified against every major crawler on
 2026-07-27. See `cloudflare/ask-fredrik-worker/README.md` › "Link previews".

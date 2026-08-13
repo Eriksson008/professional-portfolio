@@ -22,6 +22,10 @@ The frontend (`src/lib/askFredrik.ts`) already speaks this contract: when
 `VITE_ASK_FREDRIK_API_URL` is set at build time it POSTs here first and silently falls back
 to its own static answers on any failure — the widget can never error out.
 
+`/ask` is deliberately stateless: each answer sees only the current `question`. `sessionId`
+groups rate limiting and analytics records; it does not retrieve earlier turns. The browser keeps
+the visible transcript only for the current page session, and D1 logs are never read as chat memory.
+
 ## API
 
 ```
@@ -114,17 +118,19 @@ localhost dev origins; no other origin can read it.
 ### Local resolution order (inside stage 3)
 
 1. **Curated exact match** — the canonical recruiter questions keep their curated answers.
-2. **Knowledge base** — skill/project aliases (longest match wins), logged as
+2. **Memory-capability guard** — recall/history questions get a truthful stateless answer before a
+   named skill or project can steal the match.
+3. **Knowledge base** — skill/project aliases (longest match wins), logged as
    `skill:<name>` / `project:<name>` (e.g. `skill:tailscale`, `project:homebase`).
-3. **Curated keyword scoring** — broad recruiter phrasings (`strengths`, `role_fit`,
+4. **Curated keyword scoring** — broad recruiter phrasings (`strengths`, `role_fit`,
    `strongest_projects`, `technical_stack`, `why_interview`, `leadership`,
    `ai_experience`, `cloud_experience`, `salesforce_experience`, `production_support`,
    `contact_resume`).
-4. **Not-confirmed detector** — "experience with X?"-shaped questions about a technology
+5. **Not-confirmed detector** — "experience with X?"-shaped questions about a technology
    that is *not* in the knowledge base get a deterministic conservative answer
    (`skill_not_confirmed`): the bot never claims or invents unlisted experience.
 
-The widget's suggested questions all land in 1–3 — instant, free, deterministic, and
+The widget's suggested questions all land in the deterministic stages above — instant, free, and
 logged with a real `matched_intent`. This is also why enabling AI is cheap: the most
 common questions never reach the model.
 
