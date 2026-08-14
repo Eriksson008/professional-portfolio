@@ -8,16 +8,30 @@
 
 export interface CuratedAnswer {
   id: string;
-  /** Suggested-question label shown as a chip (empty for keyword-only topics). */
+  /** The question actually asked when this topic is picked (empty for keyword-only topics). */
   question: string;
+  /**
+   * Shorter wording for the prompt card. A phone card is two lines wide, and
+   * `question` is written for the matcher and the Worker, not for a 150px box.
+   * The full `question` is still what gets sent — this only changes the label.
+   */
+  label?: string;
+  /** Topic ids worth offering after this answer, best first. Filtered to unasked. */
+  followUps?: string[];
   /** Lowercase phrases matched against a normalized question. */
   keywords: string[];
   answer: string;
 }
 
-/** Shown as the assistant's opening message. */
-export const greeting =
-  'Hi — I answer recruiter questions about Fredrik Eriksson, Senior Software Engineer with acting Technical Lead experience. Pick a suggested question below, or ask about his projects, stack, leadership, or role fit.';
+/**
+ * The assistant's empty state. Deliberately two parts rather than one
+ * paragraph: on a phone the old single block was the tallest thing on screen
+ * and pushed the suggested prompts out of view before the user read them.
+ */
+export const welcome = {
+  headline: 'Recruiter questions, answered.',
+  lead: 'Senior Software Engineer with acting Technical Lead experience. Ask about projects, stack, architecture, leadership, or role fit.',
+};
 
 /** Curated response when no topic matches. */
 export const unknownAnswer =
@@ -63,6 +77,8 @@ export const curatedAnswers: CuratedAnswer[] = [
   {
     id: 'strengths',
     question: 'What does Fredrik do well?',
+    label: 'What does Fredrik do well?',
+    followUps: ['projects', 'role-fit', 'why-interview'],
     keywords: ['do well', 'strength', 'good at', 'best at', 'excel', 'superpower'],
     answer:
       'Fredrik’s core strength is end-to-end ownership of enterprise systems: he designs, builds, ships, and then supports what he ships. He works across the full stack — React/TypeScript frontends, Java/Spring Boot services, AWS deployment architecture, and enterprise Salesforce — and carried acting Technical Lead responsibilities for roughly a year and a half: design decisions, code review, mentoring, and release ownership. That ownership earned his employer’s highest performance designation, “Exceptional Impact,” three consecutive years (2023–2025).',
@@ -70,6 +86,8 @@ export const curatedAnswers: CuratedAnswer[] = [
   {
     id: 'role-fit',
     question: 'What roles is Fredrik best suited for?',
+    label: 'What roles fit Fredrik best?',
+    followUps: ['why-interview', 'projects', 'strengths'],
     keywords: [
       'role',
       'suited',
@@ -148,6 +166,8 @@ export const curatedAnswers: CuratedAnswer[] = [
   {
     id: 'projects',
     question: 'What are Fredrik’s strongest projects?',
+    label: 'His strongest projects',
+    followUps: ['stack', 'strengths', 'why-interview'],
     keywords: ['project', 'built', 'portfolio piece', 'work sample', 'case stud', 'shipped'],
     answer:
       'Three from work: a greenfield client onboarding platform he led the architecture and delivery of — three integrated microservices, roughly 16,000 lines across 144 commits in under five weeks, including a passwordless authentication flow built to enterprise CIAM and penetration-test requirements; an enterprise AI assistant where he was the single largest contributor at 63% of its commits (React, Spring AI, Amazon Bedrock, ECS/Fargate); and an enterprise Salesforce platform where he is the top contributor and has led the team since 2025. Three of his own: this portfolio and the assistant answering you, Homebase — a household app he runs in production on Cloudflare Workers and D1 with live schema migrations, a scheduled job, and 173 tests — and App Dashboard, a Tauri/Rust desktop control plane for local containerized services.',
@@ -155,6 +175,8 @@ export const curatedAnswers: CuratedAnswer[] = [
   {
     id: 'stack',
     question: 'What is Fredrik’s technical stack?',
+    label: 'His technical stack',
+    followUps: ['projects', 'strengths', 'role-fit'],
     keywords: [
       'stack',
       'technolog',
@@ -176,6 +198,8 @@ export const curatedAnswers: CuratedAnswer[] = [
   {
     id: 'why-interview',
     question: 'Why should we interview Fredrik?',
+    label: 'Why interview Fredrik?',
+    followUps: ['projects', 'role-fit', 'stack'],
     keywords: ['why', 'interview', 'hire', 'stand out', 'different', 'convince', 'pitch'],
     answer:
       'Because the track record is verifiable: 750+ commits across production repositories, 120+ Jira stories delivered, top contributor on two production codebases, and “Exceptional Impact” — his employer’s highest rating — three years running (2023–2025). He combines senior hands-on delivery (React, Spring Boot, AWS, Salesforce, enterprise AI applications) with real leadership: he led a platform team, owned releases and production support, and mentored other engineers. Every number he claims is documented; the résumé on this site mirrors the same facts.',
@@ -218,7 +242,10 @@ export const curatedAnswers: CuratedAnswer[] = [
   },
 ];
 
-/** The chips surfaced in the widget, in display order (entries with a question). */
-export const suggestedQuestions = curatedAnswers
-  .filter((entry) => entry.question !== '')
-  .map((entry) => ({ id: entry.id, question: entry.question }));
+/**
+ * The four cards in the opening grid. Four, not five: the grid is 2×2 on a
+ * phone, and a fifth card either orphans a row or costs a scroll on first
+ * open. `stack` is the one left out — it is still reachable as a follow-up,
+ * from "More questions", and from free text.
+ */
+export const starterPromptIds = ['strengths', 'role-fit', 'projects', 'why-interview'];

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * The assistant's open/close state, owned above both of its triggers: the
@@ -24,10 +24,15 @@ export function useAskFredrik(): AskFredrikController {
     setOpen((v) => !v);
   }, []);
 
-  const close = useCallback(() => {
-    setOpen(false);
+  const close = useCallback(() => setOpen(false), []);
+
+  // Focus goes back after the close has been painted, not during it. The phone
+  // dock is suspended while the panel is open, so the trigger is still hidden
+  // at the moment close() runs — focusing it there silently does nothing.
+  useEffect(() => {
+    if (open) return;
     trigger.current?.focus();
-  }, []);
+  }, [open]);
 
   return { open, toggle, close };
 }

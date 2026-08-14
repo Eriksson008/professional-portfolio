@@ -24,6 +24,11 @@
   --line-soft: rgba(17, 19, 24, 0.08);
   --line-strong: rgba(17, 19, 24, 0.24);
 
+  /* Scrim behind a full-screen surface. Deliberately NOT redefined in the dark
+     block: it darkens what is behind it in either appearance, so inverting it
+     would make it a light wash over a light page and stop it doing its job. */
+  --scrim: rgba(0, 0, 0, 0.74);
+
   /* Text */
   --text: #111318;
   --muted: #505864;

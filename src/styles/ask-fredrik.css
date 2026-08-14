@@ -1,8 +1,21 @@
 /* ============================================================
-   Ask Fredrik — floating recruiter concierge.
+   Ask Fredrik — recruiter concierge.
    Same black-glass language as the rest of the site: translucent
-   white film, hairline borders, deep shadow, mono chrome text.
-   Sits above the nav (z 100), below the film grain (z 2000).
+   film, hairline borders, deep shadow, mono chrome text.
+
+   Two shells, one component:
+     ≥720px  a floating card above a launcher pill, non-modal —
+             the page stays usable behind it.
+     ≤719px  a full-viewport sheet opened from the dock: modal,
+             page pinned, dock suspended, sized to the *visible*
+             viewport (--af-vh/--af-vt from useSheetViewport) so
+             the composer sits on the keyboard, not under it.
+
+   Layout rule for both: exactly one scroller, the conversation.
+   The header, composer and disclosure are flex:none siblings; the
+   welcome state and the suggested prompts live INSIDE the scroller
+   rather than as pinned trays, which is what stops them competing
+   with the composer for height on a phone.
    ============================================================ */
 
 .af-root {
@@ -16,7 +29,7 @@
   gap: 0.8rem;
 }
 
-/* ---- Launcher pill ---- */
+/* ---- Launcher pill (desktop entry point) ---- */
 .af-launcher {
   display: inline-flex;
   align-items: center;
@@ -61,13 +74,19 @@
   box-shadow: 0 0 0 3px var(--ice-wash);
 }
 
+/* Backdrop is a phone-only affordance; the desktop panel is non-modal. */
+.af-backdrop {
+  display: none;
+}
+
 /* ---- Panel ---- */
 .af-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: min(420px, calc(100vw - 1.8rem));
-  max-height: min(600px, calc(100vh - 6.5rem));
-  max-height: min(600px, calc(100dvh - 6.5rem));
+  max-height: min(620px, calc(100vh - 6.5rem));
+  max-height: min(620px, calc(100dvh - 6.5rem));
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   background: var(--panel-2);
@@ -77,12 +96,15 @@
   -webkit-backdrop-filter: blur(18px);
   box-shadow: var(--shadow-lift);
   /* overflow:hidden makes the panel a scroll container, so contain works
-     here too: wheel over the header/chips/input can't fall through and
-     scroll (or scrub) the page behind the open panel. The log has its
-     own contain for the same reason. */
+     here too: a gesture over the header/composer can't fall through and
+     scroll (or scrub) the page behind it. The log has its own contain for
+     the same reason. */
   overflow: hidden;
   overscroll-behavior: contain;
   animation: af-pop 0.4s var(--ease);
+}
+.af-panel:focus {
+  outline: none;
 }
 @keyframes af-pop {
   from {
@@ -110,15 +132,21 @@
     transparent
   );
   pointer-events: none;
+  z-index: 2;
 }
 
+/* ---- Header ---- */
 .af-head {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   padding: 1.1rem 1.25rem 0.9rem;
   border-bottom: 1px solid var(--line-soft);
+}
+.af-head-text {
+  min-width: 0;
 }
 .af-eyebrow {
   font-family: var(--font-mono);
@@ -134,8 +162,8 @@
   letter-spacing: -0.01em;
 }
 .af-close {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   flex: none;
   display: grid;
   place-items: center;
@@ -143,22 +171,22 @@
   border-radius: 50%;
   background: transparent;
   color: var(--muted);
-  font-size: 1.15rem;
-  line-height: 1;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition:
     color 0.2s var(--ease),
     border-color 0.2s var(--ease);
 }
-.af-close:hover {
+.af-close:hover,
+.af-close:focus-visible {
   color: var(--text);
   border-color: var(--line-strong);
 }
 
 /* ---- Conversation log ---- */
-/* Shell exists so scroll fades can overlay the log without scrolling
-   with it. Fades appear only when content actually continues past an
-   edge (classes toggled from scroll state in the component). */
+/* Shell exists so the scroll fades and the jump button can overlay the log
+   without scrolling with it. Fades appear only when content actually
+   continues past an edge (classes toggled from scroll state). */
 .af-log-shell {
   position: relative;
   flex: 1;
@@ -191,8 +219,9 @@
 }
 .af-log {
   flex: 1;
-  min-height: 180px;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 1.15rem 1.25rem;
   display: flex;
   flex-direction: column;
@@ -201,12 +230,28 @@
   scrollbar-width: thin;
   scrollbar-color: var(--silver-line) transparent;
 }
+
+/* ---- Messages ---- */
 .af-msg {
   max-width: 86%;
   padding: 0.68rem 0.9rem;
   border-radius: 14px;
   font-size: 0.9rem;
-  line-height: 1.55;
+  line-height: 1.6;
+  /* Answers carry stack names, URLs and slashed terms; none of them may
+     widen the panel or spill sideways. */
+  overflow-wrap: anywhere;
+  animation: af-rise 0.24s var(--ease);
+}
+@keyframes af-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .af-msg-assistant {
   align-self: flex-start;
@@ -264,58 +309,195 @@
   }
 }
 
-/* ---- Suggested-prompt tray ---- */
-/* A labelled tray inside the console rhythm, not loose bubbles. */
-.af-tray {
-  flex: none;
-  padding: 0.8rem 1.25rem 0.95rem;
-  border-top: 1px solid var(--line-soft);
-  background: var(--panel-wash);
+/* ---- Empty state: welcome + starter grid ---- */
+/* Both live inside the scroller. They are the conversation's first screen,
+   not chrome, so once a question is asked they simply stop being rendered
+   and every pixel they held goes to the answer. */
+.af-welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: af-rise 0.28s var(--ease);
 }
-.af-tray-label {
+.af-welcome-title {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.af-welcome-lead {
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.af-starters {
+  margin-top: 0.55rem;
+}
+/* --silver, not --faint: these two label the only controls in the empty state,
+   so they are wayfinding rather than decoration and have to clear AA in the
+   light appearance too, where --faint is 4.24:1. (.af-eyebrow keeps --silver-2
+   deliberately — it is the panel's existing chrome, shared with the rest of
+   the site, and is not this change's to redefine.) */
+.af-starters-label {
   font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--silver);
   margin-bottom: 0.55rem;
 }
-.af-chips {
+/* auto-fit rather than a fixed 2 columns: two cards wherever they fit
+   (≥~320px of content box) and one below that, with no second breakpoint
+   and — the point of the rewrite — no horizontal scrolling anywhere. */
+.af-starter-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.5rem;
 }
-.af-chip {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
-  color: var(--silver);
-  padding: 0.48rem 0.65rem;
-  background: transparent;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  cursor: pointer;
+.af-starter {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 60px;
+  padding: 0.7rem 0.75rem;
   text-align: left;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: var(--panel-wash);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* Labels wrap; they are never truncated. */
+  overflow-wrap: anywhere;
+  transition:
+    border-color 0.2s var(--ease),
+    background 0.2s var(--ease),
+    transform 0.18s var(--ease);
+}
+.af-starter:hover:not(:disabled),
+.af-starter:focus-visible {
+  border-color: var(--line-strong);
+  background: var(--panel);
+}
+.af-starter:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.af-starter:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.af-starter-label {
+  min-width: 0;
+}
+.af-starter-arrow {
+  flex: none;
+  margin-top: 0.12rem;
+  color: var(--faint);
+  opacity: 0.75;
+  transition: color 0.2s var(--ease);
+}
+.af-starter:hover:not(:disabled) .af-starter-arrow {
+  color: var(--text);
+}
+
+/* ---- Contextual follow-ups ---- */
+/* Two or three suggestions attached to the answer above them, then gone.
+   They wrap; they never scroll sideways. */
+.af-followups {
+  margin-top: 0.15rem;
+  animation: af-rise 0.28s var(--ease);
+}
+.af-followups-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--silver);
+  margin-bottom: 0.45rem;
+}
+.af-followup-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.af-followup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 36px;
+  padding: 0.42rem 0.8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--silver);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  overflow-wrap: anywhere;
   transition:
     border-color 0.2s var(--ease),
     background 0.2s var(--ease),
     color 0.2s var(--ease);
 }
-.af-chip:hover:not(:disabled),
-.af-chip:focus-visible {
+.af-followup:hover,
+.af-followup:focus-visible {
   border-color: var(--line-strong);
   background: var(--panel);
   color: var(--text);
 }
-.af-chip:disabled {
-  opacity: 0.5;
-  cursor: default;
+.af-followup-more {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--silver);
 }
 
-/* ---- Input row + disclosure ---- */
+/* ---- Jump to latest ---- */
+.af-jump {
+  position: absolute;
+  left: 50%;
+  bottom: 0.75rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--panel-2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 8px);
+  transition:
+    opacity 0.2s var(--ease),
+    visibility 0.2s var(--ease),
+    transform 0.2s var(--ease);
+}
+.af-jump.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+/* ---- Composer ---- */
 .af-form {
+  flex: none;
   display: flex;
+  align-items: flex-end;
   gap: 0.5rem;
   padding: 0.9rem 1.25rem 0;
   border-top: 1px solid var(--line-soft);
@@ -323,14 +505,25 @@
 .af-input {
   flex: 1;
   min-width: 0;
-  padding: 0.62rem 0.95rem;
+  /* 1 line to 4, then the field scrolls internally instead of eating the
+     conversation. Height itself is set inline from scrollHeight; this cap is
+     4 × (0.9rem × 1.45) + padding + borders, rounded up so the fourth line
+     lands inside the box rather than half a line short of it. */
+  max-height: 6.8rem;
+  padding: 0.6rem 0.95rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  border-radius: 18px;
   background: var(--panel-wash);
   color: var(--text);
   font-family: var(--font-body);
   font-size: 0.9rem;
-  transition: border-color 0.2s var(--ease);
+  line-height: 1.45;
+  resize: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  transition:
+    border-color 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
 }
 .af-input::placeholder {
   color: var(--faint);
@@ -342,6 +535,9 @@
 }
 .af-send {
   flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.62rem 1.1rem;
   border: 1px solid var(--text);
   border-radius: var(--radius-pill);
@@ -351,26 +547,54 @@
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition:
     background 0.2s var(--ease),
     border-color 0.2s var(--ease),
-    opacity 0.2s var(--ease);
+    opacity 0.2s var(--ease),
+    transform 0.18s var(--ease);
 }
 .af-send:hover:not(:disabled) {
   background: var(--accent-bright);
   border-color: var(--accent-bright);
 }
+/* Empty composer: an outline, not a dimmed solid. A 45%-opacity white disc
+   still reads as a live button — the state has to change shape, not just
+   brightness, for "there is nothing to send yet" to land. */
 .af-send:disabled {
-  opacity: 0.45;
+  background: transparent;
+  border-color: var(--line);
+  color: var(--faint);
   cursor: default;
 }
+/* Desktop keeps the word; the phone shell swaps in the circular arrow. */
+.af-send-icon {
+  display: none;
+}
+/* De-emphasis comes from size, never from opacity: this sentence is a privacy
+   notice. Measured against the panel background in each appearance:
+   --faint at opacity .62 was 2.62:1 on the dark sheet (and .8 was 3.72:1), and
+   --faint at full strength is 5.34:1 dark but only 4.24:1 light — so every
+   variant failed AA for 9px text somewhere. --silver clears both: 10.62:1
+   dark, 5.38:1 light. */
 .af-disclosure {
+  flex: none;
   padding: 0.55rem 1.25rem 0.95rem;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.64rem;
   line-height: 1.5;
-  color: var(--faint);
-  opacity: 0.8;
+  color: var(--silver);
+  transition:
+    font-size 0.2s var(--ease),
+    padding 0.2s var(--ease);
+}
+/* Once the conversation starts it stops being onboarding and becomes
+   metadata: same sentence, same contrast, less of the screen. */
+.af-disclosure.is-compact {
+  font-size: 0.58rem;
+  line-height: 1.4;
+  padding-top: 0.4rem;
+  padding-bottom: 0.6rem;
 }
 
 /* Screen-reader-only label. */
@@ -386,86 +610,254 @@
   border: 0;
 }
 
-/* ---- Small screens: bottom sheet ---- */
-@media (max-width: 560px) {
-  .af-root {
-    right: calc(var(--gutter) + env(safe-area-inset-right, 0px));
-    bottom: calc(var(--gutter) + env(safe-area-inset-bottom, 0px));
-    left: calc(var(--gutter) + env(safe-area-inset-left, 0px));
-    align-items: stretch;
-  }
-  .af-launcher {
-    align-self: flex-end;
-  }
-  /* Leave room for the nav (68px) + launcher pill + gaps so the open
-     sheet never pushes the launcher up over the header. */
-  .af-panel {
-    width: 100%;
-    max-height: calc(100vh - 10.5rem);
-    max-height: calc(100dvh - 10.5rem);
-  }
-  /* One swipeable row of prompts so the input stays within thumb reach. */
-  .af-chips {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    margin-inline: -1.25rem;
-    padding-inline: 1.25rem;
-    padding-bottom: 0.2rem;
-    scrollbar-width: none;
-    overscroll-behavior-x: contain;
-  }
-  .af-chips::-webkit-scrollbar {
-    display: none;
-  }
-  .af-chip {
-    flex: none;
-    max-width: 78vw;
-  }
-}
-
-/* ---- Phones: the dock owns the launcher ---- */
-/* ≤719px there is no floating pill — Ask Fredrik is a dock destination
-   (MobileDock), so the sheet opens above the dock instead of above its own
-   trigger. --kb-inset lifts it clear of an open keyboard so the input and
-   Send button stay reachable while typing. */
+/* ============================================================
+   Phones (≤719px) — full-viewport sheet.
+   There is no floating pill here: Ask Fredrik is a dock
+   destination (MobileDock), and while it is open the dock stands
+   down (dock.css) so the assistant owns the screen.
+   ============================================================ */
 @media (max-width: 719px) {
   .af-launcher {
     display: none;
   }
-  .af-root {
-    left: calc(var(--gutter) + env(safe-area-inset-left, 0px));
-    right: calc(var(--gutter) + env(safe-area-inset-right, 0px));
-    bottom: calc(var(--dock-space) + var(--kb-inset, 0px) + 0.4rem);
-    align-items: stretch;
-  }
-  .af-panel {
-    width: 100%;
-    max-height: calc(100vh - var(--dock-space) - var(--kb-inset, 0px) - 2rem);
-    max-height: calc(100dvh - var(--dock-space) - var(--kb-inset, 0px) - 2rem);
-  }
-}
 
-/* Landscape phones: give the transcript less floor and drop the prompt tray
-   so the input row never gets pushed out of the sheet. */
-@media (max-height: 520px) {
-  .af-log {
-    min-height: 88px;
+  /* Closed, the root positions nothing and intercepts nothing. Open, it
+     becomes the sheet's frame: the *visible* viewport box, above the dock's
+     z-index so nothing of the portfolio's chrome shows through. */
+  .af-root {
+    position: static;
+    display: contents;
   }
-  .af-tray {
+  .af-root.is-open {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--af-vt, 0px);
+    height: var(--af-vh, 100dvh);
+    z-index: 140;
+  }
+
+  .af-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    /* Dark enough that the portfolio reads as "behind", not "beside". It also
+       backs the strip below the sheet when the keyboard is up, so a few px of
+       reporting slop shows more sheet, not a slice of the page. The blur is
+       affordable here only because the page is pinned: nothing behind it
+       repaints while the sheet is open. */
+    background: var(--scrim);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: af-fade 0.24s var(--ease);
+  }
+  @keyframes af-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .af-panel {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    background: var(--ink);
+    /* Opaque sheet: nothing behind it is meant to read through, and blurring
+       a full-screen surface over a scrubbed film is the one cost a phone
+       cannot absorb. */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    animation: af-sheet-in 0.28s var(--ease);
+  }
+  /* With the keyboard up the sheet already ends at the keyboard's top edge —
+     the home-indicator inset is not there to clear. */
+  html.af-kb .af-panel {
+    padding-bottom: 0;
+  }
+  @keyframes af-sheet-in {
+    from {
+      transform: translateY(16px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .af-head {
+    padding: 0.7rem 0.9rem 0.7rem 1.15rem;
+  }
+  .af-eyebrow {
+    font-size: 0.58rem;
+    letter-spacing: 0.24em;
+    margin-bottom: 0.1rem;
+  }
+  .af-title {
+    font-size: 1.05rem;
+  }
+
+  .af-log {
+    padding: 1rem 1.15rem 1.15rem;
+    gap: 0.85rem;
+  }
+
+  /* Answers here are long and the screen is narrow, so readability wins over
+     decoration: the assistant's turn is text on the sheet, full width, at
+     full contrast. The reader's own turn keeps a bubble so the exchange is
+     still legible as a conversation. */
+  .af-msg {
+    max-width: 100%;
+    font-size: 0.95rem;
+    line-height: 1.62;
+  }
+  .af-msg-assistant {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0 0 0.2rem;
+    color: var(--text);
+  }
+  .af-msg-user {
+    max-width: 88%;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .af-typing {
+    padding: 0.2rem 0 0.4rem;
+  }
+
+  .af-welcome-title {
+    font-size: 1.12rem;
+  }
+  .af-welcome-lead {
+    font-size: 0.9rem;
+  }
+  .af-starter {
+    min-height: 64px;
+    font-size: 0.85rem;
+  }
+  .af-followup {
+    min-height: 40px;
+    font-size: 0.82rem;
+    padding: 0.5rem 0.9rem;
+  }
+
+  .af-form {
+    padding: 0.7rem 0.9rem 0;
+    gap: 0.45rem;
+  }
+  /* 16px minimum: anything smaller and iOS zooms the page on focus, which is
+     the fastest way to break a keyboard-aware layout. */
+  .af-input {
+    font-size: 16px;
+    padding: 0.65rem 1rem;
+    /* Same four-line cap recomputed for the 16px phone type. */
+    max-height: 7.5rem;
+  }
+  /* A circular arrow reads as "send" without spending a third of the row on
+     a word, and it is a clean 44px target. */
+  .af-send {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+  }
+  .af-send-text {
     display: none;
   }
+  .af-send-icon {
+    display: block;
+  }
+  .af-send:active:not(:disabled) {
+    transform: scale(0.92);
+  }
+
+  .af-disclosure {
+    padding: 0.5rem 0.9rem 0.6rem;
+    font-size: 0.62rem;
+  }
+  .af-disclosure.is-compact {
+    font-size: 0.58rem;
+    padding: 0.35rem 0.9rem 0.45rem;
+  }
+
+  /* Pin the portfolio while the sheet is open. This only has to stop the
+     document's own scrollers: the sheet covers the whole visible viewport and
+     .af-panel is itself a contained scroll container, so a gesture that
+     starts on the chrome has nowhere to chain to. Deliberately not the
+     position:fixed body trick — that zeroes scrollY, and the hero and finale
+     scrub video currentTime off scrollY, so it would re-seek both films on
+     every open and close. touch-action is left alone so the page can still
+     be pinch-zoomed. */
+  html.af-open,
+  html.af-open body {
+    overflow: hidden;
+  }
+  /* The backdrop is dead surface — it should never pan anything. */
+  .af-backdrop {
+    touch-action: none;
+  }
 }
 
+/* Landscape phones: the conversation gets what is left after the chrome,
+   which on a 380px-tall viewport is not much — so the header shrinks rather
+   than the log. */
+@media (max-width: 719px) and (max-height: 520px) {
+  .af-head {
+    padding-block: 0.45rem;
+  }
+  .af-title {
+    font-size: 0.95rem;
+  }
+  .af-log {
+    padding-block: 0.7rem;
+  }
+  .af-welcome {
+    gap: 0.35rem;
+  }
+  .af-starter {
+    min-height: 52px;
+  }
+}
+
+/* Short desktop windows need no rule of their own: the base panel is already
+   `min(620px, 100dvh - 6.5rem)`, so it tracks the window down on its own. The
+   `(min-width: 720px) and (max-height: 620px)` refinement that briefly lived
+   here was the exact second spelling of the shell boundary that this file
+   otherwise avoids — at a fractional 719.5px neither it nor the sheet block
+   applied — and it bought about 24px. */
+
 @media (prefers-reduced-motion: reduce) {
-  .af-panel {
+  .af-panel,
+  .af-backdrop,
+  .af-msg,
+  .af-welcome,
+  .af-followups {
     animation: none;
   }
   .af-typing-dot {
     animation: none;
     opacity: 0.7;
   }
-  .af-launcher {
+  .af-launcher,
+  .af-starter:active:not(:disabled),
+  .af-send:active:not(:disabled) {
     transform: none;
+  }
+  .af-jump {
+    transition: none;
   }
 }

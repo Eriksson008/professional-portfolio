@@ -28,7 +28,8 @@ export function useVideoMediaTier(): VideoMediaTier {
   return tier;
 }
 
-/** True on ≥720px viewports; retained for non-media responsive behavior. */
-export function useDesktopViewport() {
-  return useVideoMediaTier() !== 'small';
-}
+// useDesktopViewport() lived here as a `useVideoMediaTier() !== 'small'`
+// wrapper. Ask Fredrik was its only caller and now reads its shell from the
+// same `(max-width: 719px)` query the stylesheet uses (useSheetViewport), so
+// the wrapper is gone rather than left as a second, differently-spelled
+// version of the same breakpoint for the next caller to reach for.

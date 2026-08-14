@@ -13,13 +13,22 @@ interface MobileDockProps {
  * lit by a soft capsule that follows the scroll-spy. Rendered on every
  * viewport but displayed only on phones (dock.css); display:none also keeps
  * it out of the desktop accessibility tree and tab order.
+ *
+ * While Ask Fredrik is open the dock stands down: the assistant is the phone's
+ * primary surface, not a widget floating over the navigation. It slides out,
+ * stops taking pointers, and leaves the accessibility tree and tab order.
  */
 export function MobileDock({ ask }: MobileDockProps) {
   // Clear the active id above the first section so Home owns the opening film.
   const active = useActiveSection(dockTrackedIds, true);
+  const suspended = ask.open;
 
   return (
-    <nav className="dock" aria-label="Primary">
+    <nav
+      className={`dock ${suspended ? 'is-suspended' : ''}`}
+      aria-label="Primary"
+      aria-hidden={suspended || undefined}
+    >
       <ul className="dock-row">
         {dockDestinations.map((d) => {
           const Icon = d.icon;
@@ -33,6 +42,7 @@ export function MobileDock({ ask }: MobileDockProps) {
                   href={d.href}
                   aria-label={d.label}
                   aria-current={isActive ? 'true' : undefined}
+                  tabIndex={suspended ? -1 : undefined}
                 >
                   <Icon />
                 </a>
@@ -43,6 +53,7 @@ export function MobileDock({ ask }: MobileDockProps) {
                   aria-label={d.label}
                   aria-expanded={ask.open}
                   aria-controls="ask-fredrik-panel"
+                  tabIndex={suspended ? -1 : undefined}
                   onClick={(e) => ask.toggle(e.currentTarget)}
                 >
                   <Icon />

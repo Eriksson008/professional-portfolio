@@ -182,6 +182,27 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
   Rate limiting rules) — hard quota protection; the Worker's in-memory limiter is per-isolate
   best-effort only.
 ### Done
+- [x] **Ask Fredrik rebuilt as a mobile concierge sheet — 2026-08-14.** Below 720px the assistant is
+  a full-viewport sheet sized from `window.visualViewport` (`--af-vh`/`--af-vt` via
+  `useSheetViewport`), with the dock suspended and the page pinned while it is open; the horizontal
+  suggestion carousel is replaced by four starter cards in a 2-column `auto-fit` grid **inside the
+  scroll region**, which collapse into 2–3 contextual follow-ups (new `followUps` per curated topic)
+  once the conversation starts. Phones no longer autofocus the composer. Assistant turns lose their
+  card on mobile; auto-scroll follows only when the reader is already at the bottom, with a `↓`
+  button otherwise. **Desktop keeps its shell — floating non-modal card, launcher pill, `Send` word,
+  page still scrolls — and inherits the shared content model** (welcome state, starter grid,
+  follow-ups, textarea composer, scroll policy), because the brief asked for those to be shared
+  rather than forked. Only the shell is breakpoint-specific. **The shell breakpoint is now
+  one query** — JS reads the same `(max-width: 719px)` the stylesheet uses, because `(min-width:
+  720px)` and `(max-width: 719px)` disagree at fractional widths and that gave the desktop card the
+  sheet's modal focus trap. Prompt controls unmount themselves when used, so focus is parked on a
+  stable element first — otherwise Tab escaped the "modal" into the page behind it. A free-text
+  question retires a curated topic only when that topic's own answer was shown, never on a bare
+  keyword match the Worker then answered differently. The follow-the-conversation rule lives in
+  `src/components/askScroll.ts` as a pure, tested function for the same reason `scrollGlide.ts`
+  does. Backend, `/ask` contract, logging and admin untouched. Spec:
+  `docs/superpowers/specs/2026-08-14-ask-fredrik-mobile-concierge-design.md`; task packet:
+  `tasks/2026-08-14-ask-fredrik-mobile-concierge.md`.
 - [x] **Phone hero composition reversed, closing film moved above the closing text, desktop
   telemetry collision fixed, header brand simplified — 2026-08-13 (second pass).** The stacked phone hero
   from the entry below was reversed: the film fills the phone frame again and the identity rises on

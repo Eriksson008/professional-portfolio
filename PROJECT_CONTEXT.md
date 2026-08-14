@@ -9,6 +9,51 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
+**2026-08-14 — Ask Fredrik became a real mobile concierge instead of a floating widget.** Driven by
+real-device iPhone testing: with the keyboard up, the welcome text, the suggestion chips and the
+composer all fought for the same height, and the suggestions lost. Diagnosis before editing found
+four compounding causes, not one: `.af-chip { max-width: 78vw }` meant ~1.2 chips fit; every scroll
+affordance was suppressed (`scrollbar-width: none`, hidden `::-webkit-scrollbar`, no snap, no edge
+fade) so nothing said more existed; a 34px-tall horizontal scroller nested inside a vertical one
+loses iOS's axis arbitration on most thumb arcs; and `.af-log { min-height: 180px }` refused to
+shrink, pushing the composer and tray past the sheet's bottom edge. Separately the dock was
+`z-index: 130` against the panel's `120`, so the portfolio's own navigation painted **over** the
+assistant, and nothing locked the page behind it. **Below 720px the panel is now a full-viewport
+sheet** sized from `window.visualViewport` (`--af-vh` / `--af-vt`), so the composer sits on the
+keyboard by construction rather than by subtracting a guessed height; the dock stands down while it
+is open and the page is pinned. The carousel is gone: four starter prompts in a 2-column
+`auto-fit` grid **inside the scroll region**, which means they cost nothing once the conversation
+starts — after an answer, 2–3 contextual follow-ups (driven by a new `followUps` list per curated
+topic) appear under it, with `More questions` expanding the rest in place. Phones no longer autofocus
+the input, so the first screen is readable before the keyboard arrives. Assistant turns drop their
+card on mobile and run full-width at full contrast; auto-scroll only follows when the reader is
+already at the bottom, and a `↓` button is offered instead when they are not. **Desktop keeps its
+shell and inherits the new content model** — the floating card, launcher pill, `Send` word,
+non-modal behaviour and page scrolling are untouched, but because the brief asked for the message
+components, prompt definitions and API integration to be *shared* rather than forked, desktop also
+gets the welcome state, the starter grid, contextual follow-ups, the auto-growing textarea and the
+new scroll policy. Only the shell is breakpoint-specific. (An earlier draft of this entry claimed
+desktop was "unchanged"; independent review caught that as false and it was corrected before
+merge.) Measurement in Chrome found four defects that inspection would have missed and all four are fixed: a
+2px textarea scrollbar from border-box height math, a disabled send button that still read as
+active, a WCAG failure on the disclaimer (2.62:1 dark / 4.24:1 light → 5.38:1 in both), and a
+JS/CSS breakpoint mismatch at fractional viewport widths that handed the **desktop** card the phone
+sheet's modal focus trap — the shell is now read from the one `(max-width: 719px)` query the
+stylesheet uses. Independent review then found a real accessibility defect the measurements missed:
+**every prompt control unmounts itself when used**, so activating one dropped focus to `<body>`,
+outside the panel, where the Tab trap could no longer see it and the next Tab walked into the page
+behind the opaque sheet — focus is now parked on a stable element before the state change. Review
+also caught that a free-text question was permanently retiring curated topics on a bare keyword
+match (`'why'` → `why-interview`) even when the *Worker* had answered something unrelated, so a
+topic is now retired only when its curated answer is what was actually shown. The follow-the-
+conversation rule was extracted to a pure `askScroll.ts` with 13 tests, which is what turned two
+further defects into provable ones: the jump-to-latest button flashed during every auto-scrolled
+turn, and reopening the panel after scrolling up landed the reader on their oldest message. Lint,
+57 tests and the production build are green; measured at 320×568, 390×844,
+393×852, 412×915, 430×932, 700×390 landscape, 719×900, 768×1024 and 1534×822, light and dark, with a
+simulated keyboard. Backend untouched. Spec:
+`docs/superpowers/specs/2026-08-14-ask-fredrik-mobile-concierge-design.md`.
+
 **2026-08-13 (second pass) — the phone hero composition was reversed, the closing film moved above
 the closing text on phones, a latent desktop collision was fixed, and the header brand became the
 name alone.** Four user-reported items, in the order they matter. (1) **Desktop: the visor telemetry

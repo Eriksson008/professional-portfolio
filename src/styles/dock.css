@@ -32,6 +32,19 @@
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.05) inset,
     0 10px 30px rgba(0, 0, 0, 0.55);
+  transition:
+    opacity 0.22s var(--ease),
+    transform 0.28s var(--ease);
+}
+
+/* Ask Fredrik is open: the assistant is the phone's primary surface, so the
+   dock steps out from under it rather than competing through the sheet.
+   Transform-only, and it keeps the base translateX so the slab stays centred
+   on the way down. */
+.dock.is-suspended {
+  opacity: 0;
+  transform: translate(-50%, calc(100% + var(--dock-inset) * 2));
+  pointer-events: none;
 }
 
 @media (max-width: 719px) {
@@ -126,9 +139,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .dock,
   .dock-item,
   .dock-item::before {
     transition: none;
+  }
+  .dock.is-suspended {
+    transform: translateX(-50%);
+    visibility: hidden;
   }
   .dock-item:active {
     transform: none;

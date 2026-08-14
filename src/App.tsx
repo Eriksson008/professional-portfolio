@@ -3,7 +3,6 @@ import { Nav } from './components/Nav';
 import { MobileDock } from './components/MobileDock';
 import { useAnchorGlide } from './components/useAnchorGlide';
 import { useAskFredrik } from './components/useAskFredrik';
-import { useKeyboardInset } from './components/useKeyboardInset';
 import { AstronautHero } from './components/AstronautHero';
 import { About } from './components/About';
 import { Highlights } from './components/Highlights';
@@ -16,7 +15,11 @@ import { AskFredrik } from './components/AskFredrik';
 
 export default function App() {
   useAnchorGlide();
-  useKeyboardInset();
+  // useKeyboardInset() used to run here, publishing --kb-inset for the old
+  // assistant panel's max-height. That was its only consumer, and the sheet
+  // sizes itself from visualViewport instead (useSheetViewport, mounted only
+  // while it is open) — so a global visualViewport listener writing a custom
+  // property nobody read was pure cost on a scroll-scrubbed page.
   // One assistant, two triggers: the desktop pill and the phone dock.
   const ask = useAskFredrik();
   return (
