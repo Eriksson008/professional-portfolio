@@ -1,0 +1,302 @@
+# Experiment 2 — current MP4 vs optimized MP4 vs 97 frames vs 193 frames
+
+Branch `experiment/cinematic-media-followup` (child of `experiment/cinematic-media-converter`).
+Experiment 1 lives in [`cinematic-hero-benchmark.md`](./cinematic-hero-benchmark.md) and is **not
+superseded** — its results stand and its branch is unchanged.
+
+**Not merged.** The MP4 hero remains the default and `AstronautHero.tsx` is untouched.
+
+## What experiment 1 established, and what this one asks
+
+Experiment 1 compared the shipped MP4 scrub, a 193-frame canvas sequence, and an R3F scene. R3F
+lost: 222 kB gzipped, the worst LCP, and *less* smooth than the plain 2D canvas rendering the same
+frames. The 193-frame sequence eliminated desktop stalls entirely but cost 193 requests.
+
+So the question is no longer "does 3D help". It is: **what is the cheapest representation that keeps
+the frame sequence's smoothness?**
+
+| | Selector | Implementation |
+| --- | --- | --- |
+| **A1** | `?hero=video-current` (default) | Shipped 2560×1440 all-intra MP4 |
+| **A2** | `?hero=video-optimized` | 1920×1080 all-intra re-encode |
+| **B97** | `?hero=frames-97` | Every other source frame on a 2D canvas |
+| **B193** | `?hero=frames-193` | Every source frame on a 2D canvas |
+| — | `?hero=interactive` | R3F, retained as a historical reference only |
+
+`?hero=video` and `?hero=frames` still alias to A1 and B193, so experiment 1 stays reproducible.
+
+## Conditions
+
+Same machine, browser and configuration as experiment 1.
+
+- Windows 11, Chrome (DevTools MCP), **production build** served by `vite preview`.
+- **Display refresh 143 Hz** — idle median frame 7.0 ms. Two thresholds are reported separately:
+  **> 7.5 ms** misses this display's budget; **> 16.7 ms** would also stall a 60 Hz display and is
+  the one that indicates visible jank anywhere. A 10–14 ms frame is a high-refresh miss, not a
+  stall. **> 50 ms** is a major stall.
+- Desktop: 1440×900, DPR 1, unthrottled, localhost. Median of **3 runs**.
+- Constrained: Fast 4G + 4× CPU. Mobile: 390×844 DPR 3 + Fast 4G + 4× CPU, 2 runs.
+- Cold cache (reload, cache disabled) for all transfer and readiness figures. Smoothness figures are
+  taken **after** assets are fully loaded, so they measure scrubbing rather than loading.
+
+### Scroll patterns (identical for every candidate)
+
+| Pattern | Motion |
+| --- | --- |
+| slow | 0 → end of runway over 8000 ms |
+| fast | 0 → end of runway over 1200 ms |
+| reverse | end → 0 over 1200 ms |
+| oscillation | sine about the midpoint, ±30 % of travel, 3 cycles over 3600 ms |
+
+Oscillation is the adversarial case: a genuine direction reversal at every peak, which is what a
+video decoder handles worst.
+
+## Source and encodes
+
+Source: `media-src/astronaut-hero-source.mp4` — H.264, 3840×2160, 24 fps, 193 frames, 8.042 s, 21.8 MB.
+
+**The shipped encodes are already all-intra.** ffprobe reports 193 keyframes for 193 frames at every
+tier — GOP 1, `faststart`, `yuv420p`, no audio. The obvious scrubbing optimization was already
+applied, so shortening the GOP was not available as a fix.
+
+Candidate encodes, all H.264 High / yuv420p / GOP 1 / faststart / no audio — differing only in
+pixel count and CRF:
+
+```bash
+# The ladder, via the scroll-video-optimizer skill's own tool:
+node ../.agents/skills/scroll-video-optimizer/scripts/make-test-encodes.mjs \
+  media-src/astronaut-hero-source.mp4 \
+  --outdir public/media/generated/astronaut-hero-video --widths 1920,1600 --crf 20 --intra
+
+# The quality-matched pair actually benchmarked, and the bitrate control:
+ffmpeg -i media-src/astronaut-hero-source.mp4 -an -vf "scale=1920:-2:flags=lanczos" \
+  -c:v libx264 -profile:v high -pix_fmt yuv420p -crf 23 -g 1 -keyint_min 1 -sc_threshold 0 \
+  -x264-params "bframes=0:ref=1" -movflags +faststart \
+  public/media/generated/astronaut-hero-video/hero_w1920_g1_crf23.mp4
+# …and the same with scale=1600 (crf 23) and scale=2560 (crf 26).
+```
+
+| Encode | Resolution | Size | Bitrate |
+| --- | --- | --- | --- |
+| shipped | 2560×1440 | 8.70 MB | 9.08 Mbps |
+| `w2560` crf26 | 2560×1440 | 8.60 MB | 8.97 Mbps |
+| `w1920` crf23 | 1920×1080 | 7.07 MB | 7.38 Mbps |
+| `w1600` crf23 | 1600×900 | 6.00 MB | 6.25 Mbps |
+
+## Diagnosis: it is pixels, not bits
+
+Two controls settle this.
+
+1. **The natural experiment already in the repo.** The 1280×720 phone encode and the 2560×1440
+   desktop encode run identical code with identical GOP-1 structure. The phone one has never
+   produced a stall; the desktop one produces dozens. Four times the pixels per seek.
+2. **A same-resolution, lower-bitrate encode changes nothing.** `w2560` crf26 is 2560×1440 at ~2 %
+   fewer bytes, and measured indistinguishably from shipped.
+
+Encode selection, desktop, median of 3 runs — *frames over 16.7 ms / frames over 50 ms / longest frame*:
+
+| Encode | slow | fast | reverse | oscillation |
+| --- | --- | --- | --- | --- |
+| shipped (control) | 43 / 4 / 132.2 ms | 10 / 1 / 90.5 ms | 8 / 1 / 62.7 ms | 36 / 3 / 90.5 ms |
+| `w2560` crf26 | 36 / 1 / 55.7 ms | 9 / 1 / 90.4 ms | 11 / 2 / 62.7 ms | 35 / 3 / 90.5 ms |
+| `w1920` crf23 | 39 / 1 / 139.2 ms | 7 / 1 / 55.6 ms | **7 / 0 / 27.9 ms** | **15 / 0 / 27.9 ms** |
+| `w1600` crf23 | **27 / 0 / 34.8 ms** | **1 / 0 / 20.8 ms** | 3 / 0 / 21.0 ms | 12 / 1 / 76.6 ms |
+
+Smoothness improves monotonically as pixels fall and is flat with respect to bitrate. That is the
+diagnosis, measured rather than assumed.
+
+**`w1920` is the chosen optimized encode**, not `w1600`, and this is the one place the choice is not
+purely the measurement. `w1600` measured slightly smoother, but the test display is DPR 1: at
+1600×900 on a 1440-px viewport there is only 1.11× oversampling, and on a DPR-2 desktop it would be
+visibly soft. `w1920` keeps most of the gain with 1.33× headroom. **No DPR-2 display was tested**,
+and retina sharpness versus decode cost is unresolved — see Limitations.
+
+## Desktop results
+
+Median of 3 runs. Format: *frames > 7.5 ms / > 16.7 ms / > 50 ms · longest frame*.
+
+| Pattern | A1 current | A2 optimized | B97 | B193 |
+| --- | --- | --- | --- | --- |
+| slow | 62 / 37 / 3 · 125.3 ms | 59 / 39 / 1 · 139.2 ms | 1 / 0 / 0 · 13.9 ms | **0 / 0 / 0 · 7.1 ms** |
+| fast | 32 / 17 / 1 · 111.3 ms | 29 / 7 / 1 · 55.6 ms | **0 / 0 / 0 · 7.1 ms** | **0 / 0 / 0 · 7.1 ms** |
+| reverse | 22 / 9 / 1 · 146.1 ms | 21 / 7 / 0 · 27.9 ms | 1 / 0 / 0 · 14.0 ms | **0 / 0 / 0 · 7.1 ms** |
+| oscillation | 88 / 56 / 4 · 125.3 ms | 91 / 15 / 0 · 27.9 ms | **0 / 0 / 0 · 7.2 ms** | **0 / 0 / 0 · 7.1 ms** |
+
+Both frame candidates are **stall-free**: not one frame over 16.7 ms in any pattern. B97's two
+outliers (13.9 ms, 14.0 ms) are high-refresh misses, invisible on a 60 Hz display.
+
+The optimized encode roughly halves the video's jank on the two patterns that matter most — reverse
+(longest frame 146 ms → 27.9 ms) and oscillation (56 → 15 frames over 16.7 ms) — but does not
+eliminate it. Video scrubbing degrades under direction changes; frames do not degrade at all.
+
+### Load, weight and memory (desktop, cold)
+
+| | A1 | A2 | B97 | B193 |
+| --- | --- | --- | --- | --- |
+| Hero media requests | **1** | **1** | 97 | 193 |
+| Hero media transfer | 8.70 MB | 7.07 MB | **4.25 MB** | 8.45 MB |
+| LCP | **68 ms** | 80 ms | 136 ms | 92 ms |
+| CLS | **0** | **0** | **0** | **0** |
+| JS heap after scrub | 21.5 MB | **13.0 MB** | 20.8 MB | 24.6 MB |
+| Added JS (gzip) | 0 | 0 | 0 | 0 |
+
+No candidate adds JavaScript: all four are in the shared bundle (96.5 kB gz, +1.0 kB over
+experiment 1 for the extra variants). Only the retained R3F reference is a separate 222 kB chunk.
+
+## Constrained network (Fast 4G + 4× CPU)
+
+Network-truth figures from resource timing; the polled DOM figures are unreliable here because the
+polling loop itself is starved under 4× CPU.
+
+| | Hero usable for scrubbing | Fully deterministic | Transfer |
+| --- | --- | --- | --- |
+| A1 | 8.75 s (fully buffered) | 8.75 s | 8.9 MB |
+| A2 | 7.45 s (fully buffered) | 7.45 s | 7.2 MB |
+| B97 | **2.6 s** (reveal window) | 7.2 s | **4.4 MB** |
+| B193 | 2.8 s (reveal window) | 12.8 s | 8.7 MB |
+
+**B97 beats the current MP4 on both numbers**: interactive 3.4× sooner and fully deterministic
+sooner too, at half the bytes.
+
+### The loader change that produced this
+
+Experiment 1's loader created all 193 `Image` objects at once and revealed only when the last one
+arrived — 11.3–13.6 s before the hero was usable. It waited because a partially loaded sequence
+would skip missing frames.
+
+The renderer no longer needs it to wait. `nearestLoaded()` walks outward for the closest loaded
+neighbour, so an unarrived frame shows a marginally stale image instead of a blank canvas. That
+allows:
+
+- a **24-frame reveal window** fetched in parallel, after which the hero is live;
+- the remainder streamed in index order (which is scroll order) behind a **concurrency cap of 8**;
+- `decode()` over a sliding ±8-frame window so `drawImage` never stalls on an undecoded frame.
+
+Applied identically to both frame candidates. Same assets as experiment 1, **~4–5× faster to
+usable** (11.3–13.6 s → 2.8 s). Once loading completes the scrub is exactly as deterministic as
+before — `nearestLoaded` returns the exact frame, which is asserted by unit test.
+
+No sprite sheet or binary container was introduced: the measured problem was *when* frames were
+usable, not how many requests there were, and HTTP/2 multiplexing already handles the request count.
+
+## Mobile (390×844 DPR 3, Fast 4G + 4× CPU)
+
+A1 and A2 are **byte-identical on mobile by construction** — the optimized ladder replaces only the
+desktop tier, because the phone tier has never shown a problem. Measuring it twice would be theatre.
+
+| | A1 / A2 | B97 | B193 |
+| --- | --- | --- | --- |
+| Tier served | 1280×720 MP4 | w720 WebP | w720 WebP |
+| Transfer | 3.16 MB | **1.85 MB** | 3.68 MB |
+| All assets by | 14.7 s | **5.5 s** | — |
+| Frames > 16.7 ms (all four patterns) | **0** | **0** | 0 |
+| Longest frame | 13.9 ms | 14.0 ms | — |
+| JS heap | 18.9 MB | 18.9 MB | — |
+
+**Mobile has no smoothness problem in any representation.** The decision on mobile is bytes, and
+B97 is the lightest — lighter than the phone MP4 it would replace.
+
+## Reduced motion
+
+Verified with `prefers-reduced-motion: reduce` forced, on `?hero=frames-97` and `?hero=interactive`:
+
+- **0** frames fetched, **0** manifests fetched, **0** video, **0** three chunk.
+- The JS request list contains only `main-*.js` — the `AstronautHeroInteractive` chunk is never
+  requested, so the dynamic import is genuinely not initiated.
+- Hero fully composed: settled state, `<h1>`, 4 telemetry cells, 3 CTAs.
+
+Now guarded by unit tests as well as observation: `effectiveHeroVariant()` is pure, and the suite
+asserts that *every* variant — including any added later — collapses to the cheap default under
+reduced motion, and that the default is not itself in `EXPENSIVE_VARIANTS`.
+
+## Scale: MB per second of cinematic content
+
+Per second of source (8.042 s), desktop tier:
+
+| | MB/s | requests/s | 3 sections | 6 sections |
+| --- | --- | --- | --- | --- |
+| A1 | 1.082 | 0.1 | 26.1 MB | 52.2 MB |
+| A2 | 0.880 | 0.1 | 21.2 MB | 42.4 MB |
+| **B97** | **0.528** | 12.1 | **12.7 MB** (291 req) | **25.5 MB** (582 req) |
+| B193 | 1.050 | 24.0 | 25.3 MB (579 req) | 50.7 MB (1158 req)
+
+Mobile: A1/A2 0.393 MB/s · B97 **0.230** · B193 0.457.
+
+B97 is the cheapest representation per second of content on both desktop and mobile — roughly half
+the current MP4. Its cost is request count, which grows linearly: six sections would mean ~580
+requests. That is manageable over HTTP/2 but is the number to watch, and it is the reason B193 does
+not scale.
+
+## Recommendation
+
+**Ship the 97-frame deterministic sequence on desktop, keep the MP4 on mobile, poster under reduced
+motion.** An adaptive strategy, chosen because the measurements point different ways on different
+devices — not as a hedge.
+
+```
+viewport ≥ 720 px  → 97-frame canvas sequence   (stall-free; 4.25 MB; 0.53 MB/s)
+viewport < 720 px  → shipped 720p MP4           (already stall-free; 1 request; no change)
+prefers-reduced-motion → settled poster         (no media of any kind)
+no canvas / load failure → poster already painted underneath
+```
+
+The selection is by **viewport width against the breakpoint the stylesheet already uses**, which
+`tierForWidth()` and `useVideoMediaTier()` both read today. No user-agent sniffing, no GPU probing,
+no new capability layer — and the fallback chain is deterministic at every rung.
+
+Why not the alternatives:
+
+- **Not A1 (current).** It is the only candidate with major stalls on desktop: 3–4 frames over 50 ms
+  per pass, a 146 ms stall on reverse, 56 frames over 16.7 ms under oscillation.
+- **Not A2 alone.** It genuinely helps — reverse and oscillation improve markedly — and it is the
+  right answer if a single representation must serve everything. But it still leaves 7–15 frames per
+  pass over 16.7 ms, where frames leave zero.
+- **Not B193.** Identical smoothness to B97, twice the bytes and twice the requests. B97 dominates it.
+- **Not R3F.** Nothing here reverses experiment 1.
+
+If the adaptive path is judged too much machinery for one hero, **A2 (`w1920`) is the correct
+single-representation answer**: one request, 7.07 MB, meaningfully smoother than today, and a
+one-line source change. That is a legitimate call to make on maintenance grounds; it is just not the
+smoothest outcome available.
+
+## Limitations
+
+- One machine, one browser, one 143 Hz **DPR-1** display. The DPR-1 constraint matters here: it is
+  the reason `w1600` measured best and the reason it was not chosen. **A retina desktop was never
+  tested**, and both the optimized encode and the 1440-px frame tier would be softer there than the
+  shipped 2560 encode.
+- **No real device.** Mobile figures are emulated (viewport + CPU + network) and model neither GPU,
+  thermals, nor real radio latency.
+- **Safari/WebKit untested.** The video path carries a deliberate WebKit playback prime; the canvas
+  path has no equivalent and may not need one, but that is untested.
+- Throttled figures come from a single cold run per candidate, not a median, and emulated throttling
+  over localhost is noisy.
+- Smoothness was measured after full load, so it excludes any jank caused by loading concurrently
+  with scrolling — the case the `nearestLoaded` fallback exists for.
+- LCP differences among candidates (68–136 ms) are within the run-to-run noise of a localhost load
+  and should not be read as a ranking.
+
+## Reproducing
+
+```bash
+npm run build && npm run preview          # production build, port 4173
+# then, per candidate:
+#   ?hero=video-current
+#   ?hero=video-optimized[&enc=shipped|w2560|w1920|w1600]
+#   ?hero=frames-97
+#   ?hero=frames-193
+```
+
+Regenerating the assets (frames are git-ignored; encodes are git-ignored; manifests are tracked):
+
+```bash
+SKILL=../ai-workflows/skills
+node $SKILL/cinematic-media-converter/scripts/analyze-source.mjs media-src/astronaut-hero-source.mp4
+node $SKILL/cinematic-media-converter/scripts/extract-frames.mjs media-src/astronaut-hero-source.mp4 \
+  --outdir public/media/generated --name astronaut-hero    --widths 1440,1080,720
+node $SKILL/cinematic-media-converter/scripts/extract-frames.mjs media-src/astronaut-hero-source.mp4 \
+  --outdir public/media/generated --name astronaut-hero-97 --widths 1440,1080,720 --every 2
+```
+
+Screenshots at identical scroll (`--p = 0.515`): `benchmarks/exp2-frames-97-mid.jpeg`,
+`benchmarks/exp2-video-optimized-mid.jpeg`, alongside experiment 1's three.

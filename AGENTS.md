@@ -59,8 +59,20 @@ too**; keep the two in sync when a shared fact changes.
 - **Check `README.md`** for stack, dev commands, Docker usage, and deployment notes.
 - Keep changes simple — avoid over-engineering. No CSS-in-JS, no UI kit, no stock images, no
   gimmicky animations. Approved visual library (2026-07-03): **framer-motion** (via `LazyMotion`
-  + `m.*`) only — the three + @react-three/fiber WebGL layer was removed with the astronaut-video
-  hero. **No WebGL/WebGPU.** Don't add other frameworks.
+  + `m.*`). Don't add other frameworks.
+- **WebGL — scoped exception, `experiment/*` branches only (user decision, 2026-08-14).** The
+  three + @react-three/fiber layer was removed on 2026-07-03 with the Career Nebula backdrop, when
+  the astronaut film replaced it (commit `aa3511a`) — a *design-direction* change plus a bundle
+  win, not a measured WebGL failure. `experiment/cinematic-media-converter` reintroduces
+  three + @react-three/fiber deliberately, to measure a 3D hero against the current MP4 scrub and
+  an image-sequence variant. Conditions:
+  - **`main` keeps the no-WebGL rule.** This exception does not travel to `main` without a
+    separate decision, taken on the benchmark evidence.
+  - The 3D layer must be a **lazy chunk**, so the default hero never downloads it.
+  - The existing MP4 hero stays the default and stays intact.
+  - GSAP was evaluated and **not** added: framer-motion springs already drive hero progress via
+    `scrollGlide.ts`, and a second scroll system driving one runway fights the first.
+  Benchmarks: `docs/cinematic-hero-benchmark.md`.
 - Content lives in `src/data/` (typed modules) — it is the single source of truth. Update data
   there, not inline in components.
 - Do **not** add a backend, database, auth, or external services unless explicitly requested.
