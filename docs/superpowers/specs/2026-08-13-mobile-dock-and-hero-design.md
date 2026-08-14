@@ -216,18 +216,21 @@ Three consequences worth knowing:
 fast without a runway) was replaced by `viewportTravelProgress(top, viewportHeight, endFraction)`,
 which both the text ramp and the phone film now use. Tests moved with it.
 
-### 5. The header brand mark is the monogram
+### 5. The header brand is the name, and nothing else
 
-The boxed `FE` lettering in the desktop header is now `public/logo-fe.png` — the user's monogram
-lockup, downscaled to 216px for a 36px tile. The square crop is centred on the **glyph** (x 420–920
-of the 1254px source) rather than on the artwork's bounding box, because the "FREDRIK ERIKSSON"
-wordmark is wider than the monogram and centring on it pushes the mark visibly off-centre in a
-36px box. The wordmark itself stays — it crosses the glyph at mid-height and cannot be cropped out
-without cutting the monogram — and at this size it reads as a hairline across the mark rather than
-as text. `alt=""` because the link already carries `aria-label="Fredrik Eriksson — home"`; that
-also retired `profile.initials`, which nothing rendered any more. The dock's Home glyph stays a
-line icon: it belongs to a set of seven drawn on one 24×24 grid, and photographic artwork at 22px
-would read as a smudge.
+The boxed `FE` lettering in the desktop header was briefly replaced with the user's monogram
+lockup (`public/logo-fe.png`, glyph-centred crop at 216px for a 36px tile). **The user then asked
+for no emblem at all**, so the image was deleted from the repo and the header brand is now just
+`Fredrik Eriksson` as the home link — the name is the mark. It keeps the link's
+`aria-label="Fredrik Eriksson — home"`, and since it is now the header's only home affordance it
+gained a hover/focus colour of its own instead of relying on the cursor. `profile.initials` went
+with the tile; nothing renders initials any more. The dock's Home glyph is unaffected — it stays a
+line icon on the same 24×24 grid as its six neighbours.
+
+The monogram experiment is worth one line of history: a lockup whose wordmark crosses its glyph at
+mid-height cannot be cropped down to just the glyph, so at 36px the wordmark degrades into a
+hairline smear across the mark. If an emblem is ever wanted here, it needs artwork drawn for small
+sizes, not a downscaled lockup.
 
 ### 1′. The readout's ceiling, after review
 

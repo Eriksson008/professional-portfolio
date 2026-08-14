@@ -24,17 +24,8 @@ export function Nav() {
   return (
     <header className={`nav ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="wrap nav-inner">
+        {/* The name itself is the home link — no mark beside it. */}
         <a className="brand" href="#top" aria-label={`${profile.name} — home`}>
-          {/* The monogram carries the identity; the link's aria-label already
-              says whose it is, so the mark itself is decorative. */}
-          <img
-            className="brand-mark"
-            src={`${import.meta.env.BASE_URL}logo-fe.png`}
-            alt=""
-            width={36}
-            height={36}
-            decoding="async"
-          />
           <span className="brand-name">{profile.name}</span>
         </a>
 

@@ -197,28 +197,23 @@ img {
   justify-content: space-between;
   height: 68px;
 }
+/* The name is the whole brand — no mark, no tile. It is also the only home
+   affordance in the header, so it carries a hover/focus state of its own
+   rather than relying on the cursor. */
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
-}
-/* The monogram (public/logo-fe.png) is white artwork on true black, so it
-   sits inside the same hairline-bordered tile the "FE" lettering used to —
-   the border is what separates it from the black header behind it. */
-.brand-mark {
-  display: block;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  background: var(--black);
-  object-fit: cover;
 }
 .brand-name {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: 0.98rem;
   letter-spacing: -0.01em;
+  transition: color 0.2s var(--ease);
+}
+.brand:hover .brand-name,
+.brand:focus-visible .brand-name {
+  color: var(--accent-bright);
 }
 .nav-menu {
   display: flex;

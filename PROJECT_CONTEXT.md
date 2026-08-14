@@ -10,8 +10,8 @@ advertises, so it doubles as a work sample.
 ## Current Status
 
 **2026-08-13 (second pass) — the phone hero composition was reversed, the closing film moved above
-the closing text on phones, a latent desktop collision was fixed, and the header carries the
-monogram.** Four user-reported items, in the order they matter. (1) **Desktop: the visor telemetry
+the closing text on phones, a latent desktop collision was fixed, and the header brand became the
+name alone.** Four user-reported items, in the order they matter. (1) **Desktop: the visor telemetry
 readout collided with the "Mission Portfolio" eyebrow.** Not a regression from the dock work
 (desktop CSS was untouched, verified value by value) but a latent flaw: the readout is anchored at
 41% of the hero and the identity is anchored to the bottom, so the two converge as the window
@@ -30,8 +30,9 @@ desktop windows are unchanged. Where the band is ordered first, the staged closi
 the panel's travel rather than the section's, and `#contact` lands on the panel rather than on a
 viewport of film (`[data-anchor-landing]`, phones only) — both caught by review, the second because
 tapping Contact otherwise arrived with the contact copy still un-revealed. (4) **The header's boxed `FE`
-lettering is now the monogram** (`public/logo-fe.png`, 216px, 36px tile); the dock's Home glyph
-stays a line icon. Lint, 33 tests and the production build are green; measured in Chrome via
+lettering is gone and the name itself is the home link** — a monogram image was tried first and
+removed at the user's direction, so no emblem file exists in the repo; the dock's Home glyph stays
+a line icon. Lint, 33 tests and the production build are green; measured in Chrome via
 Playwright at 1920×1080 / 1534×822 / 1366×768 / 1280×600 / 760×640 / 760×900 / 712×390 / 390×844 /
 360×640. Spec amendment: `docs/superpowers/specs/2026-08-13-mobile-dock-and-hero-design.md`.
 

@@ -183,7 +183,7 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
   best-effort only.
 ### Done
 - [x] **Phone hero composition reversed, closing film moved above the closing text, desktop
-  telemetry collision fixed, header monogram — 2026-08-13 (second pass).** The stacked phone hero
+  telemetry collision fixed, header brand simplified — 2026-08-13 (second pass).** The stacked phone hero
   from the entry below was reversed: the film fills the phone frame again and the identity rises on
   scroll (the 200svh runway, the 0.94 film end, the portrait pan and the dock clearance all stay).
   On phones the closing film band now sits **above** the "06 Open to meaningful…" text and no longer
@@ -192,7 +192,8 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
   below the text. Separately, `.hero-hud` and `.hero-content` had been converging as the window
   shortened (measured −5px at 1534×822): the readout now caps its anchor against the room the
   identity needs, leaving ≥860px-tall windows pixel-identical. The header's boxed `FE` lettering is
-  now `public/logo-fe.png`. Spec amendment:
+  gone: the name **is** the home link, with no emblem file in the repo (a monogram image was tried
+  and removed at the user's direction). Spec amendment:
   `docs/superpowers/specs/2026-08-13-mobile-dock-and-hero-design.md`.
 - [x] **Phone navigation moved to a bottom dock and the phone hero re-composed — 2026-08-13.**
   Below 720px the sticky header is replaced by a fixed icon dock (Home · Impact · Projects ·
