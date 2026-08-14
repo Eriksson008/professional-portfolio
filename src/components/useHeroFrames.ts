@@ -7,14 +7,18 @@ import {
   tierForWidth,
 } from './heroFrames';
 
+export { nearestLoaded } from './heroFrames';
+
 export interface HeroFrames {
   /** Decoded-on-demand frame images, index-aligned with the manifest's count. */
   images: HTMLImageElement[];
   tier: FrameTier | null;
   manifest: FrameManifest | null;
-  /** Every frame has arrived; the sequence can be revealed. */
+  /** Enough of the sequence has arrived to reveal the canvas and start scrubbing. */
   ready: boolean;
-  /** 0..1 — how much of the sequence has loaded, for the loading state. */
+  /** Every frame has arrived; the scrub is fully deterministic from here. */
+  complete: boolean;
+  /** 0..1 — how much of the sequence has loaded. */
   progress: number;
   failed: boolean;
 }
@@ -24,29 +28,49 @@ const EMPTY: HeroFrames = {
   tier: null,
   manifest: null,
   ready: false,
+  complete: false,
   progress: 0,
   failed: false,
 };
 
 /**
+ * How many frames must land before the hero reveals.
+ *
+ * Experiment 1's loader fetched all 193 frames and revealed only when the last
+ * one arrived, which cost 8-14 s over Fast 4G before the hero was usable at
+ * all. It waited because a partially loaded sequence would skip over missing
+ * frames — but the renderer can simply draw the nearest loaded frame instead,
+ * which degrades to a slightly stale image for a moment rather than a stall.
+ *
+ * A first window sized to the opening of the film gets the hero live quickly;
+ * the rest streams in behind it, and the reader has to scroll a long way before
+ * they can outrun it.
+ */
+const REVEAL_WINDOW = 24;
+
+/**
+ * Concurrent image requests once the first window is in flight.
+ *
+ * Issuing all 193 at once lets the browser interleave them, so the frames the
+ * reader needs first are not reliably the ones that arrive first. A modest cap
+ * keeps the queue in index order, which is also scroll order.
+ */
+const CONCURRENCY = 8;
+
+/**
  * Load a generated frame sequence.
  *
  * Frames are held as `HTMLImageElement`, not `ImageBitmap`, deliberately: 193
- * bitmaps at 1440x810 would pin roughly 900 MB of decoded RGBA, and the browser
- * cannot evict any of it. With `<img>` the browser owns the decode cache and
- * can drop what is off-screen. `decode()` is then called over a sliding window
- * around the playhead so the frames about to be drawn are already decoded and
- * `drawImage` does not stall on one.
- *
- * The whole sequence must arrive before the hero reveals — a partially loaded
- * scrub would jump over missing frames, which is worse than waiting on the
- * poster that is already painted underneath.
+ * bitmaps at 1440x810 would pin roughly 900 MB of decoded RGBA and the browser
+ * could not evict any of it. With `<img>` the browser owns the decode cache.
+ * `decode()` is then called over a sliding window around the playhead so the
+ * frames about to be drawn are already decoded and `drawImage` does not stall.
  */
-export function useHeroFrames(name: string, enabled: boolean): HeroFrames {
+export function useHeroFrames(name: string | null, enabled: boolean): HeroFrames {
   const [state, setState] = useState<HeroFrames>(EMPTY);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !name) {
       setState(EMPTY);
       return;
     }
@@ -73,34 +97,61 @@ export function useHeroFrames(name: string, enabled: boolean): HeroFrames {
         return;
       }
 
-      let loaded = 0;
-      let settled = 0;
-      const onSettled = (ok: boolean) => {
-        if (!active) return;
-        settled += 1;
-        if (ok) loaded += 1;
-        // Re-render on a coarse cadence only: one setState per frame arrival
-        // would be 193 renders of the tree during load.
-        if (settled === count || settled % 12 === 0) {
-          setState({
-            images,
-            tier,
-            manifest,
-            ready: settled === count && loaded === count,
-            progress: settled / count,
-            failed: settled === count && loaded !== count,
-          });
-        }
-      };
-
-      for (let index = 0; index < count; index += 1) {
+      for (let i = 0; i < count; i += 1) {
         const image = new Image();
         image.decoding = 'async';
-        image.addEventListener('load', () => onSettled(true), { once: true });
-        image.addEventListener('error', () => onSettled(false), { once: true });
-        image.src = frameSrc(base, name, tier, index);
         images.push(image);
       }
+
+      let settled = 0;
+      let failures = 0;
+      const revealAt = Math.min(REVEAL_WINDOW, count);
+
+      const publish = () => {
+        if (!active) return;
+        setState({
+          images,
+          tier,
+          manifest,
+          ready: settled >= revealAt,
+          complete: settled === count,
+          progress: settled / count,
+          failed: settled === count && failures === count,
+        });
+      };
+
+      const fetchOne = (index: number) =>
+        new Promise<void>((resolve) => {
+          const image = images[index];
+          const done = (ok: boolean) => {
+            if (!ok) failures += 1;
+            settled += 1;
+            // Publish on the reveal boundary, on completion, and sparsely in
+            // between — one setState per frame would re-render the tree 193
+            // times during load.
+            if (settled === revealAt || settled === count || settled % 24 === 0) publish();
+            resolve();
+          };
+          image.addEventListener('load', () => done(true), { once: true });
+          image.addEventListener('error', () => done(false), { once: true });
+          image.src = frameSrc(base, name, tier, index);
+        });
+
+      // The opening window first, in parallel, so the hero reveals as early as
+      // it can. Everything after it streams in index order behind a cap.
+      await Promise.all(Array.from({ length: revealAt }, (_, i) => fetchOne(i)));
+      if (!active) return;
+
+      let next = revealAt;
+      const worker = async () => {
+        while (active && next < count) {
+          const index = next;
+          next += 1;
+          await fetchOne(index);
+        }
+      };
+      await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+      publish();
     };
 
     void load();
@@ -119,9 +170,9 @@ export function useHeroFrames(name: string, enabled: boolean): HeroFrames {
  * not stall on one.
  *
  * Imperative on purpose. The playhead moves every animation frame, and passing
- * it through React state would re-render the tree at 60 Hz — the cost this
- * whole hero is built to avoid. The returned function is called from inside the
- * render loop instead, where the index already lives in a ref.
+ * it through React state would re-render the tree at display rate — the cost
+ * this whole hero is built to avoid. The returned function is called from
+ * inside the render loop instead, where the index already lives in a ref.
  *
  * Fire-and-forget: a rejected decode just means that frame draws a beat later.
  */
@@ -139,8 +190,10 @@ export function useDecodeWindow(radius = 8) {
     const to = Math.min(images.length - 1, index + radius);
     for (let i = from; i <= to; i += 1) {
       if (decoded.current.has(i)) continue;
+      const image = images[i];
+      if (!image?.complete || image.naturalWidth === 0) continue;
       decoded.current.add(i);
-      images[i]?.decode?.().catch(() => decoded.current.delete(i));
+      image.decode?.().catch(() => decoded.current.delete(i));
     }
   }).current;
 }

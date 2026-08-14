@@ -1,32 +1,54 @@
 /**
- * Hero implementation selector for the cinematic-media-converter experiment.
+ * Hero implementation selector for the cinematic-media experiments.
  *
- * Three implementations of the same hero are built side by side so they can be
- * measured against each other on identical scroll input:
+ * Experiment 1 compared the shipped MP4 scrub against a 193-frame canvas
+ * sequence and an R3F scene. R3F lost decisively (see
+ * docs/cinematic-hero-benchmark.md) and is kept only as a reference candidate.
  *
- *   video       the shipped MP4 scrub (AstronautHero) — the baseline, untouched
- *   frames      a deterministic WebP frame sequence drawn to a 2D canvas
- *   interactive a three/R3F scene with the same frames on a plane, plus real
- *               camera depth and cursor parallax
+ * Experiment 2 compares the four representations that could plausibly ship:
  *
- * Selected with `?hero=frames` / `?hero=interactive`. The default is always the
- * shipped implementation, so a visitor who passes nothing sees production.
+ *   video-current    the shipped 2560x1440 all-intra MP4 scrub — the baseline
+ *   video-optimized  a lower-resolution all-intra re-encode, same access pattern
+ *   frames-97        every other source frame, drawn to a 2D canvas
+ *   frames-193       every source frame, drawn to a 2D canvas
+ *   interactive      the R3F scene (historical reference, not a contender)
+ *
+ * Selected with `?hero=`. The default is always the shipped implementation, so
+ * a visitor who passes nothing sees production.
  *
  * Pure and parameterised on the search string rather than reading `location`
  * directly, so it is testable without a DOM — the same reason `scrollGlide.ts`
  * and `askScroll.ts` are shaped this way.
  */
 
-export const HERO_VARIANTS = ['video', 'frames', 'interactive'] as const;
+export const HERO_VARIANTS = [
+  'video-current',
+  'video-optimized',
+  'frames-97',
+  'frames-193',
+  'interactive',
+] as const;
 
 export type HeroVariant = (typeof HERO_VARIANTS)[number];
 
 /** The shipped implementation. Anything unrecognised falls back to it. */
-export const DEFAULT_HERO_VARIANT: HeroVariant = 'video';
+export const DEFAULT_HERO_VARIANT: HeroVariant = 'video-current';
+
+/**
+ * Experiment 1's names still work. Benchmark scripts, notes and the first
+ * report all reference `?hero=video` and `?hero=frames`, and silently breaking
+ * those would make the earlier results unreproducible.
+ */
+const ALIASES: Readonly<Record<string, HeroVariant>> = {
+  video: 'video-current',
+  frames: 'frames-193',
+};
 
 const LABELS: Record<HeroVariant, string> = {
-  video: 'MP4 scrub (current)',
-  frames: 'Frame sequence',
+  'video-current': 'MP4 (current)',
+  'video-optimized': 'MP4 (optimized)',
+  'frames-97': 'Frames ×97',
+  'frames-193': 'Frames ×193',
   interactive: '3D / R3F',
 };
 
@@ -38,6 +60,15 @@ function isHeroVariant(value: string): value is HeroVariant {
   return (HERO_VARIANTS as readonly string[]).includes(value);
 }
 
+function readParam(search: string | null | undefined, key: string): string | null {
+  if (!search) return null;
+  try {
+    return new URLSearchParams(search).get(key);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Read the requested variant out of a `location.search` string.
  *
@@ -45,19 +76,77 @@ function isHeroVariant(value: string): value is HeroVariant {
  * experiment toggle must never be able to leave a visitor with no hero at all.
  */
 export function parseHeroVariant(search: string | null | undefined): HeroVariant {
-  if (!search) return DEFAULT_HERO_VARIANT;
-  let requested: string | null = null;
-  try {
-    requested = new URLSearchParams(search).get('hero');
-  } catch {
-    return DEFAULT_HERO_VARIANT;
-  }
+  const requested = readParam(search, 'hero');
   if (requested === null) return DEFAULT_HERO_VARIANT;
   const normalised = requested.trim().toLowerCase();
-  return isHeroVariant(normalised) ? normalised : DEFAULT_HERO_VARIANT;
+  if (isHeroVariant(normalised)) return normalised;
+  return ALIASES[normalised] ?? DEFAULT_HERO_VARIANT;
 }
 
 /** The search string that selects a variant, for the dev-only switcher's links. */
 export function heroVariantHref(variant: HeroVariant): string {
   return variant === DEFAULT_HERO_VARIANT ? '?' : `?hero=${variant}`;
+}
+
+/**
+ * Variants whose module or assets are expensive enough that a reduced-motion
+ * visitor must never trigger them. `React.lazy` starts fetching the moment its
+ * component renders — before the component can read the preference and decline
+ * — so the decision has to happen *above* the lazy boundary.
+ *
+ * Measured in experiment 1: a reduced-motion visitor on `?hero=interactive`
+ * downloaded 217 kB of three for a scene that never mounted.
+ */
+export const EXPENSIVE_VARIANTS: readonly HeroVariant[] = [
+  'interactive',
+  'frames-97',
+  'frames-193',
+  'video-optimized',
+];
+
+/**
+ * The variant actually rendered, once the motion preference is applied.
+ *
+ * Pure so the guarantee can be asserted in a test rather than only observed in
+ * a browser: under reduced motion this must resolve to the cheap default for
+ * *every* requested variant, including ones added later.
+ */
+export function effectiveHeroVariant(
+  requested: HeroVariant,
+  reducedMotion: boolean
+): HeroVariant {
+  return reducedMotion ? DEFAULT_HERO_VARIANT : requested;
+}
+
+/** Which generated frame sequence a variant reads, or null if it is not frame-based. */
+export function frameSequenceFor(variant: HeroVariant): string | null {
+  if (variant === 'frames-97') return 'astronaut-hero-97';
+  if (variant === 'frames-193' || variant === 'interactive') return 'astronaut-hero';
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Encode override — benchmarking only.
+//
+// `?hero=video-optimized&enc=w1600` points the optimized-video hero at a
+// specific candidate encode. `enc=shipped` renders the *current* file through
+// the *optimized* component, which is what makes A1-vs-A2 a fair test: without
+// it the two candidates would differ in both their encode and their component,
+// and a difference could not be attributed to either.
+// ---------------------------------------------------------------------------
+
+export const ENCODE_KEYS = ['shipped', 'w2560', 'w1920', 'w1600'] as const;
+
+export type EncodeKey = (typeof ENCODE_KEYS)[number];
+
+/** Chosen by measurement in experiment 2; see docs/cinematic-hero-benchmark-2.md. */
+export const DEFAULT_ENCODE: EncodeKey = 'w1920';
+
+export function parseEncodeKey(search: string | null | undefined): EncodeKey {
+  const requested = readParam(search, 'enc');
+  if (requested === null) return DEFAULT_ENCODE;
+  const normalised = requested.trim().toLowerCase();
+  return (ENCODE_KEYS as readonly string[]).includes(normalised)
+    ? (normalised as EncodeKey)
+    : DEFAULT_ENCODE;
 }

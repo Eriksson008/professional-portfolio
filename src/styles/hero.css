@@ -594,6 +594,10 @@
   font-size: 11px;
   letter-spacing: 0.04em;
 }
+.hero-dev-row {
+  display: flex;
+  gap: 2px;
+}
 .hero-dev-switcher a {
   padding: 5px 11px;
   border-radius: 999px;

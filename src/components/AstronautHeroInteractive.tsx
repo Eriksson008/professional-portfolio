@@ -6,7 +6,10 @@ import { frameIndexForProgress } from './heroFrames';
 import { useDecodeWindow, useHeroFrames } from './useHeroFrames';
 import { useHeroRunway } from './useHeroRunway';
 import { HeroShell } from './HeroShell';
-import { HERO_FRAMES_NAME } from './AstronautHeroFrames';
+import { frameSequenceFor } from './heroVariant';
+
+/** The R3F candidate reads the full-density sequence, same as frames-193. */
+const HERO_FRAMES_NAME = frameSequenceFor('interactive') ?? 'astronaut-hero';
 
 const POSTER_SRC = `${import.meta.env.BASE_URL}media/astronaut-hero-poster.jpg`;
 const START_SRC = `${import.meta.env.BASE_URL}media/astronaut-hero-start.jpg`;

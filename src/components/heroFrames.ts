@@ -67,6 +67,38 @@ export function frameSrc(base: string, name: string, tier: FrameTier, index: num
  * pulled the 1440 sequence would triple its transfer for pixels the crop throws
  * away.
  */
+/**
+ * The frame to actually draw for a requested index.
+ *
+ * While the tail of the sequence is still streaming, the exact frame may not
+ * have arrived. Walking outward for the nearest loaded neighbour shows a
+ * slightly stale image for a moment instead of leaving the canvas blank or
+ * freezing the scrub. Once loading completes this always returns the exact
+ * frame, so the finished scrub is fully deterministic.
+ *
+ * Lives here rather than beside the loader because it is pure: no DOM, no
+ * React, and therefore directly testable.
+ */
+export function nearestLoaded(
+  images: readonly HTMLImageElement[],
+  index: number
+): HTMLImageElement | null {
+  const usable = (i: number) => {
+    const image = images[i];
+    return image?.complete && image.naturalWidth > 0 ? image : null;
+  };
+  const exact = usable(index);
+  if (exact) return exact;
+  for (let offset = 1; offset < images.length; offset += 1) {
+    const before = index - offset;
+    const after = index + offset;
+    if (before < 0 && after >= images.length) break;
+    const candidate = usable(before) ?? usable(after);
+    if (candidate) return candidate;
+  }
+  return null;
+}
+
 export function tierForWidth(tiers: readonly FrameTier[], viewportWidth: number): FrameTier | null {
   if (tiers.length === 0) return null;
   const ascending = [...tiers].sort((a, b) => a.width - b.width);
