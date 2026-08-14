@@ -172,8 +172,10 @@ These two replace the convention with structure. Chosen over a full `#ask` page 
   rejected because it forces `scrollY` to 0, and `AstronautHero` / `AstronautFinale` scrub video
   `currentTime` off `scrollY` — locking would seek both films on open and again on close.
 - Verification below is Chrome DevTools device emulation. Emulation reproduces layout, safe areas
-  (via manual insets) and `visualViewport` resize, but **not** iOS Safari's real keyboard. Real-device
-  confirmation on the iPhone remains the user's step.
+  (via manual insets) and `visualViewport` resize, but **not** iOS Safari's real keyboard.
+  **Resolved 2026-08-14: the user confirmed the shipped result on a real iPhone** — the same device
+  and the same keyboard-open scenario that produced the original ten findings. Emulation's blind
+  spot is closed for this change; it is still a blind spot for the next one.
 
 ---
 

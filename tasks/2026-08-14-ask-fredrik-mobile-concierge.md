@@ -74,8 +74,9 @@ simulated `visualViewport` keyboard.
   scroll-scrubbed films on every open and close. Verified against a wheel gesture; the iOS-specific
   leak class is covered by the sheet covering everything and containing its own overscroll.
 - **Emulation is not iOS Safari.** The keyboard was simulated by shrinking `window.visualViewport`,
-  which exercises the real code path but not WebKit's own behaviour. Real-device confirmation is
-  still worth doing.
+  which exercises the real code path but not WebKit's own behaviour. **Closed 2026-08-14 — the user
+  confirmed the shipped result on the real iPhone**, on the device and in the keyboard-open scenario
+  that produced the original report.
 
 ## Completion evidence
 
@@ -102,6 +103,12 @@ border-box height math; a disabled send button that read as active; a WCAG failu
 (`--faint`@.62 = 2.62:1 dark, `--faint` full = 4.24:1 light → `--silver` = 10.62:1 dark / 5.38:1
 light); and a JS/CSS breakpoint mismatch at fractional widths that gave the **desktop** card the
 phone sheet's modal focus trap.
+
+## Status
+
+**Done.** Every acceptance criterion above is met, both blockers from independent review are fixed,
+the work is deployed to GitHub Pages (`27bc1f3`, `3880d6f`) and live-verified, and the user has
+confirmed the result on a real iPhone.
 
 ## Independent review round
 

@@ -181,6 +181,13 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
 - [ ] **Add the free Cloudflare WAF rate rule for `/ask`** (dashboard: zone → Security → WAF →
   Rate limiting rules) — hard quota protection; the Worker's in-memory limiter is per-isolate
   best-effort only.
+- [ ] **`--faint` is 4.24:1 in the light appearance** — under WCAG AA (4.5:1) wherever it carries
+  small text. Found 2026-08-14 while fixing the assistant's disclaimer, which moved to `--silver`
+  (5.38:1 light / 10.62:1 dark). The token is used site-wide for eyebrows and micro-labels, so
+  changing it is a whole-site visual decision and was deliberately left out of that change's scope.
+  Decide: darken `--faint` in the light palette, or move the remaining small-text users to
+  `--silver`. Measure, don't eyeball — every variant of this failed somewhere and none of it was
+  visible without computing the ratio.
 ### Done
 - [x] **Ask Fredrik rebuilt as a mobile concierge sheet — 2026-08-14.** Below 720px the assistant is
   a full-viewport sheet sized from `window.visualViewport` (`--af-vh`/`--af-vt` via
@@ -205,7 +212,8 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
   question retires a curated topic only when that topic's own answer was shown, never on a bare
   keyword match the Worker then answered differently. The follow-the-conversation rule lives in
   `src/components/askScroll.ts` as a pure, tested function for the same reason `scrollGlide.ts`
-  does. Backend, `/ask` contract, logging and admin untouched. Spec:
+  does. Backend, `/ask` contract, logging and admin untouched. **Confirmed by the user on a real
+  iPhone** after deploy, closing the emulation blind spot this change was verified through. Spec:
   `docs/superpowers/specs/2026-08-14-ask-fredrik-mobile-concierge-design.md`; task packet:
   `tasks/2026-08-14-ask-fredrik-mobile-concierge.md`.
 - [x] **Phone hero composition reversed, closing film moved above the closing text, desktop

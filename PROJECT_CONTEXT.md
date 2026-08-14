@@ -60,8 +60,10 @@ further defects into provable ones: the jump-to-latest button flashed during eve
 turn, and reopening the panel after scrolling up landed the reader on their oldest message. Lint,
 57 tests and the production build are green; measured at 320×568, 390×844,
 393×852, 412×915, 430×932, 700×390 landscape, 719×900, 768×1024 and 1534×822, light and dark, with a
-simulated keyboard. Backend untouched. Spec:
-`docs/superpowers/specs/2026-08-14-ask-fredrik-mobile-concierge-design.md`.
+simulated keyboard, then **confirmed by the user on a real iPhone** — the device and the
+keyboard-open scenario that produced the original report. Backend untouched. Spec:
+`docs/superpowers/specs/2026-08-14-ask-fredrik-mobile-concierge-design.md`; task packet:
+`tasks/2026-08-14-ask-fredrik-mobile-concierge.md`.
 
 **2026-08-13 (second pass) — the phone hero composition was reversed, the closing film moved above
 the closing text on phones, a latent desktop collision was fixed, and the header brand became the
