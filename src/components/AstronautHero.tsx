@@ -27,8 +27,13 @@ const START_SRC = `${import.meta.env.BASE_URL}media/astronaut-hero-start.jpg`;
 /**
  * The film completes at this fraction of the runway; the remainder is a hold
  * where the settled frame stays put and the visor telemetry assembles.
+ * Phones have no telemetry (it crowds the portrait band) and a much shorter
+ * runway, so there the film runs almost to the end — a hold with nothing to
+ * assemble in it is just dead scroll. Keep in step with the object-position
+ * pan in hero.css and the finale's phone runway (finale.css).
  */
-const FILM_END = 0.78;
+const FILM_END_DESKTOP = 0.78;
+const FILM_END_PHONE = 0.94;
 
 /** Scroll progress past which the scroll cue has done its job. */
 const SETTLE_AT = 0.5;
@@ -67,6 +72,12 @@ const telemetry = [
  * the astronaut in frame under the portrait crop. Reduced-motion gets the
  * settled poster still (no pinning, no scrub, everything resolved); if the
  * video errors, the poster is already painted underneath.
+ *
+ * Phones re-compose the same scene rather than shrink it (hero.css): the
+ * film is a band across the top of the frame with the identity stacked
+ * directly beneath it, the identity arrives on load instead of on scroll,
+ * and the runway is 200svh (100svh of travel) with the film running to 0.94
+ * of it. Same mechanic, a third of the scroll, no empty stretch.
  */
 export function AstronautHero() {
   const reduced = useReducedMotion();
@@ -77,6 +88,7 @@ export function AstronautHero() {
   const [failed, setFailed] = useState(false);
   const [settled, setSettled] = useState(false);
   const scrub = !reduced && !failed;
+  const filmEnd = desktop ? FILM_END_DESKTOP : FILM_END_PHONE;
 
   const runwayRef = useRef<HTMLElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -115,7 +127,7 @@ export function AstronautHero() {
     const syncVideo = (force = false) => {
       const dur = video.duration;
       if (!Number.isFinite(dur) || dur <= 0 || video.seeking) return;
-      const t = Math.min(1, clamp01(smooth.get()) / FILM_END) * (dur - 0.05);
+      const t = Math.min(1, clamp01(smooth.get()) / filmEnd) * (dur - 0.05);
       if (force || Math.abs(t - video.currentTime) > FRAME) video.currentTime = t;
     };
 
@@ -222,7 +234,7 @@ export function AstronautHero() {
       if (revealTimer !== undefined) window.clearTimeout(revealTimer);
       video.style.visibility = 'hidden';
     };
-  }, [scrub, desktop, mediaTier, raw, smooth]);
+  }, [scrub, desktop, filmEnd, mediaTier, raw, smooth]);
 
   return (
     <section

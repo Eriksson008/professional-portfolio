@@ -7,6 +7,7 @@ import './styles/hero.css';
 import './styles/premium.css';
 import './styles/finale.css';
 import './styles/ask-fredrik.css';
+import './styles/dock.css';
 
 // Cloudflare Web Analytics (cookieless beacon). Production builds only, so dev
 // sessions never count as visitors; the token is public by design (it ships in

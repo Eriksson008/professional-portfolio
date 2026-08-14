@@ -1,0 +1,139 @@
+/* ============================================================
+   Mobile dock — phone navigation, thumb height.
+   A floating near-black slab inset from the screen edges: the
+   same hairline/glass language as the rest of the site, but
+   bottom-mounted and icon-only, so the seven destinations stay
+   ≥44px tall at 320px. Shown only ≤719px (the project's phone
+   breakpoint, matching the media tier and the hero); the desktop
+   header owns everything above it.
+
+   Geometry lives in tokens.css (--dock-h / --dock-inset /
+   --dock-space) because the hero, the assistant panel, and the
+   footer all reserve space against it.
+   ============================================================ */
+
+.dock {
+  display: none;
+  position: fixed;
+  z-index: 130;
+  left: 50%;
+  bottom: calc(var(--dock-inset) + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  width: min(calc(100% - var(--dock-inset) * 2), 480px);
+  height: var(--dock-h);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  /* Deliberately near-opaque: the blur is a finish, not the surface.
+     A translucent slab over a scrolling film is the one thing a fixed
+     bar must not ask a phone GPU to re-composite every frame. */
+  background: rgba(6, 7, 10, 0.88);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 10px 30px rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 719px) {
+  .dock {
+    display: block;
+  }
+}
+
+.dock-row {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 6px;
+}
+.dock-cell {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.dock-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--faint);
+  border-radius: 15px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color 0.2s var(--ease),
+    transform 0.18s var(--ease);
+}
+
+/* Active capsule — a quiet lift behind the glyph, not a pill of colour. */
+.dock-item::before {
+  content: '';
+  position: absolute;
+  inset: 2px 3px;
+  border-radius: 14px;
+  background: var(--accent-wash);
+  border: 1px solid transparent;
+  opacity: 0;
+  transform: scale(0.82);
+  transition:
+    opacity 0.22s var(--ease),
+    transform 0.22s var(--ease);
+}
+.dock-item.is-active::before {
+  opacity: 1;
+  transform: none;
+  border-color: var(--line-soft);
+}
+.dock-item.is-active {
+  color: var(--text);
+}
+/* The pseudo-element is positioned, so it would paint over a plain inline
+   glyph — lift the icon back on top. */
+.dock-item svg {
+  position: relative;
+}
+
+/* Tap feedback: a short compression that releases with the page's ease. */
+.dock-item:active {
+  transform: scale(0.9);
+}
+
+/* Ask Fredrik — one degree more presence than a destination: a small ice
+   dot that wakes into a soft glow while the panel is open. */
+.dock-ask .dock-spark {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ice);
+  opacity: 0.75;
+  transition:
+    opacity 0.22s var(--ease),
+    box-shadow 0.22s var(--ease);
+}
+.dock-ask.is-active .dock-spark {
+  opacity: 1;
+  box-shadow: 0 0 0 3px var(--ice-wash);
+}
+.dock-ask.is-active::before {
+  border-color: var(--ice-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-item,
+  .dock-item::before {
+    transition: none;
+  }
+  .dock-item:active {
+    transform: none;
+  }
+  .dock-item::before {
+    transform: none;
+  }
+}

@@ -80,8 +80,24 @@
   --radius-card: 22px;
   --radius-pill: 999px;
 
+  /* Chrome geometry. Exactly one navigation surface exists at a time: the
+     sticky header (≥720px) or the phone dock (≤719px). --nav-h is what
+     sticky tops and anchor landings offset by; --dock-space is the bottom
+     clearance the hero, the assistant panel, and the footer reserve. */
+  --nav-h: 68px;
+  --dock-h: 62px;
+  --dock-inset: 10px;
+  --dock-space: 0px;
+
   /* Motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 719px) {
+  :root {
+    --nav-h: 0px;
+    --dock-space: calc(var(--dock-h) + var(--dock-inset) * 2 + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -146,7 +162,8 @@
    mission-control frame. They intentionally do not invert with the document. */
 .hero,
 .finale,
-.nav {
+.nav,
+.dock {
   --black: #000000;
   --ink: #030305;
   --ink-2: #07080c;

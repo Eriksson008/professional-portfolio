@@ -424,6 +424,39 @@
   }
 }
 
+/* ---- Phones: the dock owns the launcher ---- */
+/* ≤719px there is no floating pill — Ask Fredrik is a dock destination
+   (MobileDock), so the sheet opens above the dock instead of above its own
+   trigger. --kb-inset lifts it clear of an open keyboard so the input and
+   Send button stay reachable while typing. */
+@media (max-width: 719px) {
+  .af-launcher {
+    display: none;
+  }
+  .af-root {
+    left: calc(var(--gutter) + env(safe-area-inset-left, 0px));
+    right: calc(var(--gutter) + env(safe-area-inset-right, 0px));
+    bottom: calc(var(--dock-space) + var(--kb-inset, 0px) + 0.4rem);
+    align-items: stretch;
+  }
+  .af-panel {
+    width: 100%;
+    max-height: calc(100vh - var(--dock-space) - var(--kb-inset, 0px) - 2rem);
+    max-height: calc(100dvh - var(--dock-space) - var(--kb-inset, 0px) - 2rem);
+  }
+}
+
+/* Landscape phones: give the transcript less floor and drop the prompt tray
+   so the input row never gets pushed out of the sheet. */
+@media (max-height: 520px) {
+  .af-log {
+    min-height: 88px;
+  }
+  .af-tray {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .af-panel {
     animation: none;

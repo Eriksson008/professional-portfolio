@@ -9,6 +9,22 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
+**2026-08-13 — phones got their own navigation and their own hero composition.** Two mobile-only
+changes, both because the phone had been inheriting the desktop layout rather than being designed
+for. (1) **The top header is replaced below 720px by a fixed bottom dock** — a rounded near-black
+slab in the home-indicator safe area with seven icon-only destinations (Home, Impact, Projects,
+Skills, Career, Contact, Ask Fredrik), an IntersectionObserver-driven active capsule, and the
+assistant folded in as a dock citizen instead of a second floating pill. Desktop and tablet
+(≥720px) keep the header, the floating pill, and every hero timing unchanged. (2) **The phone hero
+is stacked instead of overlaid**: the film is a band across the top of the frame with the identity
+directly beneath it, the identity arrives on load rather than on scroll, and the runway drops from
+360svh to 200svh with the film running to 0.94 of it (previously 0.78, whose remaining hold
+assembled telemetry that phones hide). That removes ~1.6 viewports of scrolling through a mostly
+black frame; the film now completes exactly as the scene unpins into the summary. Verified in
+Chrome with real video decode at 320/375/390/430px, landscape, tablet and desktop, plus
+reduced-motion, keyboard-inset and scroll-spy checks; lint, 33 tests, and the production build are
+green. Spec: `docs/superpowers/specs/2026-08-13-mobile-dock-and-hero-design.md`.
+
 **2026-08-13 — finale pacing correction released and live-verified.** The closing
 eight-second film no longer races through 540 px on desktop or one ~211 px phone band: its physical
 scrub travel now matches the opening hero (1,544.4 px each at 1440×900; within 0.5% at phone/tablet
@@ -125,6 +141,31 @@ docker compose up --build       # production container at http://localhost:8790 
   static host (Netlify, S3/CloudFront, nginx). `public/.nojekyll` included.
 
 ## Important Decisions
+
+- **2026-08-13 — Phones (≤719px) get a bottom dock and a stacked hero; ≥720px is untouched.**
+  The phone breakpoint is the project's existing one (`useVideoMediaTier`, hero, finale) — no new
+  breakpoint was invented, so 720–879px tablets keep the desktop header. `--nav-h` (68px, 0 on
+  phones) and `--dock-space` in `tokens.css` are now the single source for chrome geometry:
+  sticky tops, anchor landings (`useAnchorGlide` reads `--nav-h`), the hero's bottom padding, the
+  assistant sheet, and the footer all derive from them instead of hard-coding 68px. Navigation
+  destinations live once in `src/components/navigation.ts`; `Nav` and `MobileDock` render the same
+  list, and the scroll-spy is the shared `useActiveSection` hook. **Home replaces Summary** on the
+  dock (the opening film and the summary are one landing) — that is what keeps seven thumb targets
+  usable at 320px, and the boxed `FE` mark is not part of the phone dock. Ask Fredrik has one
+  state and one panel with two triggers (`useAskFredrik`); the floating pill is hidden on phones.
+  Icons are hand-drawn on a single 24×24 grid in `NavIcons.tsx` — do not add an icon package for
+  seven paths.
+
+  On the hero: the phone runway is **200svh with the film ending at 0.94** (desktop stays 320vh /
+  0.78). Those numbers are load-bearing in **three** places — `FILM_END_PHONE` in
+  `AstronautHero.tsx`, the phone `.finale-media-runway` height in `finale.css`, and the travel
+  constant passed to `stickyMediaProgress` in `AstronautFinale.tsx` — because the closing film is
+  deliberately paced to cost the same scroll as the opening one. Change one, change all three.
+  Also load-bearing: the phone band ends the film **one pixel inside** its box via the video's own
+  `clip-path`. A composited video quad bleeds its last row past an ancestor `overflow: hidden` and
+  through an opaque scrim (Chrome, DPR 2 and 3), and the short band means `cover` crops
+  horizontally only, so the frame's bottom row is on screen. Matching the clip exactly to the band
+  edge brings the hairline back.
 
 - **2026-08-13 — Ask Fredrik is intentionally stateless, and capability/meta questions are
   deterministic.** The answering pipeline receives only the current question. The browser's visible

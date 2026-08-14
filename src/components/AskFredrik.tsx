@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { askFredrik } from '../lib/askFredrik';
 import { disclosure, greeting, suggestedQuestions } from '../data/fredrikContext';
+import type { AskFredrikController } from './useAskFredrik';
 
 interface ChatMessage {
   id: number;
@@ -9,16 +10,24 @@ interface ChatMessage {
   text: string;
 }
 
+interface AskFredrikProps {
+  ask: AskFredrikController;
+}
+
 /** The launcher stays hidden until the hero's opening frame has passed. */
 const REVEAL_FRACTION = 0.55;
 
 /**
- * Ask Fredrik — floating recruiter concierge. v1 is fully static:
- * curated answers from src/data/fredrikContext.ts via askFredrik(),
- * no backend, no keys. Non-modal dialog so the page stays usable.
+ * Ask Fredrik — recruiter concierge. v1 is fully static: curated answers
+ * from src/data/fredrikContext.ts via askFredrik(), no backend, no keys.
+ * Non-modal dialog so the page stays usable.
+ *
+ * The panel is opened from a floating pill on desktop and from the dock's
+ * Ask button on phones (ask-fredrik.css hides the pill there). Both share
+ * the controller's open state, so there is one panel and one transcript.
  */
-export function AskFredrik() {
-  const [open, setOpen] = useState(false);
+export function AskFredrik({ ask }: AskFredrikProps) {
+  const { open, close } = ask;
   const [pastHero, setPastHero] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -27,7 +36,6 @@ export function AskFredrik() {
   const [fadeTop, setFadeTop] = useState(false);
   const [fadeBottom, setFadeBottom] = useState(false);
 
-  const launcherRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const nextId = useRef(0);
@@ -59,11 +67,6 @@ export function AskFredrik() {
     syncFades();
   }, [messages, busy, open]);
 
-  const close = () => {
-    setOpen(false);
-    launcherRef.current?.focus();
-  };
-
   const send = async (question: string, suggestionId?: string) => {
     const trimmed = question.trim();
     if (trimmed === '' || busy) return;
@@ -93,14 +96,13 @@ export function AskFredrik() {
   return (
     <div className="af-root">
       <button
-        ref={launcherRef}
         type="button"
         className={`af-launcher ${visible ? 'is-visible' : ''}`}
         tabIndex={visible ? 0 : -1}
         aria-hidden={!visible}
         aria-expanded={open}
         aria-controls="ask-fredrik-panel"
-        onClick={() => (open ? close() : setOpen(true))}
+        onClick={(e) => ask.toggle(e.currentTarget)}
       >
         <span className="af-dot" aria-hidden="true" />
         Ask Fredrik
@@ -121,7 +123,12 @@ export function AskFredrik() {
               <p className="af-eyebrow">Portfolio Concierge</p>
               <h2 className="af-title">Ask Fredrik</h2>
             </div>
-            <button type="button" className="af-close" onClick={close} aria-label="Close Ask Fredrik">
+            <button
+              type="button"
+              className="af-close"
+              onClick={close}
+              aria-label="Close Ask Fredrik"
+            >
               ×
             </button>
           </header>

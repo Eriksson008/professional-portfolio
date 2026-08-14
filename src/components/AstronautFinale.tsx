@@ -141,7 +141,9 @@ export function AstronautFinale() {
                 mediaRunwayRect.height,
                 mediaRect.height,
                 vh,
-                vh * (desktop ? 1.716 : 2.028)
+                // Match the opening hero's film travel on the same device:
+                // 171.6vh on ≥720px, 94vh on phones (see finale.css).
+                vh * (desktop ? 1.716 : 0.94)
               )
             : inFlowMediaProgress(mediaRect.top, mediaRect.height, vh)
         );

@@ -1,45 +1,24 @@
 import { useEffect, useState } from 'react';
 import { profile } from '../data/profile';
+import { contactDestination, headerSections } from './navigation';
+import { useActiveSection } from './useActiveSection';
 
-const sections = [
-  { id: 'about', label: 'Summary' },
-  { id: 'highlights', label: 'Impact' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'experience', label: 'Career' },
-];
+const trackedIds = headerSections.map((s) => s.id);
 
+/**
+ * Desktop header. Hidden on phones (≤719px), where MobileDock takes over —
+ * both read the same destinations from navigation.ts.
+ */
 export function Nav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [active, setActive] = useState('');
+  const active = useActiveSection(trackedIds);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // Scroll-spy: highlight the nav link for the section currently in view.
-  useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') return;
-    const targets = sections
-      .map((s) => document.getElementById(s.id))
-      .filter((el): el is HTMLElement => el !== null);
-    if (targets.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActive(visible.target.id);
-      },
-      { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
-    );
-    targets.forEach((t) => observer.observe(t));
-    return () => observer.disconnect();
   }, []);
 
   return (
@@ -52,7 +31,7 @@ export function Nav() {
 
         <div className="nav-actions">
           <nav id="nav-menu" className={`nav-menu ${open ? 'is-open' : ''}`} aria-label="Primary">
-            {sections.map((s) => (
+            {headerSections.map((s) => (
               <a
                 key={s.id}
                 href={`#${s.id}`}
@@ -63,8 +42,12 @@ export function Nav() {
                 {s.label}
               </a>
             ))}
-            <a className="nav-cta" href="#contact" onClick={() => setOpen(false)}>
-              Contact
+            <a
+              className="nav-cta"
+              href={`#${contactDestination.id}`}
+              onClick={() => setOpen(false)}
+            >
+              {contactDestination.label}
             </a>
           </nav>
 

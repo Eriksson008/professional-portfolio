@@ -182,6 +182,13 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
   Rate limiting rules) — hard quota protection; the Worker's in-memory limiter is per-isolate
   best-effort only.
 ### Done
+- [x] **Phone navigation moved to a bottom dock and the phone hero re-composed — 2026-08-13.**
+  Below 720px the sticky header is replaced by a fixed icon dock (Home · Impact · Projects ·
+  Skills · Career · Contact · Ask Fredrik) in the safe area, the floating Ask pill is hidden and
+  the assistant is a dock destination sharing one state/panel, and the hero is stacked (film band
+  on top, identity beneath, 200svh runway instead of 360svh). ≥720px is unchanged. Chrome geometry
+  now comes from `--nav-h` / `--dock-space` in `tokens.css`. Spec:
+  `docs/superpowers/specs/2026-08-13-mobile-dock-and-hero-design.md`.
 - [x] **Cloudflare Web Analytics live on the portfolio — 2026-08-04.** Web Analytics site
   registered in the Cloudflare account for hostname `eriksson008.github.io`; the beacon is
   injected from `src/main.tsx` gated on `import.meta.env.PROD` (dev sessions never report;

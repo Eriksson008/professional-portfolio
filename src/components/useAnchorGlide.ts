@@ -1,7 +1,16 @@
 import { useEffect } from 'react';
 
-/** Height of the sticky nav — anchor targets land just below it. */
-const NAV_OFFSET = 68;
+/**
+ * Height of the sticky nav — anchor targets land just below it. Read from
+ * --nav-h (tokens.css) rather than hard-coded, because phones have no
+ * header at all (the dock is fixed over the page, not above it) and there
+ * the same links must land flush with the section top.
+ */
+const navOffset = () => {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-h');
+  const px = Number.parseFloat(raw);
+  return Number.isFinite(px) ? px : 0;
+};
 
 /**
  * Landing progress inside a pinned-reveal runway: past the last phase
@@ -69,7 +78,7 @@ export function useAnchorGlide() {
       const top =
         runway > window.innerHeight * 0.5
           ? rect.top + window.scrollY + runway * RUNWAY_SETTLE
-          : Math.max(0, rect.top + window.scrollY - NAV_OFFSET);
+          : Math.max(0, rect.top + window.scrollY - navOffset());
       if (reduce.matches) {
         window.scrollTo(0, top);
       } else {

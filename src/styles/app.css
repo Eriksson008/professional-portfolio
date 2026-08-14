@@ -93,11 +93,16 @@ img {
   border-radius: 2px;
 }
 
+/* The gutter carries the display cutout in landscape: index.html opts into
+   viewport-fit=cover so the dock can reach the safe area, which also lets
+   page content under the notch unless every column pads for it. Both insets
+   are 0 everywhere else, so this is a no-op off-device. */
 .wrap {
   width: 100%;
   max-width: var(--wrap);
   margin: 0 auto;
-  padding-inline: var(--gutter);
+  padding-inline: calc(var(--gutter) + env(safe-area-inset-left, 0px))
+    calc(var(--gutter) + env(safe-area-inset-right, 0px));
 }
 
 .skip-link {
@@ -664,6 +669,19 @@ img {
     margin-top: 0.8rem;
     width: 100%;
     text-align: center;
+  }
+}
+
+/* Phones: the sticky header is replaced by the fixed bottom dock
+   (dock.css). --nav-h drops to 0 with it, so every sticky top and anchor
+   landing that offsets for the header resolves flush to the viewport. */
+@media (max-width: 719px) {
+  .nav {
+    display: none;
+  }
+  /* The document ends above the dock, not behind it. */
+  .site-footer {
+    padding-bottom: calc(2.5rem + var(--dock-space));
   }
 }
 

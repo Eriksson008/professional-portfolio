@@ -213,10 +213,11 @@
     padding-block: 4.5rem 0;
   }
   .finale.is-scrub .finale-media-runway {
-    /* The opening phone hero plays its film across 202.8vh of scroll
-       (260vh runway travel × 0.78). Add one media height so this runway's
-       sticky travel matches it exactly. */
-    height: calc(202.8vh + 56.25vw);
+    /* The opening phone hero plays its film across 94vh of scroll (100svh
+       runway travel × 0.94). Add one media height so this runway's sticky
+       travel matches it exactly — the closing film should cost the same
+       scroll as the opening one on the same device. */
+    height: calc(94vh + 56.25vw);
     margin-inline: calc(var(--gutter) * -1);
     margin-top: 2.5rem;
   }
