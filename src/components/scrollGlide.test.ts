@@ -1,17 +1,19 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { inFlowMediaProgress, stickyMediaProgress } from './scrollGlide.ts';
+import { stickyMediaProgress, viewportTravelProgress } from './scrollGlide.ts';
 
-test('in-flow media progress spans entry to full visibility', () => {
-  assert.equal(inFlowMediaProgress(844, 220, 844), 0);
-  assert.equal(inFlowMediaProgress(734, 220, 844), 0.5);
-  assert.equal(inFlowMediaProgress(624, 220, 844), 1);
+test('viewport travel progress spans entry to the reveal endpoint', () => {
+  const vh = 844;
+  const end = 0.18;
+  assert.equal(viewportTravelProgress(vh, vh, end), 0);
+  assert.equal(viewportTravelProgress(vh - (vh * (1 - end)) / 2, vh, end), 0.5);
+  assert.equal(viewportTravelProgress(vh * end, vh, end), 1);
 });
 
-test('in-flow media progress clamps beyond both endpoints', () => {
-  assert.equal(inFlowMediaProgress(900, 220, 844), 0);
-  assert.equal(inFlowMediaProgress(400, 220, 844), 1);
-  assert.equal(inFlowMediaProgress(400, 0, 844), 1);
+test('viewport travel progress clamps beyond both endpoints', () => {
+  assert.equal(viewportTravelProgress(900, 844, 0.18), 0);
+  assert.equal(viewportTravelProgress(-200, 844, 0.18), 1);
+  assert.equal(viewportTravelProgress(100, 0, 0.18), 1);
 });
 
 test('sticky media progress spans the full runway travel', () => {

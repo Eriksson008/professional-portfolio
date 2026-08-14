@@ -130,15 +130,17 @@ to fit the scene (≥880×720) it **pins like the hero**: the section is a 386vh
 sticky inner holds the CTA column and film still on screen while scrolling lights the
 astronaut out of black. The film occupies progress 0.18–0.78, giving it the same 171.6vh of
 physical scroll travel as the opening desktop hero, with text before it and a lit hold after it;
-scrolling back re-darkens it. On viewports below 880 px, the contact content stays **in-flow** while
-the edge-to-edge 16:9 film band below it holds in its own sticky runway. Short desktop windows keep
-the desktop two-column composition but give its right-column film the same sticky runway instead
-of pinning the whole scene. That media travel matches the opening film: 202.8vh on phones and
-171.6vh at ≥720 px. `measure()` reads the finale container's computed sticky state, so JS follows
+scrolling back re-darkens it. On viewports below 880 px the contact content stays **in-flow**. Tablets
+(720–879 px) keep the edge-to-edge 16:9 film band below the copy, holding in its own sticky runway
+whose travel matches the opening film (171.6vh at ≥720 px); short desktop windows keep the
+two-column composition but give the right-column film that same runway instead of pinning the whole
+scene. **Phones put the band above the copy and give it no runway** — it scrubs on its own travel
+through the viewport, so the contact actions are one screen of scroll in rather than two. `measure()` reads the finale container's computed sticky state, so JS follows
 the same responsive mode as CSS. The pin doesn't touch the Ask Fredrik widget (`position: fixed`,
 higher stacking context). The subject drifts across the frame during the reveal, so the film remains
 a 16:9 object: CTA column on the left and film bleeding to the right viewport edge in desktop grid
-layouts; an edge-to-edge band after the stacked content below 880 px.
+layouts; an edge-to-edge band beside the stacked content below 880 px — after it on tablets, before
+it on phones.
 
 - **Scrub discipline** (same as the hero): scroll geometry and the two spring subscriptions are
   each coalesced to one animation-frame callback. Scroll only moves the targets of overdamped

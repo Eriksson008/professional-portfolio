@@ -9,7 +9,35 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
-**2026-08-13 — phones got their own navigation and their own hero composition.** Two mobile-only
+**2026-08-13 (second pass) — the phone hero composition was reversed, the closing film moved above
+the closing text on phones, a latent desktop collision was fixed, and the header carries the
+monogram.** Four user-reported items, in the order they matter. (1) **Desktop: the visor telemetry
+readout collided with the "Mission Portfolio" eyebrow.** Not a regression from the dock work
+(desktop CSS was untouched, verified value by value) but a latent flaw: the readout is anchored at
+41% of the hero and the identity is anchored to the bottom, so the two converge as the window
+shortens — measured **−5px at 1534×822**, overlapping below that, and invisible on the 900px+
+windows it was designed on. `.hero-hud` now caps its anchor against the room the identity needs
+(`top: clamp(calc(var(--hud-half) + 8px), calc(100% - var(--hud-floor)), 41%)`), so ≥860px-tall
+windows are pixel-identical and shorter ones lift the readout instead of colliding. **Below 600px
+of viewport height the readout is hidden outright** — independent review found that a laptop at
+200% browser zoom (1536×864 → 768×432 CSS px) has no anchor that fits both, and the first version
+of the fix clipped the readout and dropped it on the eyebrow there (−84px, reproduced). (2) **The phone hero is overlaid again, not
+stacked** — the film fills the frame at load and the identity rises out of it on scroll, exactly as
+desktop does; the 200svh runway, the 0.94 film end and the portrait pan stay. (3) **On phones the
+closing film band now sits above the "06 Open to meaningful…" text and no longer pins**, scrubbing
+on its own travel through the viewport (one screen of scroll instead of two); tablets and short
+desktop windows are unchanged. Where the band is ordered first, the staged closing text ramps off
+the panel's travel rather than the section's, and `#contact` lands on the panel rather than on a
+viewport of film (`[data-anchor-landing]`, phones only) — both caught by review, the second because
+tapping Contact otherwise arrived with the contact copy still un-revealed. (4) **The header's boxed `FE`
+lettering is now the monogram** (`public/logo-fe.png`, 216px, 36px tile); the dock's Home glyph
+stays a line icon. Lint, 33 tests and the production build are green; measured in Chrome via
+Playwright at 1920×1080 / 1534×822 / 1366×768 / 1280×600 / 760×640 / 760×900 / 712×390 / 390×844 /
+360×640. Spec amendment: `docs/superpowers/specs/2026-08-13-mobile-dock-and-hero-design.md`.
+
+**2026-08-13 — phones got their own navigation and their own hero composition.** _(The hero half of
+this entry was reversed later the same day — see the entry above; the dock, the shared navigation
+config, and the single assistant state remain current.)_ Two mobile-only
 changes, both because the phone had been inheriting the desktop layout rather than being designed
 for. (1) **The top header is replaced below 720px by a fixed bottom dock** — a rounded near-black
 slab in the home-indicator safe area with seven icon-only destinations (Home, Impact, Projects,
@@ -142,7 +170,39 @@ docker compose up --build       # production container at http://localhost:8790 
 
 ## Important Decisions
 
+- **2026-08-13 (second pass) — the phone gets the same *composition* as desktop; only the pacing
+  and the chrome differ. And an absolutely-positioned overlay must reserve room for whatever is
+  anchored opposite it.**
+
+  The stacked phone hero shipped that morning (film band on top, identity beneath, identity on
+  load) was reversed the same day at the user's direction: on a phone the opening shot is the film
+  and nothing else, and the identity rises out of it on scroll, exactly as on desktop. What phones
+  legitimately change is **pacing** (200svh runway, film to 0.94), **crop** (portrait
+  `object-position` pan), and **chrome** (no telemetry, no scroll cue, `--dock-space` clearance,
+  blur-free reveal for mobile GPUs) — not the composition itself. The same principle moved the
+  closing film **above** the closing text on phones and unpinned it: one screen of scroll to the
+  contact actions, not two, while tablets and short desktop windows keep the pinned runway below
+  the text.
+
+  The desktop bug found in the same pass is the durable lesson: **`.hero-hud` is anchored to a
+  percentage of the hero and `.hero-content` is anchored to its bottom edge, so nothing in the CSS
+  knew they were on a collision course.** They converged as the window shortened and overlapped
+  below ~830px of viewport height — a real defect that had shipped unnoticed because it is
+  invisible on the 900px+ windows the scene was composed on. The fix caps the readout's anchor
+  against the space the identity needs (`--hud-floor` = the identity's own bottom-padding clamp +
+  the panel's measured 288px + a 24px gap + `--hud-half`), floored at half the readout + 8px so the
+  frame can never clip it. **Both numbers are measured, so both need re-measuring when what they
+  describe changes**: 288px is the identity panel (the name, the sub copy, a single-row CTA wrap),
+  and `--hud-half` is half the readout, which is why it rises to 70px below 900px wide where
+  `.hud-cell` gains padding — a review round caught that the flat 52px under-reserved there.
+  **Below 600px of viewport the readout is hidden entirely**: at 768×432 (a 1536×864 laptop at 200%
+  browser zoom, which still matches every desktop width rule) the identity alone takes ~330px of a
+  364px frame, so no anchor fits both and clamping only clipped the list. Verified 1920×1080
+  (unchanged at 41%) through 720×800, with 768×432 / 900×560 / 820×560 hidden.
+
 - **2026-08-13 — Phones (≤719px) get a bottom dock and a stacked hero; ≥720px is untouched.**
+  _(The stacked-hero half is superseded by the entry above; the dock, the token-driven chrome
+  geometry, the shared `navigation.ts` and the single assistant state all stand.)_
   The phone breakpoint is the project's existing one (`useVideoMediaTier`, hero, finale) — no new
   breakpoint was invented, so 720–879px tablets keep the desktop header. `--nav-h` (68px, 0 on
   phones) and `--dock-space` in `tokens.css` are now the single source for chrome geometry:
@@ -157,15 +217,12 @@ docker compose up --build       # production container at http://localhost:8790 
   seven paths.
 
   On the hero: the phone runway is **200svh with the film ending at 0.94** (desktop stays 320vh /
-  0.78). Those numbers are load-bearing in **three** places — `FILM_END_PHONE` in
-  `AstronautHero.tsx`, the phone `.finale-media-runway` height in `finale.css`, and the travel
-  constant passed to `stickyMediaProgress` in `AstronautFinale.tsx` — because the closing film is
-  deliberately paced to cost the same scroll as the opening one. Change one, change all three.
-  Also load-bearing: the phone band ends the film **one pixel inside** its box via the video's own
-  `clip-path`. A composited video quad bleeds its last row past an ancestor `overflow: hidden` and
-  through an opaque scrim (Chrome, DPR 2 and 3), and the short band means `cover` crops
-  horizontally only, so the frame's bottom row is on screen. Matching the clip exactly to the band
-  edge brings the hairline back.
+  0.78). **Amended the same day — the stacked phone composition was reversed** (see the decision
+  below): the film fills the phone frame again and the identity rises on scroll, so the band, its
+  `clip-path` seam fix and the landscape un-pin block are gone. The runway and film end survive the
+  reversal. The film-travel coupling is now **two** places, both ≥720px — the `.finale-media-runway`
+  height in `finale.css` and the travel constant passed to `stickyMediaProgress` in
+  `AstronautFinale.tsx` — because phones no longer give the closing film a runway at all.
 
 - **2026-08-13 — Ask Fredrik is intentionally stateless, and capability/meta questions are
   deterministic.** The answering pipeline receives only the current question. The browser's visible

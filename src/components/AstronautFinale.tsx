@@ -8,10 +8,10 @@ import {
   clamp01,
   createFrameScheduler,
   debugGlide,
-  inFlowMediaProgress,
   mediaFrameDuration,
   startVideoFrameDebug,
   stickyMediaProgress,
+  viewportTravelProgress,
 } from './scrollGlide';
 
 // All-intra re-encodes (a keyframe every frame, ffmpeg -g 1) like the hero's —
@@ -56,18 +56,21 @@ const REVEAL_END = 0.18;
  * the `--fp` custom property that the phase ramps in finale.css read,
  * plus the film seek time. The pin is CSS-gated to viewports
  * tall enough to fit the scene (see finale.css); everywhere else —
- * phones, short windows — the section stays in-flow: the text phases
- * map onto the section's travel through the viewport and the film onto
- * its own media travel (extended into a sticky runway on phones and
- * tablets). measure() reads the finale container's computed sticky
- * state, so JS and CSS can't disagree about which mode is active.
+ * phones, tablets, short windows — the section stays in-flow: the text
+ * phases map onto the travel of the section (or, where the film band is
+ * ordered above the copy, of the panel itself), and the film onto its
+ * own travel — through a sticky runway on tablets and short windows,
+ * and simply through the viewport on phones, which give it no runway.
+ * measure() reads the computed sticky position and the band's computed
+ * order, so JS and CSS can't disagree about which mode is active.
  *
  * The subject drifts across the frame during the reveal, so the film is
  * shown whole (16:9, never cover-cropped) as its own object: CTA column
  * on the left, film bleeding to the right viewport edge on desktop,
- * hung slightly low so the figure reads as emerging from the dark; a
- * full-width 16:9 band *below* the stacked content on phones, so the
- * contact actions never hide behind a viewport of video.
+ * hung slightly low so the figure reads as emerging from the dark. On
+ * phones it is a full-width 16:9 band *above* the closing text, with no
+ * runway of its own — it scrubs on its own travel through the viewport, so
+ * the contact actions are one screen of scroll away rather than two.
  *
  * The video is decorative (aria-hidden, muted, no controls, and never
  * allowed to free-run) and lazy: preload="metadata" until an
@@ -88,6 +91,7 @@ export function AstronautFinale() {
 
   const sectionRef = useRef<HTMLElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const mediaRunwayRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -105,17 +109,15 @@ export function AstronautFinale() {
     if (!scrub) return;
     const section = sectionRef.current;
     const sticky = stickyRef.current;
+    const panel = panelRef.current;
     const mediaRunway = mediaRunwayRef.current;
     const media = mediaRef.current;
     const video = videoRef.current;
-    if (!section || !sticky || !mediaRunway || !media || !video) return;
+    if (!section || !sticky || !panel || !mediaRunway || !media || !video) return;
 
     let lastP = '';
 
-    const travel = (top: number, vh: number) => {
-      const range = vh * (1 - REVEAL_END);
-      return range > 0 ? clamp01((vh - top) / range) : 1;
-    };
+    const travel = (top: number, vh: number) => viewportTravelProgress(top, vh, REVEAL_END);
 
     const measure = () => {
       const rect = section.getBoundingClientRect();
@@ -128,24 +130,33 @@ export function AstronautFinale() {
         raw.set(target);
         filmRaw.set(clamp01((target - FILM_START) / (FILM_END - FILM_START)));
       } else {
-        // In-flow: text phases follow the section's travel into the
-        // viewport; the film follows its own band's travel, because on
-        // phones it now sits below the content.
-        raw.set(travel(rect.top, vh));
+        // In-flow. The text phases follow the section's travel into the
+        // viewport — except where the film band is ordered *above* the copy
+        // (phones), because there a section-relative ramp would finish before
+        // the copy it stages had reached the screen. Read the order from the
+        // computed style for the same reason measure() reads the sticky
+        // position above: CSS owns which composition is active, and JS must
+        // not keep its own copy of the breakpoint.
+        const filmFirst = getComputedStyle(mediaRunway).order === '-1';
+        raw.set(travel(filmFirst ? panel.getBoundingClientRect().top : rect.top, vh));
         const mediaRect = media.getBoundingClientRect();
         const mediaRunwayRect = mediaRunway.getBoundingClientRect();
         filmRaw.set(
           mediaRunwayRect.height > mediaRect.height
-            ? stickyMediaProgress(
+            ? // Tablets and short desktop windows keep the sticky runway:
+              // match the opening hero's film travel on the same device
+              // (171.6vh at ≥720px — see finale.css).
+              stickyMediaProgress(
                 mediaRunwayRect.top,
                 mediaRunwayRect.height,
                 mediaRect.height,
                 vh,
-                // Match the opening hero's film travel on the same device:
-                // 171.6vh on ≥720px, 94vh on phones (see finale.css).
-                vh * (desktop ? 1.716 : 0.94)
+                vh * 1.716
               )
-            : inFlowMediaProgress(mediaRect.top, mediaRect.height, vh)
+            : // Phones: no runway. The band scrubs on its own travel through
+              // the viewport, finishing as it settles into the top of the
+              // frame with the closing text arriving beneath it.
+              travel(mediaRect.top, vh)
         );
       }
     };
@@ -290,7 +301,10 @@ export function AstronautFinale() {
       video.style.visibility = 'hidden';
       section.style.removeProperty('--fp');
     };
-  }, [scrub, desktop, mediaTier, raw, smooth, filmRaw, filmSmooth]);
+    // `desktop` is not in the deps: nothing in the effect reads it any more
+    // (the film's travel constant is ≥720px-only now), and `mediaTier` — which
+    // it is derived from — already re-runs this on every tier change.
+  }, [scrub, mediaTier, raw, smooth, filmRaw, filmSmooth]);
 
   return (
     <section
@@ -302,7 +316,10 @@ export function AstronautFinale() {
     >
       <div className="finale-sticky" ref={stickyRef}>
         <div className="wrap finale-inner">
-          <div className="finale-panel">
+          {/* Phones put the film band above this panel, so an anchor into
+              #contact must land here rather than on the band (useAnchorGlide).
+              Everywhere else the panel already is the section's first child. */}
+          <div className="finale-panel" ref={panelRef} data-anchor-landing={desktop ? undefined : ''}>
             <p className="sheet-mark">
               <span className="sheet-no">06</span>
               <span className="sheet-rule" aria-hidden="true" />

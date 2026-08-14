@@ -75,10 +75,16 @@ export function useAnchorGlide() {
       // the section is in-flow (phones, short windows) it doesn't trigger
       // and the anchor lands at the top as usual.
       const runway = 'pinnedReveal' in el.dataset ? rect.height - window.innerHeight : 0;
+      // In-flow sections may nominate what the link should actually land on:
+      // the closing scene puts a decorative film band above its contact copy
+      // on phones, and "Contact" must land on the copy, not on a viewport of
+      // film with the copy still un-revealed below it. Absent that hint the
+      // section's own top is the target, as before.
+      const landing = (el.querySelector('[data-anchor-landing]') as HTMLElement | null) ?? el;
       const top =
         runway > window.innerHeight * 0.5
           ? rect.top + window.scrollY + runway * RUNWAY_SETTLE
-          : Math.max(0, rect.top + window.scrollY - navOffset());
+          : Math.max(0, landing.getBoundingClientRect().top + window.scrollY - navOffset());
       if (reduce.matches) {
         window.scrollTo(0, top);
       } else {

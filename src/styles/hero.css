@@ -118,7 +118,26 @@
   position: absolute;
   z-index: 2;
   left: 56%;
-  top: 41%;
+  /* The readout is centred on the visor while the identity is anchored to the
+     bottom of the frame, so the two close on each other as the window gets
+     shorter — below ~860px of viewport height the last telemetry line lands on
+     the "Mission Portfolio" eyebrow. --hud-floor is the room the identity needs
+     beneath the readout: its own bottom padding (the same clamp .hero-content
+     uses), the panel, a 24px breathing gap, and half the readout's height. So
+     the anchor holds at 41% while there is space for it and rides up once
+     there isn't, and it can never be pushed past its own half-height + 8px,
+     which is what keeps it inside `overflow: hidden`.
+
+     Both constants are measured, not derived, so they need re-measuring when
+     what they describe changes: **288px** is `.hero-panel` (the name in
+     profile.ts, the sub copy in AstronautHero.tsx, and a single-row CTA
+     wrap — any of those growing a line invalidates it), and **--hud-half** is
+     half this list's own height, which is why the ≤900px block below raises it
+     when .hud-cell gains padding. Where even the floor cannot fit both, the
+     readout is hidden outright (the short-window block further down). */
+  --hud-half: 52px;
+  --hud-floor: calc(clamp(4rem, 12vh, 8rem) + 288px + 24px + var(--hud-half));
+  top: clamp(calc(var(--hud-half) + 8px), calc(100% - var(--hud-floor)), 41%);
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -271,18 +290,6 @@
     filter: blur(0);
   }
 }
-/* Same rise without the blur — phones pay too much for a 6px filter and the
-   composition doesn't need it. */
-@keyframes hero-rise-flat {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 @keyframes hud-in {
   from {
     opacity: 0;
@@ -320,98 +327,76 @@
   .hud-cell {
     padding: 0.28rem 1.05rem;
   }
+  /* That padding makes the readout ~140px tall instead of ~104px, and the
+     anchor math above is expressed in half-heights. */
+  .hero-hud {
+    --hud-half: 70px;
+  }
   .hero-content {
     justify-content: flex-start;
   }
 }
 
+/* Short windows (including any laptop at 200% browser zoom — 1536×864 becomes
+   768×432 CSS px, which still matches every width rule above): the identity
+   alone takes ~330px of a 364px frame, so there is no anchor that fits the
+   readout as well. Clamping it would only clip the first line and drop the
+   rest on the eyebrow, so below 600px of viewport the readout is dropped
+   entirely — exactly as on phones, and every figure in it appears again in
+   the Impact section. */
+@media (max-height: 599px) {
+  .hero-hud {
+    display: none;
+  }
+}
+
 /* ============================================================
-   Phones (≤719px) — a different composition, not a smaller one.
-   The desktop hero is a full-screen film with the identity laid
-   over its lower right. On a portrait screen that reads as a
-   tall dark void you scroll through waiting for words, so the
-   phone scene is stacked instead: the film is a band across the
-   top of the frame, the identity sits directly under it, and the
-   scrim feathers one into the other so they read as one image.
-   The runway drops from 360svh to 200svh (100svh of travel, vs
-   260svh before) and the film runs to 0.94 of it — there is no
-   telemetry to assemble on a phone, so the old end-of-runway
-   hold was pure dead scroll.
+   Phones (≤719px) — the same scene, re-cropped, not restacked.
+   The film fills the frame here exactly as it does on desktop:
+   the opening screen is the astronaut and nothing else, and the
+   identity rises out of the dark as you scroll (the choreography
+   block at the end of this file). What changes for a portrait
+   crop is the pan that keeps the subject in frame, a scrim built
+   for text over a full-height film, and the runway: 200svh
+   (100svh of travel) with the film running to 0.94 of it, since
+   there is no telemetry to assemble in an end-of-runway hold.
    ============================================================ */
 @media (max-width: 719px) {
-  .hero {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
   .hero-runway.is-scrub {
     height: 200svh;
   }
 
-  /* The band: as tall as the frame can spare around the identity below it
-     (~50–58svh on a modern phone), and free to shrink on small/short
-     screens rather than push the actions out of the frame. */
-  .hero-media {
-    position: relative;
-    flex: 1 1 52svh;
-    min-height: 0;
-    overflow: hidden;
-  }
-  /* The band is short enough that cover crops horizontally only, so the film
-     frame's own bottom row is on screen — and a composited video quad bleeds
-     that row past both the band's overflow clip and the scrim above it,
-     drawing a bright hairline along the seam (verified in Chrome at DPR 2
-     and 3). Ending the film one pixel *inside* the band, with its own
-     clip-path rather than the ancestor's, removes the bleeding row at the
-     source; the scrim is solid black over that last pixel either way. */
-  .hero-media video,
-  .hero-media img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: calc(100% + 2px);
-    clip-path: inset(0 0 3px 0);
-  }
-
   /* Desktop-only telemetry: on the portrait crop it crowds the visor and the
-     stacked identity below, so drop it entirely on phones. */
+     identity below it, so drop it entirely on phones. */
   .hero-hud {
     display: none;
   }
-  /* The scroll cue would land under the dock, and the copy below the band is
-     its own invitation to keep going. */
+  /* The dock floats over the bottom of every phone screen, which is where
+     this cue lives — and a cue is the one thing that must not be behind
+     something. Hidden here, so the phone's first screen is the film alone. */
   .hero-scroll {
     display: none;
   }
   /* Portrait crop: hold the astronaut in frame, panning with the film (he
      enters at the left of the 16:9 frame; the settled visor centers at
-     ≈56% of it, which lands mid-band at object-position ≈58%). */
+     ≈56% of it, which lands mid-screen at object-position ≈58%). */
   .hero-runway.is-scrub .hero-media {
     background-position: 24% center;
   }
   .hero-runway.is-scrub .hero-media video {
     object-position: calc(24% + clamp(0, calc(var(--p) / 0.94), 1) * 34%) center;
   }
-  /* Feather the band into the identity beneath it — the seam between the
-     two is what makes the scene read as one composition. */
+  /* Deeper than the desktop scrim: the identity sits over the film itself
+     here, and the portrait crop puts the lit suit right where the copy is. */
   .hero-scrim {
     background:
-      linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, transparent 22%),
-      linear-gradient(180deg, transparent 42%, rgba(0, 0, 0, 0.5) 72%, var(--black) 93%);
-  }
-  /* The halo moves with the subject, into the middle of the band. */
-  .hero-glow {
-    left: 50%;
-    top: 26%;
-    width: min(74vw, 44svh);
+      linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, transparent 25%),
+      linear-gradient(180deg, transparent 35%, rgba(0, 0, 0, 0.6) 62%, rgba(0, 0, 0, 0.92) 100%);
   }
 
   .hero-content {
-    flex: none;
-    justify-content: flex-start;
-    padding-top: 1.4rem;
     /* Clear of the dock, which floats over the bottom of every screen. */
-    padding-bottom: calc(var(--dock-space) + 0.5rem);
+    padding-bottom: calc(var(--dock-space) + 1rem);
   }
   .hero-name {
     font-size: clamp(2.1rem, 10vw, 2.8rem);
@@ -437,16 +422,11 @@
   }
 }
 
-/* Short phones (SE-class, and anything with a 4.7" screen): the identity is
-   what squeezes the band, and below ~40svh the subject stops reading as a
-   subject and becomes a small object in a wide black frame — the exact
-   failure this composition exists to avoid. Tighten the type instead. */
+/* Short phones (SE-class, and anything with a 4.7" screen) and landscape:
+   the identity is what crowds the frame, so tighten the type rather than
+   let the block swallow the film it is standing on. */
 @media (max-width: 719px) and (max-height: 700px) {
-  .hero-content {
-    padding-top: 0.9rem;
-  }
   .hero-name {
-    margin-top: 0.75rem;
     font-size: clamp(1.85rem, 9vw, 2.35rem);
   }
   .hero-sub {
@@ -460,25 +440,6 @@
   .hero-ctas .btn {
     padding: 0.6rem 0.9rem;
     font-size: 0.76rem;
-  }
-}
-
-/* Landscape phones: there is no room to stack a band and the identity inside
-   one 360px-tall frame, so the scene stops pinning and simply flows — the
-   film scrubs as the hero passes, and nothing is clipped. */
-@media (max-width: 719px) and (max-height: 520px) {
-  .hero-runway.is-scrub {
-    height: auto;
-  }
-  .hero-runway.is-scrub .hero {
-    position: relative;
-    top: auto;
-    height: auto;
-    min-height: 0;
-  }
-  .hero-media {
-    flex: none;
-    height: 56svh;
   }
 }
 
@@ -581,30 +542,14 @@
   --tc: clamp(0, calc((var(--p) - 0.87) / 0.08), 1);
 }
 
-/* Phones: the identity is part of the opening composition, not something the
-   reader has to scroll out of the dark. It writes itself in on load, directly
-   under the band — so the first screen is a finished scene — and scroll is
-   left to drive the film alone. (blur() is also the costliest part of the
-   desktop choreography, and mobile GPUs feel it; the flat rise skips it.) */
+/* Phones: same scroll-driven reveal, minus the blur — blur() is the costliest
+   part of the choreography and mobile GPUs feel it, while opacity + translate
+   carry the effect on their own. */
 @media (max-width: 719px) {
   .hero-runway.is-scrub .hero-eyebrow,
   .hero-runway.is-scrub .hero-name,
   .hero-runway.is-scrub .hero-sub,
   .hero-runway.is-scrub .hero-ctas {
-    opacity: 0;
-    translate: none;
     filter: none;
-  }
-  .hero-runway.is-scrub .hero-eyebrow {
-    animation: hero-fade 0.9s var(--ease) 0.25s forwards;
-  }
-  .hero-runway.is-scrub .hero-name {
-    animation: hero-rise-flat 0.9s var(--ease) 0.45s forwards;
-  }
-  .hero-runway.is-scrub .hero-sub {
-    animation: hero-rise-flat 0.9s var(--ease) 0.68s forwards;
-  }
-  .hero-runway.is-scrub .hero-ctas {
-    animation: hero-rise-flat 0.9s var(--ease) 0.88s forwards;
   }
 }

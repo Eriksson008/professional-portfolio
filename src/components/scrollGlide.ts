@@ -73,12 +73,21 @@ export function createFrameScheduler(
 }
 
 /**
- * In-flow film progress: start when the band enters the viewport and finish
- * when it is fully visible. Unlike a viewport-percentage endpoint, this can
- * always reach 1 before the document footer stops normal scrolling.
+ * In-flow reveal progress: an element's travel up the viewport, starting when
+ * its top crosses the bottom edge and complete once that top has risen to
+ * `endFraction` of the viewport height. Drives the finale's staged text, and
+ * on phones — where the closing film has no sticky runway — the film band
+ * itself, which is why the ramp is one viewport of scroll rather than the
+ * band's own (much shorter) height.
  */
-export const inFlowMediaProgress = (top: number, height: number, viewportHeight: number) =>
-  height > 0 ? clamp01((viewportHeight - top) / height) : 1;
+export const viewportTravelProgress = (
+  top: number,
+  viewportHeight: number,
+  endFraction: number
+) => {
+  const range = viewportHeight * (1 - endFraction);
+  return range > 0 ? clamp01((viewportHeight - top) / range) : 1;
+};
 
 /**
  * Progress through a sticky media runway. The media reaches the viewport's

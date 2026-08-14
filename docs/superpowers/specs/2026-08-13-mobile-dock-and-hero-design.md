@@ -144,3 +144,134 @@ touched file. In-browser (Chrome via DevTools protocol, device emulation, real v
 
 Not verifiable here: real iOS Safari safe areas and the on-screen keyboard (emulation only), and
 touch tap feedback on a physical device.
+
+---
+
+## Amendment — 2026-08-13, later the same day
+
+The user reviewed the shipped result and reversed **section 4 (the re-composed phone hero)** while
+keeping everything else. Two further changes landed in the same pass. The dock, the shared
+navigation config, and the one-assistant-two-triggers work above are unchanged and still current.
+
+### 4′. The phone hero goes back to the desktop composition
+
+> "opening hero isn't the overall view anymore when scrolling as Mission Portfolio and Fredrik
+> Eriksson do not fade in and are always in view"
+
+The stacked band was solving for dead scroll; what it cost was the opening *shot*. On a phone the
+first screen is now the film and nothing else — exactly what desktop shows — and the identity rises
+out of it on scroll:
+
+    [ film fills the frame ]        [ film fills the frame ]
+    (nothing else)            →     Mission Portfolio
+                                    Fredrik Eriksson
+                                    Senior Software Engineer building AI, …
+                                    [ View Work ] [ Download Résumé ]
+      at load                         after ~0.3 of the runway
+
+Removed: the `.hero` flex column, `.hero-media` as an in-flow band, the video `clip-path` seam fix
+(no seam without a band), the phone `.hero-glow` override, the load-time `hero-rise-flat`
+choreography, and the landscape un-pin block (it existed only because a band + copy + dock could
+not share a 375px-tall frame; an overlay can). Kept: the 200svh runway, `FILM_END_PHONE = 0.94`,
+the portrait `object-position` pan, hidden telemetry, the hidden scroll cue, the two-column CTAs
+without the ghost button, and `--dock-space` clearance. Phones keep the blur-free identity reveal
+(`filter: none`) — that part was always about mobile GPU cost, not composition.
+
+**The finale's phone runway is no longer derived from the hero's film travel** (see 4″), so the
+three-coupled-constants rule in "Two things worth remembering" now applies to **two** places
+(`FILM_END_PHONE` and the ≥720px runway/JS travel constant), not three. The video-quad hairline
+note is retained as a warning: it only bites when a short band makes `cover` crop horizontally,
+which no longer happens on this page.
+
+### 4″. The closing film moves above the closing text on phones
+
+> "on mobile, I want ending hero to be above 06 Open to Meaningful... text rather than below"
+
+`.finale-inner` becomes a flex column at ≤719px with `.finale-media-runway { order: -1 }`, and the
+band **stops pinning**: no runway, `position: static`, and its scrub follows its own travel through
+the viewport (complete when its top reaches 18% of the screen — one screen of scroll, chosen over
+the pinned runway's two so the contact actions are not behind a viewport of film). Tablets
+(720–879px) and wide-but-short windows keep the film below the text on the sticky runway,
+unchanged.
+
+Three consequences worth knowing:
+
+- **The staged text ramps off the panel's travel wherever the band is ordered first.** With the
+  band as the section's first child, a section-relative ramp finishes before the copy it stages is
+  on screen. `AstronautFinale.measure()` reads the band's **computed `order`** — the same
+  CSS-owns-the-mode idiom as the existing computed-`position` check — and measures `.finale-panel`
+  only when it is `-1`. Everywhere else it keeps measuring the section, which matters more than it
+  looks: in the wide-but-short bracket the panel is vertically centred against a 2,011px media row,
+  so a panel-relative ramp measures **−0.845** where the section measures 0.766. Reviewer-caught.
+- **The band no longer fades in on `--fp`.** It is on screen before the panel whose progress it
+  used to borrow, so `.finale.is-scrub .finale-media` is opaque and untransformed on phones.
+- **`#contact` has to land on the copy, not on the film.** The anchor glide lands in-flow sections
+  at their top, which is now a viewport of film with the contact copy below it and un-revealed
+  (measured: `--fp` 0.75, the note and repo lines still faded). `useAnchorGlide` now honours an
+  opt-in `[data-anchor-landing]` element inside the target section, and `AstronautFinale` sets it
+  on the panel **on phones only** — so the landing settles at `--fp` 1 with the copy at the top of
+  the frame, as it did before the reorder, while every other viewport is untouched.
+
+`inFlowMediaProgress` (finish when the band is fully visible — 219px of scroll on a phone, far too
+fast without a runway) was replaced by `viewportTravelProgress(top, viewportHeight, endFraction)`,
+which both the text ramp and the phone film now use. Tests moved with it.
+
+### 5. The header brand mark is the monogram
+
+The boxed `FE` lettering in the desktop header is now `public/logo-fe.png` — the user's monogram
+lockup, downscaled to 216px for a 36px tile. The square crop is centred on the **glyph** (x 420–920
+of the 1254px source) rather than on the artwork's bounding box, because the "FREDRIK ERIKSSON"
+wordmark is wider than the monogram and centring on it pushes the mark visibly off-centre in a
+36px box. The wordmark itself stays — it crosses the glyph at mid-height and cannot be cropped out
+without cutting the monogram — and at this size it reads as a hairline across the mark rather than
+as text. `alt=""` because the link already carries `aria-label="Fredrik Eriksson — home"`; that
+also retired `profile.initials`, which nothing rendered any more. The dock's Home glyph stays a
+line icon: it belongs to a set of seven drawn on one 24×24 grid, and photographic artwork at 22px
+would read as a smudge.
+
+### 1′. The readout's ceiling, after review
+
+The first version of the fix capped the anchor with a flat 60px floor and a 52px half-height, and
+an independent review found two holes, both reproduced before fixing:
+
+- **Below ~600px of viewport the floor re-created the collision it existed to prevent.** A 1536×864
+  laptop at 200% browser zoom is **768×432 CSS px** — still wide enough for every desktop rule. The
+  identity alone takes ~330px of that 364px frame, so no anchor fits the readout: it clamped to the
+  floor, clipped its first line against `overflow: hidden`, and sat on the eyebrow (**measured
+  −84px**). Below 600px of viewport height the readout is now hidden outright, exactly as on
+  phones — every figure in it appears again in the Impact section.
+- **The 52px half-height is wrong below 900px wide**, where `.hud-cell` gains padding and the list
+  is ~140px tall, not ~104px. It is now a variable (`--hud-half`) raised in the same block that
+  adds the padding, and both the ceiling and the floor are expressed in it — so the floor is "half
+  the readout + 8px", which is what actually keeps it inside the frame.
+
+### Verification of the amendment
+
+`npm run lint`, `npm test` (33 pass), `npm run build` green. In-browser (Playwright, real video
+decode), measuring the readout-to-eyebrow gap that started this pass:
+
+| Viewport | Before | After | Readout |
+| --- | --- | --- | --- |
+| 1920×1080 | +128px | +128px | shown, anchor 41% (unchanged) |
+| 1534×822 | **−5px** | +23px | shown, 38.6% |
+| 1366×768 | overlap | +23px | shown, 34.7% |
+| 1280×600 | overlap | +24px | shown, 17.9% |
+| 1024×640 | overlap | +44px | shown, 22.8% |
+| 900×620 | overlap | +51px | shown, 17.2% (140px-tall list) |
+| 880×740 | +35px¹ | +53px | shown, 29.8% |
+| 720×800 | overlap | +61px | shown, 34.6% |
+| 900×560, 820×560 | clipped | — | hidden |
+| **768×432** (200% zoom) | **−84px, clipped** | — | hidden |
+
+¹ the first version's gap, which only looked safe because the panel is shorter at that width; the
+reserve itself was 18px short there.
+
+Phone hero at 390×844 and 360×640: film full-frame at load with `--p` 0 and the identity at
+opacity 0, identity risen and clearing the dock by 27px at rest after scrolling; landscape 712×390
+fits without the old un-pin block. Phone finale at 390×844: band above the panel, section 1789px →
+987px, `--fp` tracks the panel (0.3194 measured vs 0.319 expected) and the film tracks the band
+(5.44s of 7.99 vs 0.682 expected); tapping Contact in the dock lands with the panel top at 0 and
+the copy settled. Tablet 760×900 unchanged: panel first, 1972px sticky runway, `--fp` 0.8672 =
+section travel 0.867; wide-short 1440×700 likewise (0.7665 = 0.766). Reduced motion at 390×844:
+no `is-scrub`, poster `<img>`, band still above the panel, everything opaque, actions clear the
+dock. Desktop finale at 1534×822 still pins (3,174px runway, grid, `--fp` 0.8224 at 0.85 of it).

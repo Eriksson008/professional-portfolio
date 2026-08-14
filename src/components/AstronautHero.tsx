@@ -27,10 +27,10 @@ const START_SRC = `${import.meta.env.BASE_URL}media/astronaut-hero-start.jpg`;
 /**
  * The film completes at this fraction of the runway; the remainder is a hold
  * where the settled frame stays put and the visor telemetry assembles.
- * Phones have no telemetry (it crowds the portrait band) and a much shorter
+ * Phones have no telemetry (it crowds the portrait crop) and a much shorter
  * runway, so there the film runs almost to the end — a hold with nothing to
  * assemble in it is just dead scroll. Keep in step with the object-position
- * pan in hero.css and the finale's phone runway (finale.css).
+ * pan in hero.css.
  */
 const FILM_END_DESKTOP = 0.78;
 const FILM_END_PHONE = 0.94;
@@ -73,11 +73,10 @@ const telemetry = [
  * settled poster still (no pinning, no scrub, everything resolved); if the
  * video errors, the poster is already painted underneath.
  *
- * Phones re-compose the same scene rather than shrink it (hero.css): the
- * film is a band across the top of the frame with the identity stacked
- * directly beneath it, the identity arrives on load instead of on scroll,
- * and the runway is 200svh (100svh of travel) with the film running to 0.94
- * of it. Same mechanic, a third of the scroll, no empty stretch.
+ * Phones run the same composition, not a stacked variant of it: the film
+ * fills the frame and the identity rises out of it on scroll. What differs
+ * is the runway — 200svh (100svh of travel) with the film running to 0.94 of
+ * it, because there is no telemetry to assemble in an end-of-runway hold.
  */
 export function AstronautHero() {
   const reduced = useReducedMotion();

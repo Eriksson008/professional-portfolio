@@ -1,6 +1,5 @@
 export const profile = {
   name: 'Fredrik Eriksson',
-  initials: 'FE',
   role: 'Senior Software Engineer',
   location: 'Austin, TX Metro Area',
   tagline:
