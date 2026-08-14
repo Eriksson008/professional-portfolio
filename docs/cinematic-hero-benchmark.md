@@ -1,7 +1,16 @@
-# Cinematic hero — three implementations, measured
+# Experiment 1 — cinematic hero: MP4 vs 193 frames vs R3F
+
+> **Superseded as a decision, kept as a record.** Experiment 2
+> ([`cinematic-hero-benchmark-2.md`](./cinematic-hero-benchmark-2.md)) compares the current MP4, an
+> optimized MP4, and 97- vs 193-frame sequences, and is where the production recommendation now
+> lives. Nothing below has been edited: these numbers were measured against the loader and variant
+> names of the time, and experiment 2 changed both. In particular the "8–14 s to load the frame
+> sequence" figure here was fixed by the streaming loader described in experiment 2 (now ~2.8 s to
+> usable on the same assets), and `?hero=video` / `?hero=frames` are now aliases for
+> `?hero=video-current` / `?hero=frames-193`.
 
 Branch `experiment/cinematic-media-converter`. Produced with the workspace
-`cinematic-media-converter` skill (`../../.agents/skills/cinematic-media-converter/`).
+`cinematic-media-converter` skill (canonical source now `../../ai-workflows/skills/`).
 
 **Not merged, and not a recommendation to merge.** The MP4 hero remains the default and is
 untouched; everything here is switchable and reversible.
