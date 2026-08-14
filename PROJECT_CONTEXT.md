@@ -32,8 +32,11 @@ constrained-network readiness (usable at 2.6 s vs 8.75 s, 4.4 MB vs 8.9 MB). Mob
 smoothness problem in any representation, so the mobile decision is bytes.
 
 `?hero=` now selects `video-current` (default, unchanged), `video-optimized`, or `frames-97` on the
-live site, with the dev-only switcher stripped from production. **The production default is
-deliberately unchanged** pending real-device validation. Derived media is regenerated in CI
+live site, with the dev-only switcher stripped from production. **Confirmed good on a real iPhone
+and on desktop after deploy (2026-08-14)** — a qualitative check, not an on-device trace, but it
+closes the emulation blind spot the benchmarks were produced through, retina softness included.
+**The production default is still `video-current`:** switching it is a deliberate, separate call
+that has not been made. Derived media is regenerated in CI
 (`scripts/generate-hero-media.mjs`, run by the Pages workflow) rather than committed, so ~17 MB of
 binaries stay out of a public repo. Reports: `docs/cinematic-hero-benchmark.md`,
 `docs/cinematic-hero-benchmark-2.md`. Full R3F and 193-frame implementations are preserved on

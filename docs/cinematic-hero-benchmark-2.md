@@ -272,12 +272,16 @@ smoothest outcome available.
 
 ## Limitations
 
-- One machine, one browser, one 143 Hz **DPR-1** display. The DPR-1 constraint matters here: it is
-  the reason `w1600` measured best and the reason it was not chosen. **A retina desktop was never
-  tested**, and both the optimized encode and the 1440-px frame tier would be softer there than the
-  shipped 2560 encode.
-- **No real device.** Mobile figures are emulated (viewport + CPU + network) and model neither GPU,
-  thermals, nor real radio latency.
+- One machine, one browser, one 143 Hz **DPR-1** display for all *measurements*. The DPR-1
+  constraint is why `w1600` measured best and why it was not chosen.
+- **Real-device check: passed, qualitatively (2026-08-14).** After deploy, the live candidates were
+  confirmed good by the user on a real iPhone and on desktop. That closes the emulation blind spot
+  every number above was produced through — including the retina-softness concern, which was the
+  specific risk in choosing `w1920` over `w2560`.
+  **It does not upgrade the measurements.** No frame-time trace, LCP, or memory figure was captured
+  on device; this is an observation that nothing looked or felt wrong, not a reproduction of the
+  tables above on real hardware. Every quantitative claim in this document remains emulated.
+- Emulated mobile figures still model neither GPU, thermals, nor real radio latency.
 - **Safari/WebKit untested.** The video path carries a deliberate WebKit playback prime; the canvas
   path has no equivalent and may not need one, but that is untested.
 - Throttled figures come from a single cold run per candidate, not a median, and emulated throttling
