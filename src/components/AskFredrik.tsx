@@ -6,7 +6,7 @@ import { followUpPrompts, starterPrompts } from '../lib/askPrompts';
 import type { AskPrompt } from '../lib/askPrompts';
 import { disclosure, welcome } from '../data/fredrikContext';
 import { nextFollowState } from './askScroll';
-import { useAskSheet, useSheetViewport } from './useSheetViewport';
+import { useAskSheet, useSheetHistory, useSheetViewport } from './useSheetViewport';
 import type { AskFredrikController } from './useAskFredrik';
 
 interface ChatMessage {
@@ -68,6 +68,7 @@ export function AskFredrik({ ask }: AskFredrikProps) {
   const [fadeBottom, setFadeBottom] = useState(false);
   const [atBottom, setAtBottom] = useState(true);
 
+  const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
@@ -79,7 +80,8 @@ export function AskFredrik({ ask }: AskFredrikProps) {
   /** Previous distance-to-bottom, used to tell our animation from the reader. */
   const lastDistance = useRef(Number.POSITIVE_INFINITY);
 
-  useSheetViewport(open && isSheet);
+  useSheetViewport(open && isSheet, rootRef);
+  useSheetHistory(open && isSheet, close);
 
   // Keep the hero's opening frame clean: reveal only after real scrolling.
   useEffect(() => {
@@ -274,7 +276,7 @@ export function AskFredrik({ ask }: AskFredrikProps) {
   const visible = open || pastHero;
 
   return (
-    <div className={`af-root ${open ? 'is-open' : ''}`}>
+    <div ref={rootRef} className={`af-root ${open ? 'is-open' : ''}`}>
       <button
         type="button"
         className={`af-launcher ${visible ? 'is-visible' : ''}`}

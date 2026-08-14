@@ -195,8 +195,13 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
   rather than forked. Only the shell is breakpoint-specific. **The shell breakpoint is now
   one query** — JS reads the same `(max-width: 719px)` the stylesheet uses, because `(min-width:
   720px)` and `(max-width: 719px)` disagree at fractional widths and that gave the desktop card the
-  sheet's modal focus trap. Prompt controls unmount themselves when used, so focus is parked on a
-  stable element first — otherwise Tab escaped the "modal" into the page behind it. A free-text
+  sheet's modal focus trap. **What makes the sheet modal is `inert` on every sibling of `.af-root`,
+  not a hand-rolled trap** — prompt controls unmount themselves when used, dropping focus to
+  `<body>` where a keydown-scoped trap cannot see it, and `inert` makes that unreachable-by-
+  construction instead of a rule each future control has to remember. **Opening pushes one history
+  entry (`#ask`), so Back and the iOS edge-swipe dismiss the sheet**; before this the site created no
+  history entries at all (`useAnchorGlide` only ever `replaceState`s) and Back left the site.
+  `/#ask` is a deep link, handled on load and on `hashchange`. A free-text
   question retires a curated topic only when that topic's own answer was shown, never on a bare
   keyword match the Worker then answered differently. The follow-the-conversation rule lives in
   `src/components/askScroll.ts` as a pure, tested function for the same reason `scrollGlide.ts`

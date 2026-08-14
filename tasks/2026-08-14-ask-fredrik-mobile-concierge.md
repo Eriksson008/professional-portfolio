@@ -126,6 +126,27 @@ was accepted; nothing was argued down. Fixed before merge:
 
 Re-verified after the fixes: `OK: lint` · `tests 57 / pass 57 / fail 0` · `OK: build`.
 
+### Second round — hardening chosen after review (user decision)
+
+`parkFocus` closed every known escape route but was preventive, so the fix was made structural, and
+the same pass fixed a dismissal gap review had not raised:
+
+- **`inert` on every sibling of `.af-root` while the sheet is open** (D26). The background cannot
+  take focus, a pointer, or a screen-reader cursor regardless of where focus lands. Measured: with
+  the sheet open, `document.querySelector('main a').focus()` leaves `document.activeElement` on
+  `.af-panel` — the background refuses focus. 5 siblings inert while open, 0 after close.
+- **Back-gesture dismissal + `#ask` deep link** (D27). Measured: Back closes the sheet and stays on
+  the site (`hash` → `''`, scroll preserved, inert restored, focus back on the dock's Ask button);
+  the × retires the pushed entry so `history.length` does not grow; `/#ask` opens the assistant on a
+  cold load *and* from a same-document link, with exactly one entry in the stack so one Back exits.
+- Desktop re-checked: 0 inert, no history entry, page still scrolls, a background link is still
+  focusable, `aria-modal` still absent, 420px card, `Send` word. Unaffected.
+
+A full `#ask` page and native `<dialog showModal()>` were both weighed; the reasoning for choosing
+`inert` + history over them is recorded in the spec under "Alternatives weighed".
+
+Re-verified: `OK: lint` · `tests 57 / pass 57 / fail 0` · `OK: build`.
+
 The reviewer explicitly confirmed clean: `matchStaticAnswer` answer-selection is behaviourally
 identical; no curated `answer:` or `keywords:` line changed; no phone number, codename, new metric
 or PII anywhere in the diff; no new dependency and no framer-motion misuse; `prefers-reduced-motion`

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 
 /** Below this, a shrunken visual viewport is browser chrome, not a keyboard. */
 const KEYBOARD_MIN = 120;
@@ -51,16 +52,48 @@ export function useAskSheet(): boolean {
  * Only mounted while the sheet is open. Publishing these on every
  * visualViewport scroll all the time would invalidate document styles each
  * time the URL bar collapses — on a scroll-scrubbed page that is not free.
+ *
+ * It also marks every sibling of the sheet `inert`, which is what actually
+ * makes the sheet modal. Moving focus back inside whenever a control unmounts
+ * itself works, but it is a rule each future control has to remember: forget
+ * it once and focus lands on <body>, outside the keydown-scoped Tab trap, and
+ * the next Tab walks into the page behind an opaque sheet. `inert` is
+ * structural instead of preventive — the background cannot take focus, a
+ * pointer, or a screen-reader cursor no matter where focus ends up.
+ *
+ * @param sheetRoot the assistant's own root; everything beside it goes inert.
  */
-export function useSheetViewport(active: boolean) {
+export function useSheetViewport(active: boolean, sheetRoot: RefObject<HTMLElement | null>) {
   useEffect(() => {
     if (!active) return;
 
     const root = document.documentElement;
     root.classList.add('af-open');
 
+    // Ordering note: AskFredrik parks focus inside the panel in a *layout*
+    // effect, and React runs every layout effect before any passive one — so
+    // focus is already inside the sheet before this runs. Were it the other
+    // way round, inerting an ancestor of the focused element would drop focus
+    // to <body> at exactly the moment we are trying to contain it.
+    const inerted: HTMLElement[] = [];
+    const siblings = sheetRoot.current?.parentElement?.children;
+    for (const node of Array.from(siblings ?? [])) {
+      // Skip anything already inert for its own reasons — restoring on cleanup
+      // must put the page back exactly as it was found, not as we assume.
+      if (node === sheetRoot.current || !(node instanceof HTMLElement)) continue;
+      if (node.hasAttribute('inert')) continue;
+      node.setAttribute('inert', '');
+      inerted.push(node);
+    }
+    const restore = () => {
+      for (const node of inerted) node.removeAttribute('inert');
+      root.classList.remove('af-open', 'af-kb');
+      root.style.removeProperty('--af-vh');
+      root.style.removeProperty('--af-vt');
+    };
+
     const vv = window.visualViewport;
-    if (!vv) return () => root.classList.remove('af-open');
+    if (!vv) return restore;
 
     let frame = 0;
     const sync = () => {
@@ -82,9 +115,48 @@ export function useSheetViewport(active: boolean) {
       if (frame !== 0) cancelAnimationFrame(frame);
       vv.removeEventListener('resize', schedule);
       vv.removeEventListener('scroll', schedule);
-      root.classList.remove('af-open', 'af-kb');
-      root.style.removeProperty('--af-vh');
-      root.style.removeProperty('--af-vt');
+      restore();
+    };
+  }, [active, sheetRoot]);
+}
+
+/**
+ * Back-gesture dismissal for the phone sheet.
+ *
+ * Before this, the site created no history entries at all — useAnchorGlide
+ * only ever calls replaceState — so pressing Back with the sheet open left the
+ * site entirely. On a full-screen surface that is the gesture people reach for
+ * first, and the × was the only way out (the backdrop is unreachable: the
+ * sheet covers the whole visible viewport).
+ *
+ * Opening pushes one entry, so Back — and the iOS edge-swipe that maps to it —
+ * closes the sheet. Closing any other way takes that entry back out, so Back
+ * never has to be pressed twice to leave the page.
+ */
+export function useSheetHistory(active: boolean, close: () => void) {
+  // The panel's own `close` is recreated per render; keep the listener stable
+  // so it is bound once per open rather than re-bound on every keystroke.
+  const closeRef = useRef(close);
+  closeRef.current = close;
+
+  useEffect(() => {
+    if (!active) return;
+    let ours = true;
+    history.pushState({ askFredrik: true }, '', '#ask');
+
+    const onPop = () => {
+      // The browser has already popped our entry; don't try to pop it again.
+      ours = false;
+      closeRef.current();
+    };
+    window.addEventListener('popstate', onPop);
+
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      // Closed by the × , Escape, or a resize to the desktop shell — the entry
+      // is still on the stack, so retire it. The popstate this triggers has no
+      // listener left, which is what stops it looping back into close().
+      if (ours) history.back();
     };
   }, [active]);
 }

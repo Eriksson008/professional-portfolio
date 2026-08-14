@@ -26,6 +26,27 @@ export function useAskFredrik(): AskFredrikController {
 
   const close = useCallback(() => setOpen(false), []);
 
+  // Deep link: /#ask opens the assistant, so the URL can be handed to a
+  // recruiter directly. Handled on load *and* on hashchange, because a hash
+  // that only differs from the current one is a same-document navigation —
+  // React never remounts, so a load-time check alone would do nothing for
+  // anyone already on the page.
+  //
+  // The hash is normalised away before opening: the sheet pushes its own #ask
+  // entry (useSheetHistory), and two of them in the stack would need Back
+  // pressed twice to get out. Only ever *opens* — a hashchange back to '' is
+  // what Back already produces, and acting on it would fight useSheetHistory.
+  useEffect(() => {
+    const openFromHash = () => {
+      if (window.location.hash !== '#ask') return;
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      setOpen(true);
+    };
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+    return () => window.removeEventListener('hashchange', openFromHash);
+  }, []);
+
   // Focus goes back after the close has been painted, not during it. The phone
   // dock is suspended while the panel is open, so the trigger is still hidden
   // at the moment close() runs — focusing it there silently does nothing.

@@ -42,7 +42,16 @@ sheet's modal focus trap — the shell is now read from the one `(max-width: 719
 stylesheet uses. Independent review then found a real accessibility defect the measurements missed:
 **every prompt control unmounts itself when used**, so activating one dropped focus to `<body>`,
 outside the panel, where the Tab trap could no longer see it and the next Tab walked into the page
-behind the opaque sheet — focus is now parked on a stable element before the state change. Review
+behind the opaque sheet. Focus is parked on a stable element before the state change, and — because
+that is a rule every future control would have to remember — **the sheet is now modal by `inert` on
+every sibling of `.af-root`**, which makes the background unable to take focus regardless of where
+it lands. Verified by calling `.focus()` directly on a background link with the sheet open: refused.
+In the same pass, **opening the sheet pushes one history entry (`#ask`) so Back and the iOS
+edge-swipe dismiss it** — the site previously created no history entries at all, so Back left the
+site entirely and the × was the only way out (the backdrop is unreachable behind a full-viewport
+sheet). `/#ask` is now a deep link, handled on load and on `hashchange`, and is shareable. A full
+`#ask` page and native `<dialog showModal()>` were both weighed and rejected, with reasons, in the
+spec. Review
 also caught that a free-text question was permanently retiring curated topics on a bare keyword
 match (`'why'` → `why-interview`) even when the *Worker* had answered something unrelated, so a
 topic is now retired only when its curated answer is what was actually shown. The follow-the-

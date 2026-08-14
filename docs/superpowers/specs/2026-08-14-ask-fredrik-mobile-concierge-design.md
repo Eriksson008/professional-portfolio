@@ -133,9 +133,37 @@ review, and each one is a defect that inspection did not catch.
 | D22 | Focus is parked on a stable element (`parkFocus()`) **before** any state change that unmounts the control that triggered it. | Every prompt control removes itself when used — a starter card ends the empty state, a follow-up is replaced by the thinking indicator, "More questions" is replaced by the questions. The browser then drops focus to `<body>`, outside `panelRef`, where the keydown-scoped trap cannot see it: the next Tab walked into the page behind the opaque sheet, with no visible focus ring and no way back. Found by review, not by measurement. |
 | D23 | A curated topic is retired from future follow-ups only when `promptId` was explicit **or** `result.source === 'static'`. | `topicId` for free text is a keyword guess, and several topics match on a single common word (`'why'` → `why-interview`). Production sets `VITE_ASK_FREDRIK_API_URL`, so the Worker answers — "why did he build this site?" would otherwise delete the strongest recruiter prompt from every later list on the strength of an answer nobody saw. |
 | D24 | `atBottom` reports `true` while our own scroll is in flight; the composer's height is `scrollHeight + borders`; the disclaimer uses `--silver`. | Three measured defects. The jump button flashed on every answered turn because `syncScroll()` ran synchronously before a smooth scroll had moved anything. The textarea showed a 2px scrollbar on one line of text because it is `border-box` and `scrollHeight` excludes borders. And the disclaimer failed AA in **both** appearances — `--faint`@.62 is 2.62:1 dark, `--faint` at full strength is 4.24:1 light; `--silver` is 10.62:1 / 5.38:1. |
-| D25 | The mobile backdrop is a scrim with **no** click handler, and `useKeyboardInset` was deleted. | The sheet covers the whole visible viewport, so the only reachable backdrop is the strip behind the keyboard — a tap-to-close that can never be tapped is worse than none, and the × is the dismissal affordance. `useKeyboardInset` published `--kb-inset` for the old panel's `max-height`; that was its only consumer, so it had become a global `visualViewport` listener writing a property nobody read, on a page that scrubs video off scroll. |
+| D25 | The mobile backdrop is a scrim with **no** click handler, and `useKeyboardInset` was deleted. | The sheet covers the whole visible viewport, so the only reachable backdrop is the strip behind the keyboard — a tap-to-close that can never be tapped is worse than none. `useKeyboardInset` published `--kb-inset` for the old panel's `max-height`; that was its only consumer, so it had become a global `visualViewport` listener writing a property nobody read, on a page that scrubs video off scroll. |
 
-### 2.4 Known limits (stated, not hidden)
+### 2.4 Second review round — making the modal structural
+
+D22 (park focus before the trigger unmounts) closed every escape route that existed, but it is
+**preventive**: a rule each future control has to remember, with nothing to catch a forgotten call.
+These two replace the convention with structure. Chosen over a full `#ask` page and over native
+`<dialog showModal()>` — see "Alternatives weighed".
+
+| # | Decision | Why |
+| --- | --- | --- |
+| D26 | While the sheet is open, every **sibling** of `.af-root` gets the `inert` attribute (`useSheetViewport`). Attributes already present are left alone and only what was set is removed on cleanup. | Structural, not preventive: the background cannot take focus, a pointer, or a screen-reader cursor regardless of where focus lands, so the whole bug class behind D22 stops existing. Verified by calling `.focus()` directly on a `main` link with the sheet open — it is refused. Siblings-of-root rather than a hard-coded list so a future top-level element is covered automatically. Ordering is load-bearing and commented in the hook: focus is parked in a **layout** effect and React runs every layout effect before any passive one, so focus is already inside the sheet before `inert` is applied — the reverse order would drop it to `<body>` at exactly the wrong moment. |
+| D27 | Opening the sheet pushes one history entry (`#ask`); Back closes it, and closing any other way retires the entry. `/#ask` is a deep link, handled on load **and** on `hashchange`. | Before this the site created **no** history entries at all — `useAnchorGlide` only ever calls `replaceState` — so pressing Back with the sheet open left the site. On a full-screen surface Back (and the iOS edge-swipe that maps to it) is the first gesture people reach for, and the × was the only way out. `hashchange` as well as load because a hash-only navigation never remounts React, so a load-time check alone does nothing for anyone already on the page. The handler only ever *opens*: a hashchange back to `''` is what Back itself produces, and acting on it would fight `useSheetHistory`. |
+
+#### Alternatives weighed
+
+- **Ask Fredrik as its own `#ask` page on phones.** Dissolves the focus problem outright — with no
+  modal there is nothing to trap — and would delete the scroll lock and its iOS caveat entirely.
+  Rejected because it reintroduces the problem the lock was designed around: if the portfolio
+  unmounts, returning re-seeks the scroll-scrubbed hero, and if it merely hides, the lock is needed
+  anyway. It also forces a choice between showing the dock (competing again) and hiding it (needing
+  a back affordance, i.e. the × again), and it takes a recruiter out of their place in the page.
+  D27 buys the part that mattered — Back dismisses it, the URL is shareable — for none of that.
+- **Native `<dialog showModal()>`.** The strongest correctness story: browser-owned focus trap,
+  automatic inerting, Escape, and top-layer rendering that would make the dock z-index conflict
+  disappear. Rejected for now because `showModal()` in the top layer has known iOS interactions with
+  the on-screen keyboard, and the `--af-vh` sizing that makes the composer sit on the keyboard is
+  the one part of this change that is measured and proven. `inert` gets the same containment
+  guarantee without re-opening it. Worth revisiting if the shell is ever rebuilt.
+
+### 2.5 Known limits (stated, not hidden)
 
 - **Scroll lock** uses `overflow:hidden` on `html`/`body` rather than the `position:fixed` body
   technique. On iOS Safari `overflow:hidden` alone has historically been leaky; here it is backed by
@@ -158,7 +186,7 @@ review, and each one is a defect that inspection did not catch.
 | `src/lib/askPrompts.ts` *(new)* | Pure prompt selection: `starterPrompts`, `followUpPrompts()`. |
 | `src/lib/askPrompts.test.ts` *(new)* | Unit tests for the above. |
 | `src/components/askScroll.ts` + `.test.ts` *(new)* | `nextFollowState` — the follow-the-conversation rule as a pure, tested function. |
-| `src/components/useSheetViewport.ts` *(new)* | `--af-vh` / `--af-vt` / `.af-open` / `.af-kb` while the sheet is open, plus `useAskSheet()` (D21). |
+| `src/components/useSheetViewport.ts` *(new)* | `--af-vh` / `--af-vt` / `.af-open` / `.af-kb` and background `inert` while the sheet is open, plus `useAskSheet()` (D21) and `useSheetHistory()` (D27). |
 | `src/components/useDesktopViewport.ts` | `useDesktopViewport()` removed (D21); `useVideoMediaTier` untouched. |
 | `src/components/useKeyboardInset.ts` | **Deleted** (D25), and its call removed from `src/App.tsx`. |
 | `src/styles/tokens.css` | `--scrim` added — the one new colour, given a name rather than inlined. |
