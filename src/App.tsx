@@ -3,7 +3,7 @@ import { Nav } from './components/Nav';
 import { MobileDock } from './components/MobileDock';
 import { useAnchorGlide } from './components/useAnchorGlide';
 import { useAskFredrik } from './components/useAskFredrik';
-import { AstronautHero } from './components/AstronautHero';
+import { HeroSwitch } from './components/HeroSwitch';
 import { About } from './components/About';
 import { Highlights } from './components/Highlights';
 import { Projects } from './components/Projects';
@@ -29,7 +29,9 @@ export default function App() {
       </a>
       <Nav />
       <main>
-        <AstronautHero />
+        {/* Renders AstronautHero unchanged unless ?hero= selects an
+            experimental implementation (experiment/cinematic-media-converter). */}
+        <HeroSwitch />
         <About />
         <Highlights />
         <Projects />
