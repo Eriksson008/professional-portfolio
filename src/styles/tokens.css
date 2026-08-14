@@ -32,11 +32,21 @@
   /* Text */
   --text: #111318;
   --muted: #505864;
-  --faint: #69717c;
+  /* Was #69717c, which measured 4.24-4.48:1 depending on the surface - under
+     the 4.5:1 AA floor everywhere in the light appearance, and invisible
+     without computing it. The binding surface is --ink-2 (#e7e7e2, the
+     .section-alt band), where .sheet-no and .sheet-eyebrow both sit; this
+     value clears 4.61:1 there and more on lighter surfaces. Same hue, same
+     R+8/R+19 channel offsets - only darker. See appearance.test.ts, which
+     fails if any small-text token drops back under the floor. */
+  --faint: #5f6772;
 
   /* Silver - labels, hairlines, resting states */
   --silver: #59616c;
-  --silver-2: #69717c;
+  /* Identical to --faint in this appearance (they diverge only in dark), so it
+     failed identically and is corrected identically. Kept as its own token
+     rather than merged: the dark palette gives them different values. */
+  --silver-2: #5f6772;
   --silver-line: rgba(61, 68, 78, 0.28);
   --silver-wash: rgba(61, 68, 78, 0.08);
 

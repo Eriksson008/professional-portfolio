@@ -181,14 +181,19 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
 - [ ] **Add the free Cloudflare WAF rate rule for `/ask`** (dashboard: zone → Security → WAF →
   Rate limiting rules) — hard quota protection; the Worker's in-memory limiter is per-isolate
   best-effort only.
-- [ ] **`--faint` is 4.24:1 in the light appearance** — under WCAG AA (4.5:1) wherever it carries
-  small text. Found 2026-08-14 while fixing the assistant's disclaimer, which moved to `--silver`
-  (5.38:1 light / 10.62:1 dark). The token is used site-wide for eyebrows and micro-labels, so
-  changing it is a whole-site visual decision and was deliberately left out of that change's scope.
-  Decide: darken `--faint` in the light palette, or move the remaining small-text users to
-  `--silver`. Measure, don't eyeball — every variant of this failed somewhere and none of it was
-  visible without computing the ratio.
 ### Done
+- [x] **Light-appearance text contrast brought over the AA floor — 2026-08-14.** `--faint` and
+  `--silver-2` were **the same colour** in the light palette (`#69717c`) and both measured
+  4.24–4.48:1 depending on surface — under WCAG AA's 4.5:1 everywhere small text used them, and
+  invisible without computing it. Both are now `#5f6772` (same hue, same R+8/R+19 channel offsets,
+  only darker). The binding surface is `--ink-2` (`#e7e7e2`, the `.section-alt` band) where
+  `.sheet-no` and `.sheet-eyebrow` sit: 4.61:1 there, 4.92–5.72:1 elsewhere. The **dark palette is
+  untouched** and was already passing. Measured across all 80 small-text elements on the page in
+  both appearances — worst case 4.61:1 light, 5.10:1 dark. `src/styles/contrast.test.ts` now
+  computes every text token against every opaque surface token and fails under 4.5:1; it was
+  confirmed to fail on the old value (`--faint on --black (light) is 4.48:1`) before being kept.
+  A second test guards the grey scale's ordering, so a future contrast fix can't silently invert
+  the hierarchy it belongs to.
 - [x] **Ask Fredrik rebuilt as a mobile concierge sheet — 2026-08-14.** Below 720px the assistant is
   a full-viewport sheet sized from `window.visualViewport` (`--af-vh`/`--af-vt` via
   `useSheetViewport`), with the dock suspended and the page pinned while it is open; the horizontal

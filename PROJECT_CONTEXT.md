@@ -9,6 +9,22 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
+**2026-08-14 (later) — the light appearance's quiet greys were under the accessibility floor, and
+now aren't.** `--faint` and `--silver-2` were **the same colour** in the light palette (`#69717c`),
+so they failed identically: 4.24–4.48:1 depending on surface, against WCAG AA's 4.5:1 for normal
+text. It was invisible on screen — the miss is between 0.02 and 0.26 — and was found only by
+computing the ratio while fixing the assistant's disclaimer. Both are now `#5f6772`: same hue, same
+R+8/R+19 channel offsets, only darker. The binding surface turned out to be `--ink-2` (`#e7e7e2`,
+the `.section-alt` band) rather than the page background, because `.sheet-no` and `.sheet-eyebrow`
+both sit on it; it measures 4.61:1 there and 4.92–5.72:1 on lighter surfaces. **The dark palette is
+untouched** — it was already passing at 5.34:1 — and the forced-dark scenes (`.hero`, `.finale`,
+`.nav`, `.dock`) were never affected in either appearance. Verified across all 80 small-text
+elements on the page with alpha-composited backgrounds: worst case 4.61:1 light, 5.10:1 dark.
+`src/styles/contrast.test.ts` makes it permanent — it computes every text token against every
+opaque surface token and was confirmed to **fail on the old value** before being kept, plus a
+second test guarding the grey scale's ordering so a future contrast fix can't invert the hierarchy.
+Not a redesign: the tokens stay separate (they diverge in dark) and only the value moved.
+
 **2026-08-14 — Ask Fredrik became a real mobile concierge instead of a floating widget.** Driven by
 real-device iPhone testing: with the keyboard up, the welcome text, the suggestion chips and the
 composer all fought for the same height, and the suggestions lost. Diagnosis before editing found
