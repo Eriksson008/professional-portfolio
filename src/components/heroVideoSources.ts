@@ -33,17 +33,13 @@ const GENERATED = `${BASE}media/generated/astronaut-hero-video`;
  */
 const DESKTOP_CANDIDATES: Record<EncodeKey, string> = {
   shipped: SHIPPED.large,
-  w2560: `${GENERATED}/hero_w2560_g1_crf26.mp4`,
   w1920: `${GENERATED}/hero_w1920_g1_crf23.mp4`,
-  w1600: `${GENERATED}/hero_w1600_g1_crf23.mp4`,
 };
 
 /** Human-readable provenance, for the dev switcher and the benchmark report. */
 export const ENCODE_DETAIL: Record<EncodeKey, string> = {
   shipped: '2560×1440 · 8.7 MB · shipped',
-  w2560: '2560×1440 · 8.6 MB · crf26',
-  w1920: '1920×1080 · 7.1 MB · crf23',
-  w1600: '1600×900 · 6.0 MB · crf23',
+  w1920: '1920×1080 · 7.1 MB · crf23 · regenerated in CI',
 };
 
 export function shippedSource(tier: VideoMediaTier): string {

@@ -1,33 +1,34 @@
 /**
- * Hero implementation selector for the cinematic-media experiments.
+ * Hero implementation selector.
  *
- * Experiment 1 compared the shipped MP4 scrub against a 193-frame canvas
- * sequence and an R3F scene. R3F lost decisively (see
- * docs/cinematic-hero-benchmark.md) and is kept only as a reference candidate.
+ * Two experiments compared five representations of this hero; the branches
+ * `experiment/cinematic-media-converter` and `experiment/cinematic-media-followup`
+ * hold all of them, with full measurements in docs/cinematic-hero-benchmark.md
+ * and docs/cinematic-hero-benchmark-2.md.
  *
- * Experiment 2 compares the four representations that could plausibly ship:
+ * Two lost and are **not** on main:
  *
- *   video-current    the shipped 2560x1440 all-intra MP4 scrub — the baseline
- *   video-optimized  a lower-resolution all-intra re-encode, same access pattern
+ * - **R3F / Three.js** — 222 kB gzipped, the worst LCP of every candidate, and
+ *   less smooth than a plain 2D canvas drawing the same frames. Shipping the
+ *   chunk for a rejected candidate would cost every deploy for nothing.
+ * - **frames-193** — identical smoothness to frames-97 at twice the bytes and
+ *   twice the requests. Strictly dominated.
+ *
+ * What remains are the three that could plausibly ship:
+ *
+ *   video-current    the shipped 2560x1440 all-intra MP4 scrub — the default
+ *   video-optimized  1920x1080 all-intra re-encode, same access pattern
  *   frames-97        every other source frame, drawn to a 2D canvas
- *   frames-193       every source frame, drawn to a 2D canvas
- *   interactive      the R3F scene (historical reference, not a contender)
  *
  * Selected with `?hero=`. The default is always the shipped implementation, so
- * a visitor who passes nothing sees production.
+ * a visitor who passes nothing sees production untouched.
  *
  * Pure and parameterised on the search string rather than reading `location`
  * directly, so it is testable without a DOM — the same reason `scrollGlide.ts`
  * and `askScroll.ts` are shaped this way.
  */
 
-export const HERO_VARIANTS = [
-  'video-current',
-  'video-optimized',
-  'frames-97',
-  'frames-193',
-  'interactive',
-] as const;
+export const HERO_VARIANTS = ['video-current', 'video-optimized', 'frames-97'] as const;
 
 export type HeroVariant = (typeof HERO_VARIANTS)[number];
 
@@ -41,15 +42,19 @@ export const DEFAULT_HERO_VARIANT: HeroVariant = 'video-current';
  */
 const ALIASES: Readonly<Record<string, HeroVariant>> = {
   video: 'video-current',
-  frames: 'frames-193',
+  // Both experiments' reports reference ?hero=frames for the 193-frame
+  // sequence. That candidate is not on main, so the alias resolves to the
+  // frame renderer that is — a reader following the old link still sees a
+  // frame sequence rather than a silent fallback to video.
+  frames: 'frames-97',
+  'frames-193': 'frames-97',
+  interactive: 'video-current',
 };
 
 const LABELS: Record<HeroVariant, string> = {
   'video-current': 'MP4 (current)',
   'video-optimized': 'MP4 (optimized)',
   'frames-97': 'Frames ×97',
-  'frames-193': 'Frames ×193',
-  interactive: '3D / R3F',
 };
 
 export function heroVariantLabel(variant: HeroVariant): string {
@@ -97,12 +102,7 @@ export function heroVariantHref(variant: HeroVariant): string {
  * Measured in experiment 1: a reduced-motion visitor on `?hero=interactive`
  * downloaded 217 kB of three for a scene that never mounted.
  */
-export const EXPENSIVE_VARIANTS: readonly HeroVariant[] = [
-  'interactive',
-  'frames-97',
-  'frames-193',
-  'video-optimized',
-];
+export const EXPENSIVE_VARIANTS: readonly HeroVariant[] = ['frames-97', 'video-optimized'];
 
 /**
  * The variant actually rendered, once the motion preference is applied.
@@ -120,9 +120,7 @@ export function effectiveHeroVariant(
 
 /** Which generated frame sequence a variant reads, or null if it is not frame-based. */
 export function frameSequenceFor(variant: HeroVariant): string | null {
-  if (variant === 'frames-97') return 'astronaut-hero-97';
-  if (variant === 'frames-193' || variant === 'interactive') return 'astronaut-hero';
-  return null;
+  return variant === 'frames-97' ? 'astronaut-hero-97' : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -135,7 +133,10 @@ export function frameSequenceFor(variant: HeroVariant): string | null {
 // and a difference could not be attributed to either.
 // ---------------------------------------------------------------------------
 
-export const ENCODE_KEYS = ['shipped', 'w2560', 'w1920', 'w1600'] as const;
+// Only the encodes that exist on the deployed site. The 2560/1600 candidates
+// were benchmarking-only and are regenerated on the experiment branches;
+// offering them here would hand a visitor a 404.
+export const ENCODE_KEYS = ['shipped', 'w1920'] as const;
 
 export type EncodeKey = (typeof ENCODE_KEYS)[number];
 

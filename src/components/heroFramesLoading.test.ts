@@ -46,28 +46,19 @@ test('nothing loaded yields null instead of throwing', () => {
 const manifest = (name: string) =>
   JSON.parse(readFileSync(`public/media/generated/${name}/manifest.json`, 'utf8'));
 
-test('both sequences describe the same source film', () => {
-  const a = manifest('astronaut-hero');
-  const b = manifest('astronaut-hero-97');
-  assert.equal(a.source.frames, 193);
-  assert.equal(b.source.frames, 193);
-  assert.equal(a.source.fps, b.source.fps);
-  assert.equal(a.source.duration, b.source.duration);
+test('the sequence describes the source film it was cut from', () => {
+  const m = manifest('astronaut-hero-97');
+  assert.equal(m.source.frames, 193);
+  assert.equal(m.source.fps, 24);
+  assert.ok(Math.abs(m.source.duration - 8.041667) < 0.001);
 });
 
-test('the sequences differ in density and nothing else', () => {
-  const a = manifest('astronaut-hero');
-  const b = manifest('astronaut-hero-97');
-  assert.equal(a.every, 1);
-  assert.equal(b.every, 2);
-  assert.equal(a.frameCount, 193);
-  assert.equal(b.frameCount, 97);
-  assert.equal(a.format, b.format);
-  assert.equal(a.quality, b.quality);
-  assert.deepEqual(
-    a.tiers.map((t: { width: number }) => t.width),
-    b.tiers.map((t: { width: number }) => t.width)
-  );
+test('the shipped sequence is the half-density cut', () => {
+  const m = manifest('astronaut-hero-97');
+  assert.equal(m.every, 2);
+  assert.equal(m.frameCount, 97);
+  assert.equal(m.format, 'webp');
+  assert.deepEqual(m.tiers.map((t) => t.width), [1440, 1080, 720]);
 });
 
 // 193 = 2*96 + 1, so decimating by 2 lands exactly on frame 0 and frame 192.
@@ -80,33 +71,25 @@ test('decimation preserves both endpoints of the film', () => {
 });
 
 test('every tier reports the full frame count it claims', () => {
-  for (const name of ['astronaut-hero', 'astronaut-hero-97']) {
-    const m = manifest(name);
-    for (const tier of m.tiers) {
-      assert.equal(tier.count, m.frameCount, `${name} ${tier.dir}`);
-      assert.ok(tier.bytes > 0, `${name} ${tier.dir} has bytes`);
-    }
+  const m = manifest('astronaut-hero-97');
+  for (const tier of m.tiers) {
+    assert.equal(tier.count, m.frameCount, tier.dir);
+    assert.ok(tier.bytes > 0, tier.dir + ' has bytes');
   }
 });
 
 // Both candidates must land on the same first and last frame at the same
 // progress, or they are not showing the same film.
-test('both sequences resolve identical endpoints from progress', () => {
-  const a = manifest('astronaut-hero').frameCount;
-  const b = manifest('astronaut-hero-97').frameCount;
-  assert.equal(frameIndexForProgress(0, 0.78, a), 0);
-  assert.equal(frameIndexForProgress(0, 0.78, b), 0);
-  assert.equal(frameIndexForProgress(0.78, 0.78, a), a - 1);
-  assert.equal(frameIndexForProgress(0.78, 0.78, b), b - 1);
+test('progress resolves the true first and last frame', () => {
+  const n = manifest('astronaut-hero-97').frameCount;
+  assert.equal(frameIndexForProgress(0, 0.78, n), 0);
+  assert.equal(frameIndexForProgress(0.78, 0.78, n), n - 1);
+  assert.equal(frameIndexForProgress(1, 0.78, n), n - 1);
 });
 
-test('the 97-frame sequence is materially lighter at every tier', () => {
-  const a = manifest('astronaut-hero');
-  const b = manifest('astronaut-hero-97');
-  for (let i = 0; i < a.tiers.length; i += 1) {
-    assert.ok(
-      b.tiers[i].bytes < a.tiers[i].bytes * 0.6,
-      `tier ${a.tiers[i].dir}: ${b.tiers[i].bytes} should be well under 60% of ${a.tiers[i].bytes}`
-    );
-  }
+// The whole reason 97 frames won: roughly half the bytes of the full-density
+// cut, which was 8.45 MB at w1440 and is measured in experiment 2.
+test('the shipped tier stays materially lighter than the full-density cut', () => {
+  const w1440 = manifest('astronaut-hero-97').tiers.find((t) => t.width === 1440);
+  assert.ok(w1440.bytes < 8.45 * 1048576 * 0.6, 'w1440 should be well under 60% of 8.45 MB');
 });

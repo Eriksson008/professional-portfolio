@@ -9,6 +9,36 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
+**2026-08-14 (latest) — the cinematic hero was measured against four alternatives; the default did
+not change, but two candidates now ship alongside it for real-device comparison.** Two experiments
+compared the shipped MP4 scrub against a Three.js/R3F scene, 193- and 97-frame canvas sequences, and
+an optimized re-encode. **Three.js lost decisively** — 222 kB gzipped, the worst LCP of every
+candidate, and *less* smooth than a plain 2D canvas drawing the same frames — so `three` and
+`@react-three/fiber` are removed from `main` again and the no-WebGL rule is re-confirmed, this time
+on evidence rather than on the 2026-07-03 design-direction change that first produced it.
+
+The desktop jitter turned out to be **decode area, not keyframe spacing**: the shipped encodes were
+*already* all-intra (193 keyframes for 193 frames) at every tier, so the obvious fix had already
+been applied. Three controls settled it — a matched-quality resolution ladder improved smoothness
+monotonically, a same-resolution encode at ~2 % fewer bytes changed nothing, and the repo's own
+720p phone tier has never stalled on identical code. Every seek was decoding a full 2560×1440 intra
+frame.
+
+Measured on desktop across slow, fast, reverse and oscillating scroll: the current MP4 produces 3–4
+frames over 50 ms per pass and a 146 ms stall on reverse; a 1920×1080 all-intra re-encode roughly
+halves that; **both frame sequences are stall-free — not one frame over 16.7 ms in any pattern.**
+97 frames matches 193 exactly at half the bytes and half the requests, and beats the current MP4 on
+constrained-network readiness (usable at 2.6 s vs 8.75 s, 4.4 MB vs 8.9 MB). Mobile has **no**
+smoothness problem in any representation, so the mobile decision is bytes.
+
+`?hero=` now selects `video-current` (default, unchanged), `video-optimized`, or `frames-97` on the
+live site, with the dev-only switcher stripped from production. **The production default is
+deliberately unchanged** pending real-device validation. Derived media is regenerated in CI
+(`scripts/generate-hero-media.mjs`, run by the Pages workflow) rather than committed, so ~17 MB of
+binaries stay out of a public repo. Reports: `docs/cinematic-hero-benchmark.md`,
+`docs/cinematic-hero-benchmark-2.md`. Full R3F and 193-frame implementations are preserved on
+`experiment/cinematic-media-converter` and `experiment/cinematic-media-followup`.
+
 **2026-08-14 (later) — the light appearance's quiet greys were under the accessibility floor, and
 now aren't.** `--faint` and `--silver-2` were **the same colour** in the light palette (`#69717c`),
 so they failed identically: **3.98**–4.48:1 depending on surface, against WCAG AA's 4.5:1 for normal

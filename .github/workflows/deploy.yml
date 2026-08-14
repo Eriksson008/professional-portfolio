@@ -33,6 +33,28 @@ jobs:
 
       - run: npm ci
 
+      # The hero's derived media (97-frame WebP sequence + the optimized
+      # all-intra desktop encode) is regenerated here rather than committed.
+      # ~17 MB of binaries in a public repo would be permanent — a force-push
+      # does not un-publish — and everything is reproducible from media-src/,
+      # which is tracked. Skipping this would deploy a site where ?hero=frames-97
+      # 404s and silently falls back to the poster.
+      # Parameters are fixed in the script and were chosen by measurement:
+      # docs/cinematic-hero-benchmark-2.md.
+      - name: Install ffmpeg
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -1
+
+      - name: Generate hero media
+        run: node scripts/generate-hero-media.mjs
+
+      # Fail loudly rather than shipping a hero whose frames are missing.
+      - name: Verify hero media
+        run: node scripts/generate-hero-media.mjs --check
+
       # Project site lives under /professional-portfolio/, so build with that base.
       - name: Build
         run: npm run build

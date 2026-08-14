@@ -60,19 +60,34 @@ too**; keep the two in sync when a shared fact changes.
 - Keep changes simple — avoid over-engineering. No CSS-in-JS, no UI kit, no stock images, no
   gimmicky animations. Approved visual library (2026-07-03): **framer-motion** (via `LazyMotion`
   + `m.*`). Don't add other frameworks.
-- **WebGL — scoped exception, `experiment/*` branches only (user decision, 2026-08-14).** The
-  three + @react-three/fiber layer was removed on 2026-07-03 with the Career Nebula backdrop, when
-  the astronaut film replaced it (commit `aa3511a`) — a *design-direction* change plus a bundle
-  win, not a measured WebGL failure. `experiment/cinematic-media-converter` reintroduces
-  three + @react-three/fiber deliberately, to measure a 3D hero against the current MP4 scrub and
-  an image-sequence variant. Conditions:
-  - **`main` keeps the no-WebGL rule.** This exception does not travel to `main` without a
-    separate decision, taken on the benchmark evidence.
-  - The 3D layer must be a **lazy chunk**, so the default hero never downloads it.
-  - The existing MP4 hero stays the default and stays intact.
+- **No WebGL/WebGPU — re-confirmed on measurement, 2026-08-14.** The rule dated from `aa3511a`,
+  where three + @react-three/fiber was removed with the Career Nebula backdrop — a design-direction
+  change, not a measured verdict. So the exception was reopened on `experiment/*` branches to
+  actually test a 3D hero. **The evidence came back against it and the exception is now closed.**
+  Measured against the MP4 scrub and canvas frame sequences on the same scroll pipeline: R3F cost
+  **222 kB gzipped**, produced the **worst LCP of every candidate**, and was **less smooth than a
+  plain 2D canvas drawing the same frames**. Nothing supported the premise that WebGL makes a
+  scroll hero faster. `three`/`@react-three/fiber` are removed from `main` again.
+  - Reach for WebGL only when the *scene* needs it: real 3D geometry, camera freedom, meaningful
+    lighting or material interaction, scene-changing interaction, or depth that video and canvas
+    cannot express. "It will feel more premium" is not on that list.
+  - The R3F implementation is preserved for reference on `experiment/cinematic-media-converter`
+    and `experiment/cinematic-media-followup`; it is not deleted, just not shipped.
   - GSAP was evaluated and **not** added: framer-motion springs already drive hero progress via
     `scrollGlide.ts`, and a second scroll system driving one runway fights the first.
-  Benchmarks: `docs/cinematic-hero-benchmark.md`.
+  Benchmarks: `docs/cinematic-hero-benchmark.md` (experiment 1),
+  `docs/cinematic-hero-benchmark-2.md` (experiment 2).
+- **Hero rendering candidates on `main`.** `?hero=` selects between the shipped MP4 scrub
+  (`video-current`, the default and unchanged), an optimized 1920×1080 all-intra re-encode
+  (`video-optimized`), and a 97-frame deterministic canvas sequence (`frames-97`). The dev-only
+  switcher is stripped from production builds; the query parameter works on the live site so the
+  candidates can be compared on real devices. **The default is not changed by this** — adopting a
+  new default is a separate decision.
+- **Generated hero media is regenerated in CI, never committed.** `.github/workflows/deploy.yml`
+  runs the workspace skills' scripts against `media-src/` before the Vite build. Adding ~10 MB of
+  WebP frames and ~7 MB of MP4 to a public repo would be permanent (a force-push does not
+  un-publish), and the source they derive from is already tracked. If a frame hero is ever made
+  the default, this step becomes load-bearing rather than optional.
 - Content lives in `src/data/` (typed modules) — it is the single source of truth. Update data
   there, not inline in components.
 - Do **not** add a backend, database, auth, or external services unless explicitly requested.

@@ -29,14 +29,19 @@ test('each variant is selectable by name', () => {
 
 // Experiment 1's report, notes and benchmark scripts all reference these two
 // names. Breaking them would make the first experiment unreproducible.
-test('experiment 1 names still resolve to the right candidates', () => {
+test('experiment names still resolve, including candidates not on main', () => {
   assert.equal(parseHeroVariant('?hero=video'), 'video-current');
-  assert.equal(parseHeroVariant('?hero=frames'), 'frames-193');
+  // frames-193 and interactive lost and live only on the experiment branches.
+  // An old link should still land on the closest surviving candidate rather
+  // than silently falling back to video.
+  assert.equal(parseHeroVariant('?hero=frames'), 'frames-97');
+  assert.equal(parseHeroVariant('?hero=frames-193'), 'frames-97');
+  assert.equal(parseHeroVariant('?hero=interactive'), 'video-current');
 });
 
 test('the parameter is found alongside others, in any position', () => {
   assert.equal(parseHeroVariant('?utm=x&hero=frames-97'), 'frames-97');
-  assert.equal(parseHeroVariant('?hero=interactive&utm=x'), 'interactive');
+  assert.equal(parseHeroVariant('?hero=video-optimized&utm=x'), 'video-optimized');
 });
 
 test('casing and stray whitespace still resolve', () => {
@@ -72,16 +77,18 @@ test('every variant has a label for the dev switcher', () => {
 
 // The two frame candidates must differ ONLY in which manifest they read; if
 // they ever pointed at the same sequence the comparison would be vacuous.
-test('frame variants map to distinct sequences, video variants to none', () => {
+test('the frame variant maps to its sequence, video variants to none', () => {
   assert.equal(frameSequenceFor('frames-97'), 'astronaut-hero-97');
-  assert.equal(frameSequenceFor('frames-193'), 'astronaut-hero');
-  assert.notEqual(frameSequenceFor('frames-97'), frameSequenceFor('frames-193'));
   assert.equal(frameSequenceFor('video-current'), null);
   assert.equal(frameSequenceFor('video-optimized'), null);
 });
 
-test('the R3F candidate reuses the 193-frame sequence rather than its own copy', () => {
-  assert.equal(frameSequenceFor('interactive'), 'astronaut-hero');
+// Every variant main offers must resolve to an asset that actually exists on
+// the deployed site — a variant pointing at a sequence CI does not regenerate
+// would 404 and silently fall back to the poster.
+test('the only frame sequence referenced is the one CI regenerates', () => {
+  const sequences = HERO_VARIANTS.map(frameSequenceFor).filter(Boolean);
+  assert.deepEqual([...new Set(sequences)], ['astronaut-hero-97']);
 });
 
 test('encode override defaults, resolves, and rejects junk', () => {
@@ -126,9 +133,12 @@ test('the default variant is itself cheap — it is what reduced motion falls ba
   assert.ok(!EXPENSIVE_VARIANTS.includes(DEFAULT_HERO_VARIANT));
 });
 
-test('the 3D candidate is classed expensive, so it can never be the reduced-motion path', () => {
-  assert.ok(EXPENSIVE_VARIANTS.includes('interactive'));
-  assert.notEqual(effectiveHeroVariant('interactive', true), 'interactive');
+test('every non-default variant is classed expensive, so none survives reduced motion', () => {
+  for (const variant of HERO_VARIANTS) {
+    if (variant === DEFAULT_HERO_VARIANT) continue;
+    assert.ok(EXPENSIVE_VARIANTS.includes(variant), `${variant} should be gated`);
+    assert.notEqual(effectiveHeroVariant(variant, true), variant);
+  }
 });
 
 test('without reduced motion the requested variant is honoured unchanged', () => {
