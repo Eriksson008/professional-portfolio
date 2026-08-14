@@ -32,3 +32,11 @@ CLAUDE.local.md
 # OS files
 .DS_Store
 Thumbs.db
+
+# Generated cinematic conversion artifacts (experiment/cinematic-media-converter).
+# Frame sequences are regenerated from media-src/ by the cinematic-media-converter skill:
+#   node <skill>/scripts/extract-frames.mjs media-src/astronaut-hero-source.mp4 \
+#     --outdir public/media/generated --name astronaut-hero --widths 1440,1080,720
+# The manifest is tracked so the runtime contract is reviewable without the binaries.
+public/media/generated/**/w*/
+public/media/generated/**/matte-preview/

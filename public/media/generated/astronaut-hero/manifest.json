@@ -1,0 +1,49 @@
+{
+  "name": "astronaut-hero",
+  "generatedBy": "cinematic-media-converter/scripts/extract-frames.mjs",
+  "generatedAt": "2026-08-14T20:13:12.478Z",
+  "command": "node extract-frames.mjs C:/Users/eriks/Repositories/professional-portfolio/media-src/astronaut-hero-source.mp4 --outdir C:/Users/eriks/Repositories/professional-portfolio/public/media/generated --name astronaut-hero --widths 1440,1080,720 --format webp --quality 82",
+  "source": {
+    "file": "C:\\Users\\eriks\\Repositories\\professional-portfolio\\media-src\\astronaut-hero-source.mp4",
+    "width": 3840,
+    "height": 2160,
+    "fps": 24,
+    "duration": 8.041667,
+    "frames": 193
+  },
+  "every": 1,
+  "frameCount": 193,
+  "format": "webp",
+  "quality": 82,
+  "alpha": null,
+  "tiers": [
+    {
+      "width": 1440,
+      "height": 810,
+      "dir": "w1440",
+      "pattern": "frame-%04d.webp",
+      "count": 193,
+      "bytes": 8857676,
+      "averageBytes": 45895
+    },
+    {
+      "width": 1080,
+      "height": 608,
+      "dir": "w1080",
+      "pattern": "frame-%04d.webp",
+      "count": 193,
+      "bytes": 6275336,
+      "averageBytes": 32515
+    },
+    {
+      "width": 720,
+      "height": 406,
+      "dir": "w720",
+      "pattern": "frame-%04d.webp",
+      "count": 193,
+      "bytes": 3854872,
+      "averageBytes": 19973
+    }
+  ],
+  "totalBytes": 18987884
+}
