@@ -184,7 +184,7 @@ Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` d
 ### Done
 - [x] **Light-appearance text contrast brought over the AA floor — 2026-08-14.** `--faint` and
   `--silver-2` were **the same colour** in the light palette (`#69717c`) and both measured
-  4.24–4.48:1 depending on surface — under WCAG AA's 4.5:1 everywhere small text used them, and
+  **3.98**–4.48:1 depending on surface — under WCAG AA's 4.5:1 everywhere small text used them, and
   invisible without computing it. Both are now `#5f6772` (same hue, same R+8/R+19 channel offsets,
   only darker). The binding surface is `--ink-2` (`#e7e7e2`, the `.section-alt` band) where
   `.sheet-no` and `.sheet-eyebrow` sit: 4.61:1 there, 4.92–5.72:1 elsewhere. The **dark palette is

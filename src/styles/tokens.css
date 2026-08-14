@@ -32,7 +32,7 @@
   /* Text */
   --text: #111318;
   --muted: #505864;
-  /* Was #69717c, which measured 4.24-4.48:1 depending on the surface - under
+  /* Was #69717c, which measured 3.98-4.48:1 depending on the surface - under
      the 4.5:1 AA floor everywhere in the light appearance, and invisible
      without computing it. The binding surface is --ink-2 (#e7e7e2, the
      .section-alt band), where .sheet-no and .sheet-eyebrow both sit; this

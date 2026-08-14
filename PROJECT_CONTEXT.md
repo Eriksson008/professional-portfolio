@@ -11,9 +11,12 @@ advertises, so it doubles as a work sample.
 
 **2026-08-14 (later) — the light appearance's quiet greys were under the accessibility floor, and
 now aren't.** `--faint` and `--silver-2` were **the same colour** in the light palette (`#69717c`),
-so they failed identically: 4.24–4.48:1 depending on surface, against WCAG AA's 4.5:1 for normal
-text. It was invisible on screen — the miss is between 0.02 and 0.26 — and was found only by
-computing the ratio while fixing the assistant's disclaimer. Both are now `#5f6772`: same hue, same
+so they failed identically: **3.98**–4.48:1 depending on surface, against WCAG AA's 4.5:1 for normal
+text. It was invisible on screen and was found only by computing the ratio while fixing the
+assistant's disclaimer. (The first figures quoted for this were 4.24–4.48 — measured before the
+`.section-alt` band was identified as a text surface. Re-measuring on the live site against
+alpha-composited backgrounds put the true worst case at 3.98:1, so the gap was wider than first
+reported, not narrower.) Both are now `#5f6772`: same hue, same
 R+8/R+19 channel offsets, only darker. The binding surface turned out to be `--ink-2` (`#e7e7e2`,
 the `.section-alt` band) rather than the page background, because `.sheet-no` and `.sheet-eyebrow`
 both sit on it; it measures 4.61:1 there and 4.92–5.72:1 on lighter surfaces. **The dark palette is
