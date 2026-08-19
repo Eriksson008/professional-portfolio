@@ -2,7 +2,7 @@
 
 Canonical, cross-tool operating guide for **Professional Portfolio**. Both Claude Code (via `CLAUDE.md`, which imports this file with `@AGENTS.md`) and Codex (which reads `AGENTS.md` natively) follow it. **Edit this file only** — do not copy it back into `CLAUDE.md`.
 
-<!-- ai-workflow:default-start (managed by ai-workflows/update-repo-workflow; edit the template, not here) -->
+<!-- ai-workflow:default-start level=Standard novault=false vaultnote="Professional-Portfolio/README" (managed by ai-workflows/update-repo-workflow; edit the template, not here) -->
 ## Default agent workflow
 
 This is the standing process for both Claude Code and Codex in this repo — it applies to every task
@@ -26,13 +26,48 @@ This is the standing process for both Claude Code and Codex in this repo — it 
 - **Normal** (contained feature, bug fix, focused refactor): focused exploration → one implementation owner → repo verification → independent review.
 - **Complex / high-risk** (architecture, auth, migrations, infra, cross-app or sensitive-data changes): parallel read-only investigation where useful → written plan → one owner per isolated workstream → targeted + full verification → specialist review → browser/integration evidence where applicable → explicit rollback/risk consideration.
 
-### Updating a Second Brain project note
+### Committing mechanical refreshes
 
-When a task updates `second-brain/02-Projects/<Project>/README.md`, follow the vault's own rules in
-`second-brain/AGENTS.md`. In particular: **`## Recent Changes` is capped at ~25 lines** — trim the
-oldest entries as you add one, and promote anything durable (an architectural choice, a security
-posture, a constraint someone would otherwise rediscover) into **Important Decisions** first. Git
-already holds the history; the note holds what lasts.
+A **mechanical refresh** - the output of a generator or of a marker-scoped template applier, with no
+hand-authored content in it - may be committed locally **without asking**, as its own commit, touching
+only the files the tool wrote. Never push it, and never fold unrelated work into it. Everything else
+still needs explicit authorization.
+
+Uncommitted work is not safe work here: several sessions run against this workspace at once, and one
+of them committing everything will absorb whatever another left sitting in the tree.
+
+### If you explained it twice, write it down
+
+The second time a session has to re-derive the same constraint, gotcha, or domain fact, capture it
+before moving on - the repo docs if it is implementation, the vault note's **Important Decisions** if
+it is direction, a skill if it is a procedure. The re-explanation is the signal, and capture always
+costs less than the third explanation.
+
+### The Second Brain vault — read before, write after
+
+The vault at `../second-brain` holds this project's **direction**: why decisions were made, what is
+deliberately not being done, and what comes next. This repo's `PROJECT_CONTEXT.md` holds
+**implementation**: how it is built, run, and verified. They answer different questions, so neither
+substitutes for the other.
+
+**Read it before planning.** For any non-trivial change, read
+`../second-brain/02-Projects/Professional-Portfolio/README.md` first — its **Important Decisions** table above
+all. That table is where settled calls and their rationale live, and re-deciding something already
+decided is the failure this rule exists to prevent. Where the note and the code disagree, the code is
+what runs: say so plainly, and correct the note in the same session.
+
+**Write it after.** When a task changes this project's real state, update that note per the vault's
+own rules in `second-brain/AGENTS.md`. In particular: **`## Recent Changes` is capped at ~25 lines** —
+trim the oldest entries as you add one, and promote anything durable (an architectural choice, a
+security posture, a constraint someone would otherwise rediscover) into **Important Decisions** first.
+Git already holds the history; the note holds what lasts.
+
+**Meaningful changes only** — not typo fixes, formatting, styling tweaks, routine dependency bumps, or
+trivial refactors. What counts as meaningful for *this* repo is listed under `## Second Brain Sync
+Rule` below; the mechanics are here so all repos share one copy of them.
+
+Before finishing a meaningful session: update `PROJECT_CONTEXT.md`, update the vault note, run the
+repo's checks, then show `git status` for this repo **and** for `../second-brain`.
 <!-- ai-workflow:default-end -->
 
 ## What this is
@@ -201,109 +236,6 @@ docker run -p 8790:8790 professional-portfolio
 Host binding/port are configured via `.env` (copy `.env.example`). `BIND_ADDR` defaults to
 `127.0.0.1` (localhost-only); the container always serves on 8790 internally.
 
-## TODO / open decisions
-
-- [ ] **Validate the OG social preview** on the live site (LinkedIn Post Inspector / X card
-  validator) and confirm the résumé download link.
-- [ ] **Add the free Cloudflare WAF rate rule for `/ask`** (dashboard: zone → Security → WAF →
-  Rate limiting rules) — hard quota protection; the Worker's in-memory limiter is per-isolate
-  best-effort only.
-### Done
-- [x] **Light-appearance text contrast brought over the AA floor — 2026-08-14.** `--faint` and
-  `--silver-2` were **the same colour** in the light palette (`#69717c`) and both measured
-  **3.98**–4.48:1 depending on surface — under WCAG AA's 4.5:1 everywhere small text used them, and
-  invisible without computing it. Both are now `#5f6772` (same hue, same R+8/R+19 channel offsets,
-  only darker). The binding surface is `--ink-2` (`#e7e7e2`, the `.section-alt` band) where
-  `.sheet-no` and `.sheet-eyebrow` sit: 4.61:1 there, 4.92–5.72:1 elsewhere. The **dark palette is
-  untouched** and was already passing. Measured across all 80 small-text elements on the page in
-  both appearances — worst case 4.61:1 light, 5.10:1 dark. `src/styles/contrast.test.ts` now
-  computes every text token against every opaque surface token and fails under 4.5:1; it was
-  confirmed to fail on the old value (`--faint on --black (light) is 4.48:1`) before being kept.
-  A second test guards the grey scale's ordering, so a future contrast fix can't silently invert
-  the hierarchy it belongs to.
-- [x] **Ask Fredrik rebuilt as a mobile concierge sheet — 2026-08-14.** Below 720px the assistant is
-  a full-viewport sheet sized from `window.visualViewport` (`--af-vh`/`--af-vt` via
-  `useSheetViewport`), with the dock suspended and the page pinned while it is open; the horizontal
-  suggestion carousel is replaced by four starter cards in a 2-column `auto-fit` grid **inside the
-  scroll region**, which collapse into 2–3 contextual follow-ups (new `followUps` per curated topic)
-  once the conversation starts. Phones no longer autofocus the composer. Assistant turns lose their
-  card on mobile; auto-scroll follows only when the reader is already at the bottom, with a `↓`
-  button otherwise. **Desktop keeps its shell — floating non-modal card, launcher pill, `Send` word,
-  page still scrolls — and inherits the shared content model** (welcome state, starter grid,
-  follow-ups, textarea composer, scroll policy), because the brief asked for those to be shared
-  rather than forked. Only the shell is breakpoint-specific. **The shell breakpoint is now
-  one query** — JS reads the same `(max-width: 719px)` the stylesheet uses, because `(min-width:
-  720px)` and `(max-width: 719px)` disagree at fractional widths and that gave the desktop card the
-  sheet's modal focus trap. **What makes the sheet modal is `inert` on every sibling of `.af-root`,
-  not a hand-rolled trap** — prompt controls unmount themselves when used, dropping focus to
-  `<body>` where a keydown-scoped trap cannot see it, and `inert` makes that unreachable-by-
-  construction instead of a rule each future control has to remember. **Opening pushes one history
-  entry (`#ask`), so Back and the iOS edge-swipe dismiss the sheet**; before this the site created no
-  history entries at all (`useAnchorGlide` only ever `replaceState`s) and Back left the site.
-  `/#ask` is a deep link, handled on load and on `hashchange`. A free-text
-  question retires a curated topic only when that topic's own answer was shown, never on a bare
-  keyword match the Worker then answered differently. The follow-the-conversation rule lives in
-  `src/components/askScroll.ts` as a pure, tested function for the same reason `scrollGlide.ts`
-  does. Backend, `/ask` contract, logging and admin untouched. **Confirmed by the user on a real
-  iPhone** after deploy, closing the emulation blind spot this change was verified through. Spec:
-  `docs/superpowers/specs/2026-08-14-ask-fredrik-mobile-concierge-design.md`; task packet:
-  `tasks/2026-08-14-ask-fredrik-mobile-concierge.md`.
-- [x] **Phone hero composition reversed, closing film moved above the closing text, desktop
-  telemetry collision fixed, header brand simplified — 2026-08-13 (second pass).** The stacked phone hero
-  from the entry below was reversed: the film fills the phone frame again and the identity rises on
-  scroll (the 200svh runway, the 0.94 film end, the portrait pan and the dock clearance all stay).
-  On phones the closing film band now sits **above** the "06 Open to meaningful…" text and no longer
-  pins — it scrubs on its own travel through the viewport, so the contact actions are one screen of
-  scroll away instead of two; tablets (720–879px) and short desktop windows keep the pinned runway
-  below the text. Separately, `.hero-hud` and `.hero-content` had been converging as the window
-  shortened (measured −5px at 1534×822): the readout now caps its anchor against the room the
-  identity needs, leaving ≥860px-tall windows pixel-identical. The header's boxed `FE` lettering is
-  gone: the name **is** the home link, with no emblem file in the repo (a monogram image was tried
-  and removed at the user's direction). Spec amendment:
-  `docs/superpowers/specs/2026-08-13-mobile-dock-and-hero-design.md`.
-- [x] **Phone navigation moved to a bottom dock and the phone hero re-composed — 2026-08-13.**
-  Below 720px the sticky header is replaced by a fixed icon dock (Home · Impact · Projects ·
-  Skills · Career · Contact · Ask Fredrik) in the safe area, the floating Ask pill is hidden and
-  the assistant is a dock destination sharing one state/panel, and the hero is stacked (film band
-  on top, identity beneath, 200svh runway instead of 360svh). ≥720px is unchanged. Chrome geometry
-  now comes from `--nav-h` / `--dock-space` in `tokens.css`. Spec:
-  `docs/superpowers/specs/2026-08-13-mobile-dock-and-hero-design.md`.
-- [x] **Cloudflare Web Analytics live on the portfolio — 2026-08-04.** Web Analytics site
-  registered in the Cloudflare account for hostname `eriksson008.github.io`; the beacon is
-  injected from `src/main.tsx` gated on `import.meta.env.PROD` (dev sessions never report;
-  the beacon token is public by design). Reviewer-verified: the beacon finds its config via
-  the `script[data-cf-beacon]` fallback when injected as a module script.
-- [x] **Cloudflare Access setup completed + admin live on the Worker — 2026-07-23.** Access
-  enabled on the production `workers.dev` URL (Domains → Restricted), app path-scoped to
-  `/admin` (destination `ask-fredrik.eriksson-fredrik08.workers.dev/admin`), Allow
-  policy = admin email via one-time PIN; `ACCESS_TEAM_DOMAIN`/`ACCESS_APP_AUD` filled,
-  `ADMIN_ALLOWED_EMAILS` secret set, `ADMIN_TOKEN` deleted, `build:admin` + deploy done.
-  Live-verified: `/ask` public with correct CORS, `/admin/*` 302s to Access, dashboard loads
-  signed-in end-to-end. Gotcha for the future: `ACCESS_TEAM_DOMAIN` must include the
-  `https://` scheme (it is compared to the JWT `iss` and used to build the JWKS URL) — the
-  bare hostname fails closed with 401.
-- [x] **Admin auth moved to Cloudflare Access — 2026-07-23.** Manual `ADMIN_TOKEN` paste
-  retired: the Worker validates the Access JWT in-Worker (`src/access.ts`, WebCrypto, zero
-  deps) against an email-allowlist secret, `GET /admin/me` added, and the admin dashboard now
-  deploys as Worker static assets (`npm run build:admin`) instead of shipping in the Pages
-  artifact. Loopback-only dev auth mode; 49 new worker tests. See
-  `docs/ask-fredrik-dashboard.md` + the TODO above for the remaining dashboard-side config.
-- [x] **Live on GitHub Pages — 2026-07-06.** Repo public, Pages source = GitHub Actions,
-  `deploy.yml` publishes on every push to `main`; live-site verified (asset hashes, finale
-  media range requests, Ask Fredrik Worker URL in the bundle). Live at
-  https://eriksson008.github.io/professional-portfolio/.
-- [x] **Ask Fredrik assistant live end-to-end — 2026-07-06/07.** Cloudflare Worker
-  (`cloudflare/ask-fredrik-worker`) with curated public-safe knowledge base, sensitive filter,
-  rate limiting, D1 FIFO logging, Workers AI + prompt-leak guard; CI (`worker-tests.yml`) and
-  uptime checks (`uptime.yml`) in place.
-- [x] **GitHub Pages deployment configured (user approved going public) — 2026-06-30.** Actions
-  workflow `deploy.yml`; env-driven Vite base (`/professional-portfolio/` on Pages, `/`
-  elsewhere); SEO/OpenGraph/JSON-LD metadata + `public/og-image.png`; typography/spacing polish.
-- [x] Rebuilt as Vite + React + TypeScript and Dockerized (nginx, port 8790) — 2026-06-30.
-- [x] Standardized to family port 8790 (was 8789, collided with our-story); added `BIND_ADDR`
-  localhost-only default + `.env.example` — 2026-06-30.
-- [x] GitHub handle `Eriksson008` in the header; `public/resume.pdf` in place — 2026-06-30.
-
 ## Before finishing any meaningful session
 
 1. Update this repo's `PROJECT_CONTEXT.md`.
@@ -318,3 +250,11 @@ Update `../second-brain/02-Projects/Professional-Portfolio/README.md` on meaning
 (new architecture/feature, Docker/deploy change, networking/security change, env/port change,
 major UI/design direction, important bug fix, new setup command, major decision, changed next
 actions). Skip it for typos, tiny styling/formatting, routine dep bumps, or trivial refactors.
+
+## Where the details live
+
+Moved to `PROJECT_CONTEXT.md` so they are read when the task needs them rather than on every prompt:
+
+- TODO / open decisions
+
+Read `PROJECT_CONTEXT.md` before working in those areas.
