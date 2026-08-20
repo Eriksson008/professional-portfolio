@@ -549,6 +549,51 @@ img {
   color: var(--silver);
   line-height: 1.5;
 }
+/* The disclosure wrapper. On wide viewports it is always open and its toggle
+   is not rendered at all, so the card reads exactly as it always has. */
+.pc-more-toggle {
+  display: none;
+}
+.pc-more > summary {
+  list-style: none;
+}
+.pc-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+@media (max-width: 719px) {
+  .pc-more-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.55rem 0;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--silver-2);
+    border-top: 1px solid var(--line-soft);
+    /* A comfortable thumb target without a button's visual weight. */
+    min-height: 44px;
+  }
+  .pc-more-toggle::after {
+    content: '+';
+    margin-left: auto;
+    font-size: 1.05rem;
+    line-height: 1;
+    color: var(--faint);
+  }
+  .pc-more[open] > .pc-more-toggle::after {
+    content: '–';
+  }
+  .pc-more-toggle:focus-visible {
+    outline: 2px solid var(--accent-bright);
+    outline-offset: 3px;
+  }
+}
+
 .pc-bullets {
   margin-top: 1rem;
   display: grid;

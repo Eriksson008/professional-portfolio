@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   type FrameTier,
+  containRect,
   coverRect,
   frameIndexForProgress,
   framePositionForProgress,
@@ -276,4 +277,47 @@ test('a focal point can never pull an empty edge into frame', () => {
       assert.ok(fit.y + fit.height >= 780 - 1e-9, `bottom gap at focusY ${fy}`);
     }
   }
+});
+
+// --- contain fitting --------------------------------------------------------
+//
+// For plates whose subject is deliberately small: the receding orbiter ends at
+// a few percent of frame width, and cover-cropping a 16:9 plate into a phone
+// throws away the width the subject lives in. The chapter became an empty glow.
+
+test('a contained plate fits entirely inside the canvas', () => {
+  const fit = containRect(390, 780, 1920, 1080);
+  assert.ok(fit.width <= 390 + 1e-9 && fit.height <= 780 + 1e-9, 'overflows the canvas');
+  assert.ok(fit.x >= -1e-9 && fit.y >= -1e-9, 'starts outside the canvas');
+  // 16:9 into a tall canvas: width is the limiting axis, so it fills it exactly.
+  assert.ok(Math.abs(fit.width - 390) < 1e-9);
+});
+
+test('contain preserves aspect ratio, unlike a stretch', () => {
+  for (const [cw, ch] of [[390, 780], [1440, 900], [800, 800]]) {
+    const fit = containRect(cw, ch, 1920, 1080);
+    assert.ok(Math.abs(fit.width / fit.height - 1920 / 1080) < 1e-9, `distorted at ${cw}x${ch}`);
+  }
+});
+
+test('the anchor biases the band vertically, and is clamped', () => {
+  const top = containRect(390, 780, 1920, 1080, 0);
+  const middle = containRect(390, 780, 1920, 1080, 0.5);
+  const bottom = containRect(390, 780, 1920, 1080, 1);
+  assert.equal(top.y, 0);
+  assert.ok(middle.y > top.y && bottom.y > middle.y, 'anchor did not move the band');
+  assert.ok(Math.abs(bottom.y + bottom.height - 780) < 1e-9, 'anchor 1 does not sit flush');
+  // Out-of-range anchors clamp rather than pushing the band off the surface.
+  assert.deepEqual(containRect(390, 780, 1920, 1080, -3), top);
+  assert.deepEqual(containRect(390, 780, 1920, 1080, 9), bottom);
+});
+
+test('contain and cover agree when the aspect ratios match', () => {
+  const c = containRect(1920, 1080, 1920, 1080, 0.5);
+  const v = coverRect(1920, 1080, 1920, 1080);
+  assert.ok(Math.abs(c.width - v.width) < 1e-9 && Math.abs(c.height - v.height) < 1e-9);
+});
+
+test('an undecoded image does not produce an infinite contain scale', () => {
+  assert.deepEqual(containRect(800, 600, 0, 0), { x: 0, y: 0, width: 800, height: 600 });
 });

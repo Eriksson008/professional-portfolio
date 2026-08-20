@@ -46,6 +46,12 @@ export interface CinematicChapterProps {
    */
   tone?: 'cool' | 'ignition' | 'deep';
   /**
+   * `contain` shows the whole 16:9 plate as a band on phones instead of
+   * cropping to fill. Only for plates whose subject is small enough that a
+   * portrait crop would lose it — see `containRect`.
+   */
+  phoneFit?: 'cover' | 'contain';
+  /**
    * Fractional sub-range of the sequence to play, e.g. `[0, 0.68]`.
    * Used to split the person-reveal between this chapter and the contact
    * scene so one plate can carry two beats without reading as a repeat.
@@ -86,6 +92,7 @@ export function CinematicChapter({
   children,
   tone = 'cool',
   range,
+  phoneFit = 'cover',
 }: CinematicChapterProps) {
   const reduced = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -111,14 +118,17 @@ export function CinematicChapter({
       const { images, tier, ready } = framesRef.current;
       if (!canvas || !ready || !tier || images.length === 0) return;
 
-      const focus = window.innerWidth < 720 ? PHONE_FOCUS : WIDE_FOCUS;
+      const phone = window.innerWidth < 720;
+      const fit = phone && phoneFit === 'contain' ? 'contain' : 'cover';
+      // A contained band is anchored high so the copy below it sits on black.
+      const focus = fit === 'contain' ? { x: 0.5, y: 0.3 } : phone ? PHONE_FOCUS : WIDE_FOCUS;
       const { from, to } = frameWindow(images.length, range);
       const local = framePositionForProgress(progress, filmEnd, to - from + 1);
       const position = { index: local.index + from, next: local.next + from, blend: local.blend };
-      lastDrawn.current = drawBlendedFrame(canvas, images, position, lastDrawn.current, focus);
+      lastDrawn.current = drawBlendedFrame(canvas, images, position, lastDrawn.current, focus, fit);
       decodeAround(images, position.index);
     },
-    [decodeAround, filmEnd, range]
+    [decodeAround, filmEnd, range, phoneFit]
   );
 
   const { runwayRef, heroRef, progress } = useHeroRunway(scrub, draw, `chapter:${id}`);
@@ -167,7 +177,7 @@ export function CinematicChapter({
 
   return (
     <section
-      className={`chapter-runway ${scrub ? 'is-scrub' : ''}`}
+      className={`chapter-runway ${scrub ? 'is-scrub' : ''} ${phoneFit === 'contain' ? 'fit-band' : ''}`}
       id={id}
       aria-label={label}
       ref={runwayRef}

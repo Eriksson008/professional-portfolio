@@ -101,6 +101,43 @@ export function coverRect(
   };
 }
 
+/**
+ * `object-fit: contain` for a canvas, anchored vertically.
+ *
+ * The counterpart to `coverRect`, and it exists for one specific failure: a
+ * plate whose subject is deliberately *small* cannot survive a portrait crop.
+ * The receding chapter ends with the orbiter at a few percent of frame width;
+ * cover-cropping a 16:9 plate into a 390-px-wide phone throws away most of the
+ * width, and on that plate what it throws away is the subject. The chapter
+ * became a glow with nothing in it.
+ *
+ * Showing the plate whole instead — as a band with black above and below —
+ * keeps the composition the shot was built around. `anchorY` biases the band
+ * upward so the copy has unbroken black to sit on beneath it, which is the same
+ * arrangement the contact scene already uses on phones.
+ */
+export function containRect(
+  canvasWidth: number,
+  canvasHeight: number,
+  imageWidth: number,
+  imageHeight: number,
+  anchorY = 0.5
+): { x: number; y: number; width: number; height: number } {
+  if (imageWidth <= 0 || imageHeight <= 0) {
+    return { x: 0, y: 0, width: canvasWidth, height: canvasHeight };
+  }
+  const scale = Math.min(canvasWidth / imageWidth, canvasHeight / imageHeight);
+  const width = imageWidth * scale;
+  const height = imageHeight * scale;
+  const clamp = (v: number) => Math.min(1, Math.max(0, v));
+  return {
+    x: (canvasWidth - width) / 2,
+    y: (canvasHeight - height) * clamp(anchorY),
+    width,
+    height,
+  };
+}
+
 /** A playhead that lies between two frames, for sub-frame cross-dissolve. */
 export interface FramePosition {
   /** The frame at or before the playhead. */

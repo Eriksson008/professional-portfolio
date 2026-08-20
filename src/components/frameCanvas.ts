@@ -3,7 +3,7 @@
 // directly by the node test runner, which does not do extensionless
 // resolution. It is the pixel path for every scrubbed chapter; it should be
 // testable without a bundler in front of it.
-import { type FramePosition, coverRect, nearestLoaded } from './heroFrames.ts';
+import { type FramePosition, containRect, coverRect, nearestLoaded } from './heroFrames.ts';
 
 /**
  * The canvas half of the frame-sequence renderer, shared by every scrubbed
@@ -42,7 +42,12 @@ export function drawBlendedFrame(
   images: readonly HTMLImageElement[],
   position: FramePosition,
   lastKey: string | null,
-  focus: { x: number; y: number } = { x: 0.5, y: 0.5 }
+  focus: { x: number; y: number } = { x: 0.5, y: 0.5 },
+  /**
+   * `contain` shows the whole plate as a band rather than cropping to fill.
+   * Only worth it where the crop would discard the subject — see containRect.
+   */
+  fit: 'cover' | 'contain' = 'cover'
 ): string | null {
   const base = nearestLoaded(images, position.index);
   if (!base) return lastKey;
@@ -62,24 +67,30 @@ export function drawBlendedFrame(
   // keying on the index made each of those a different key and repainted an
   // identical bitmap. The exact frame arriving still changes `base.src`, so the
   // substitution is still corrected the moment it can be.
-  const key = `${base.src}:${overlay ? `${overlay.src}@${blend}` : ''}:${focus.x}:${focus.y}`;
+  const key = `${base.src}:${overlay ? `${overlay.src}@${blend}` : ''}:${fit}:${focus.x}:${focus.y}`;
   if (key === lastKey) return lastKey;
 
   const context = canvas.getContext('2d');
   if (!context) return lastKey;
 
   const paint = (image: HTMLImageElement) => {
-    const { x, y, width, height } = coverRect(
-      canvas.width,
-      canvas.height,
-      image.naturalWidth,
-      image.naturalHeight,
-      focus.x,
-      focus.y
-    );
+    const { x, y, width, height } =
+      fit === 'contain'
+        ? containRect(canvas.width, canvas.height, image.naturalWidth, image.naturalHeight, focus.y)
+        : coverRect(
+            canvas.width,
+            canvas.height,
+            image.naturalWidth,
+            image.naturalHeight,
+            focus.x,
+            focus.y
+          );
     context.drawImage(image, x, y, width, height);
   };
 
+  // A contained plate does not fill the surface, so last frame's pixels would
+  // survive in the letterbox. Cover never needs this.
+  if (fit === 'contain') context.clearRect(0, 0, canvas.width, canvas.height);
   context.globalAlpha = 1;
   paint(base);
   if (overlay) {
