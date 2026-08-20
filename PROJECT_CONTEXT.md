@@ -22,11 +22,25 @@ overlapping two eyebrows and two headlines reads as a rendering fault, so igniti
 before liftoff's arrives, leaving a hairline of pure film between them. Cost: nothing; it is a
 concatenation of masters already paid for.
 
-Chapter 02 is no longer an exploded assembly: it is a machined impeller dissolving into its own
-engineering drawing — the line on paper and the thing that exists, in one object. The assembly
-illustrated the *noun* while the copy is about the *verb*, and it put two consecutive chapters of
-grey engine hardware back to back. The ignition plate was re-shot to remove a stray cable and a
-duplicated glow ring, and liftoff re-seeded from it. The mid-document orbiter still is gone.
+Chapter 02 is a **three-axis gyroscopic gimbal** — an attitude-control *instrument*, not
+propulsion. It has been through three subjects. An exploded assembly failed outright (video models
+have no rigid-body solver). A machined impeller dissolving into its own drawing shipped and worked,
+and was the best literal match to the copy — but it left the page running rotor → engine → orbit,
+two consecutive chapters of engine hardware. The gimbal is a different *class* of object, so the
+sequence now reads instrument → engine → orbit and the chapter stops rehearsing the one after it.
+Its film is deliberately the page's shortest, 61 frames: the generated subject drifts leftward, so
+the master is cut at the frame where it reaches the impeller's own end composition (left edge at
+0.365 of frame width) and the copy column stays clear.
+
+Halving the frame count did **not** halve the smoothness, and this was measured rather than assumed:
+sampling one canvas state per pixel of scroll, the 61-frame chapter produced **31 distinct states
+over 31 px — the same as the 241-frame ascent chapter**. Frame count is not what sets temporal
+resolution on this page; the sub-frame blend quantiser is (`BLEND_STEPS = 24` in `frameCanvas.ts`),
+so 61 frames x 24 steps already exceeds one state per pixel of a 1481 px runway. Buy frames for
+*motion length*, not for smoothness.
+
+The ignition plate was re-shot to remove a stray cable and a duplicated glow ring, and liftoff
+re-seeded from it. The mid-document orbiter still is gone.
 
 **Mobile was measured across nine viewports from 320 to 1920 px.** Three real failures were found
 and fixed: the receding chapter rendered as an empty glow on a phone (its subject is tiny, and a

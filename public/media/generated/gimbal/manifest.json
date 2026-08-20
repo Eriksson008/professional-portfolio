@@ -1,0 +1,49 @@
+{
+  "name": "gimbal",
+  "generatedBy": "cinematic-media-converter/scripts/extract-frames.mjs",
+  "generatedAt": "2026-08-20T17:40:00.000Z",
+  "command": "node extract-frames.mjs media-src/gimbal-source.mp4 --outdir public/media/generated --name gimbal --widths 1440,1080,720 --format webp --quality 82 --every 1",
+  "source": {
+    "file": "media-src/gimbal-source.mp4",
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "duration": 2.541667,
+    "frames": 61
+  },
+  "every": 1,
+  "frameCount": 61,
+  "format": "webp",
+  "quality": 82,
+  "alpha": null,
+  "tiers": [
+    {
+      "width": 1440,
+      "height": 810,
+      "dir": "w1440",
+      "pattern": "frame-%04d.webp",
+      "count": 61,
+      "bytes": 2070524,
+      "averageBytes": 33943
+    },
+    {
+      "width": 1080,
+      "height": 608,
+      "dir": "w1080",
+      "pattern": "frame-%04d.webp",
+      "count": 61,
+      "bytes": 1513518,
+      "averageBytes": 24812
+    },
+    {
+      "width": 720,
+      "height": 406,
+      "dir": "w720",
+      "pattern": "frame-%04d.webp",
+      "count": 61,
+      "bytes": 924172,
+      "averageBytes": 15150
+    }
+  ],
+  "totalBytes": 4508214
+}

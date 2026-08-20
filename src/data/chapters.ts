@@ -80,14 +80,21 @@ export const engineerChapter: Chapter = {
   title: 'I started in mechanical engineering.',
   // profile.about[0], compressed.
   body: 'Project management, technical drawings, facility design — where I learned to break ambiguous problems into precise, buildable specifications. The software came later. The habit came with it.',
-  // A machined turbopump impeller whose trailing edge dissolves into its own
-  // engineering drawing — the line on paper and the thing that exists, in one
-  // object. It replaced an exploded assembly, which illustrated the *noun*
-  // (machine parts) while the copy is about the *verb* (specifying), and which
-  // put two consecutive chapters of grey engine hardware back to back.
-  sequence: 'impeller',
-  poster: media('impeller-poster.jpg'),
-  start: media('impeller-start.jpg'),
+  // A three-axis gyroscopic gimbal — an attitude-control *instrument*, not
+  // propulsion. It replaced a machined turbopump impeller, which was a better
+  // literal match to the copy but left the page running rotor → engine → orbit
+  // with two consecutive chapters of engine hardware. An instrument reads as a
+  // different class of object, so the sequence now goes instrument → engine →
+  // orbit, and the chapter stops rehearsing the one that follows it.
+  //
+  // The film is deliberately short (61 frames against the others' 121+). Its
+  // subject drifts leftward across the generated clip, and it is cut at the
+  // frame where it reaches the same composition the impeller ended on — left
+  // edge at 0.365 of frame width — so the copy column stays clear. The shorter
+  // move is also the point: this chapter is the quiet one before ignition.
+  sequence: 'gimbal',
+  poster: media('gimbal-poster.jpg'),
+  start: media('gimbal-start.jpg'),
   label: 'About the engineer',
 };
 

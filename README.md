@@ -108,8 +108,9 @@ How it works (`src/components/AstronautHero.tsx` + `src/styles/hero.css`):
   `rgba(255,255,255,0.12)`, `backdrop-filter: blur(18px)`, radius 22 px). No colorful gradients,
   no neon; a cool `#8ec5ff` accent exists in tokens for sparing use.
 - **Structure** is a launch narrative followed by a document. Four unnumbered, scroll-scrubbed
-  film chapters sit under the opening hero — *The engineer* (a machined impeller dissolving into
-  its own drawing) → *Ignition/Liftoff* (one continuous 241-frame film carrying two beats of copy)
+  film chapters sit under the opening hero — *The engineer* (a three-axis gyroscopic gimbal, the
+  page's shortest film at 61 frames) → *Ignition/Liftoff* (one continuous 241-frame film carrying
+  two beats of copy)
   → *In flight* → *Endurance* (the orbiter receding to a sunrise) — and then the numbered sheets
   resume: 01 Mission Summary → 02 Impact Telemetry (glass metric cards) →
   03 Systems in flight (one real production pipeline, drawn as a rail) → 04 Selected work

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { highlights } from './highlights.ts';
 
 /**
@@ -92,7 +92,21 @@ test('chapter prose states no figures — every number goes through highlights.t
   // Beat copy is nested one level deeper than chapter copy, so both indents are
   // matched. Missing the nested form would leave a whole beat unchecked, which
   // is exactly what happened when the ascent chapter gained one.
-  const copy = [...source.matchAll(/^\s{2,6}(?:title|body): '([^']*)'/gm)].map((m) => m[1]);
+  //
+  // Both quote styles are matched, and the count is asserted against the number
+  // of declarations rather than a floor. A single-quote-only pattern with a
+  // `>= 8` floor silently skips any body rewritten with an apostrophe — the
+  // string drops out of `copy`, the floor still passes, and an unverifiable
+  // figure ships. Comparing to `declared` makes a missed string fail loudly.
+  const declared = [...source.matchAll(/^\s{2,6}(?:title|body):\s*["'`]/gm)].length;
+  const copy = [...source.matchAll(/^\s{2,6}(?:title|body):\s*(?:'([^']*)'|"([^"]*)")/gm)].map(
+    (m) => m[1] ?? m[2]
+  );
+  assert.equal(
+    copy.length,
+    declared,
+    `${declared - copy.length} chapter string(s) were not readable by this test — a quote style it does not parse (a template literal, for instance) would go unchecked`
+  );
   assert.ok(copy.length >= 8, `expected title+body for 4 chapters, found ${copy.length}`);
   assert.ok(highlights.length > 0, 'highlights.ts is empty; the figures have nowhere to come from');
   for (const line of copy) {
@@ -141,4 +155,69 @@ test('the last beat arrives before the film ends', () => {
   const froms = beatWindows();
   if (froms.length === 0) return;
   assert.ok(Math.max(...froms) < 0.7, 'the final beat arrives too late in the runway');
+});
+
+// --- the media a chapter names must actually exist ---------------------------
+//
+// This is the gap that let a chapter degrade silently. `chapters.ts` names a
+// sequence, `scripts/generate-hero-media.mjs` generates one, and nothing tied
+// the two together: rename it in one place and CI still generates media, the
+// build still passes, and `--check` still reports "present" — because it
+// validates the generator's own list against itself. At runtime the manifest
+// 404s, `useHeroFrames` reports failed, scrub turns off, and the chapter falls
+// back to a static poster that still looks deliberate. Nothing goes red.
+const repoFile = (rel: string) => new URL(`../../${rel}`, import.meta.url);
+const generatorSource = read('../../scripts/generate-hero-media.mjs');
+
+const chapterSequences = () =>
+  [...source.matchAll(/^\s{2}sequence: '([^']+)'/gm)].map((m) => m[1]);
+
+test('every chapter sequence has a tracked manifest that declares real frames', () => {
+  const sequences = chapterSequences();
+  assert.ok(sequences.length > 0, 'no chapter sequences found');
+  for (const name of sequences) {
+    const manifestPath = repoFile(`public/media/generated/${name}/manifest.json`);
+    assert.ok(existsSync(manifestPath), `no tracked manifest for sequence "${name}"`);
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+    assert.equal(manifest.name, name, `manifest for "${name}" calls itself "${manifest.name}"`);
+    assert.ok(manifest.frameCount > 1, `"${name}" declares ${manifest.frameCount} frames`);
+    assert.ok(manifest.tiers?.length > 0, `"${name}" declares no tiers`);
+    for (const tier of manifest.tiers) {
+      assert.equal(
+        tier.count,
+        manifest.frameCount,
+        `"${name}" tier w${tier.width} declares ${tier.count} frames but the sequence has ${manifest.frameCount}`
+      );
+    }
+  }
+});
+
+test('every chapter sequence is one the generator actually builds', () => {
+  for (const name of chapterSequences()) {
+    assert.ok(
+      generatorSource.includes(`name: '${name}'`),
+      `"${name}" is not in SEQUENCES in scripts/generate-hero-media.mjs, so CI will never generate it`
+    );
+  }
+});
+
+test('every chapter poster and start still is present', () => {
+  // These are what the reader sees before frames arrive and instead of them
+  // under reduced motion, so a missing one is a blank chapter, not a slow one.
+  //
+  // Written as regex literals rather than built with `new RegExp` from a
+  // template: in a template literal `\s` is an unrecognised escape and JS
+  // silently drops the backslash, so the pattern matched a literal "s" and the
+  // test found nothing while looking like it passed its own shape.
+  const fields = [
+    { name: 'poster', re: /^\s{2}poster: media\('([^']+)'\)/gm },
+    { name: 'start', re: /^\s{2}start: media\('([^']+)'\)/gm },
+  ];
+  for (const { name, re } of fields) {
+    const files = [...source.matchAll(re)].map((m) => m[1]);
+    assert.ok(files.length > 0, `no ${name} entries found`);
+    for (const file of files) {
+      assert.ok(existsSync(repoFile(`public/media/${file}`)), `missing public/media/${file}`);
+    }
+  }
 });

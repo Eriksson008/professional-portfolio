@@ -179,9 +179,10 @@ space unless told, repeatedly and specifically, not to.
 Three plates on this page are inset to 75 % and seated right on black, which buys back the type
 column for free. Two are not, and the difference is the whole rule:
 
-**Reframing works when the plate's background is genuinely, numerically black.** The impeller, the
-ignition bell and the liftoff plume all sit on true black, and a sampled luma step across the pad
-boundary measures **0 → 2 of 255** — about 1 %, invisible.
+**Reframing works when the plate's background is genuinely, numerically black.** The ignition bell
+and the liftoff plume sit on true black, and a sampled luma step across the pad boundary measures
+**0 → 2 of 255** — about 1 %, invisible. (The impeller was the third such plate; it was replaced by
+the gimbal in round 6 and no longer ships. The rule is unchanged — only the roll call.)
 
 **It fails when the background has content in it.** The orbit plate carries stars and Earth glow, so
 the pad read as a second, flatter black and the Earth's limb terminated in a hard horizontal line.
@@ -198,3 +199,58 @@ $5.06.**
 
 The reusable form: before buying a new generation, check whether the assets already bought can be
 cut together. Continuity is often a timeline decision rather than a prompt.
+
+### Round 6 — the gimbal replaces the impeller
+
+Chapter 02 was changed on an art-direction review, not because the impeller was broken. Two concepts
+were weighed: a **rocket-engine turbopump** with an exploded-and-reassembled view, and a
+**three-axis gyroscopic gimbal**. The turbopump was rejected before a single call was made, on this
+ledger's own evidence — its centrepiece beat is explode-then-reassemble, which is the exact motion
+round 3 proved generative video cannot do, and it would have spent chapter 03's ignition glow a
+chapter early. That rejection cost $0.00, which is the point of keeping the ledger.
+
+| # | Asset | Model | Attempt | Cost | Keep? | Running total |
+| ---: | --- | --- | ---: | ---: | --- | ---: |
+| 24 | Gimbal still, round A (4 images) | Seedream v4 | 1 | $0.12 | no — coplanar rings, read as a bearing or a lens | $5.18 |
+| 25 | Gimbal still, round B (4 images) | Seedream v4 | 2 | $0.12 | **yes — `gimbal-b-03`** | $5.30 |
+| 26 | Gimbal still, round C — drawing-dissolve (4 images) | Seedream v4 | 3 | $0.12 | no — drifted to astrolabe ornament, more legible pseudo-text | $5.42 |
+| 27 | Gimbal clip | Kling 2.5 Turbo Pro | 1 | $0.35 | no — subject translated left across frame | $5.77 |
+| 28 | Gimbal clip, framing explicitly locked | Kling 2.5 Turbo Pro | 2 | $0.35 | **yes, after trimming** | $6.12 |
+
+**Spent across six rounds: $6.12.** Waste this round: $0.59.
+
+**"Concentric" is the wrong word for gimbal rings, and it cost a round.** Round A asked for "three
+concentric rings nested one inside another" and got exactly that — three *coplanar* circles, which
+render as a ball bearing or a camera lens. Gimbal rings are **orthogonal**, not concentric. Round B
+said so as geometry ("each ring pivoted on an axis PERPENDICULAR to the ring outside it, so the three
+rings lie in THREE DIFFERENT PLANES") plus the shapes it must not be, and the concept landed
+immediately. Name the *relationship between the parts*, not their arrangement in the frame.
+
+**The camera-lock failure repeated, which is how you know to stop.** Both clips were asked for an
+orbit and both delivered a leftward translation: the subject's luminance centroid slid 0.771 → 0.400
+of frame width, carrying it into the copy column. Attempt 2 added an explicit framing lock
+("must not drift, slide, translate or travel toward the left") and moved 0.771 → 0.400 anyway —
+within noise of attempt 1. Two identical failures under different prompts is the architecture
+talking, and round 3's rule applies: stop re-prompting.
+
+**The fix was free and came from measuring the plate it replaces.** The shipped impeller drifts too —
+centroid 0.649 → 0.568, left edge 0.476 → **0.365** — so the page already had a known-good
+compositional envelope. The gimbal master is simply cut at the frame where it reaches that same
+envelope: frame 60 of 121, centroid 0.591, left edge **0.365**. A crop could not have done it (the
+subject already touches the source's right edge at frame 0), and no mirror or reverse helps, because
+every transform that fixes the end breaks the start.
+
+The trim is not only damage control. At 61 frames it is the page's shortest film, which is what the
+art direction asked for — the quiet, near-frozen chapter before ignition — and it ships **4.30 MiB
+across three tiers against the impeller's 8.78 MiB** (4,508,214 against 9,209,014 bytes). Both
+figures are what the generator's own `fmt()` prints, which divides by 1048576; quoting the decimal
+form for one and the binary form for the other is how two numbers for one asset get into a doc.
+
+**Reframing rule, extended.** The chosen plate had a bright backlight wedge at the right edge, which
+the shipped impeller does not (its right column measures 0; the gimbal's measured 104). Because the
+background above the subject was numerically 0 across every column, the wedge was localised and a
+measured horizontal falloff removed it — peak 101 → 45, and the right edge from 104 to **3-5 of
+255**, matching the "0 → 2 of 255, invisible" standard the pad rule above is measured against —
+without regenerating. This
+is the same precondition as the pad rule above: **grade a plate only where the surrounding background
+is already numerically black, and measure before and after.**
