@@ -146,3 +146,45 @@ crop room left at render time, so no amount of focal-point adjustment could fix 
 Instead the master is reframed in ffmpeg: the content is inset to 75 % and placed right of centre on
 black. The plate is already black, so the pad is invisible and the left third comes free. Cost: zero.
 The exact command is in the commit that added it.
+
+### Round 4 — the impeller, and the ignition repair
+
+| # | Asset | Model | Attempt | Cost | Keep? | Running total |
+| ---: | --- | --- | ---: | ---: | --- | ---: |
+| 17 | Impeller still, round A (4 images) | Seedream v4 | 1 | $0.12 | no — subject centre-left, light shaft in the type half | $3.65 |
+| 18 | Ignition repair still, round A (4 images) | Seedream v4 | 1 | $0.12 | no — defects fixed but a bright haze landed in the type corner | $3.77 |
+| 19 | Impeller still, round B (4 images) | Seedream v4 | 2 | $0.12 | **yes — `impeller-b-02`** | $3.89 |
+| 20 | Ignition repair still, round B (4 images) | Seedream v4 | 2 | $0.12 | **yes — `ignition-fix-b-01`** | $4.01 |
+| 21 | Impeller clip (ch 02) | Kling 2.5 Turbo Pro | 1 | $0.35 | **yes** | $4.36 |
+| 22 | Ignition clip, re-shot on the repaired plate | Kling 2.5 Turbo Pro | 2 | $0.35 | **yes** | $4.71 |
+| 23 | Liftoff clip, re-seeded from the new ignition | Kling 2.5 Turbo Pro | 2 | $0.35 | **yes** | $5.06 |
+
+**Spent across four rounds: $5.06.**
+
+Round A of both stills ($0.24) is this round's waste, and both failed the same way: the *subject* was
+right and the *frame* was wrong — one put the subject centre-left, the other put a bright haze
+exactly where the type column sits. Round B fixed both by stating the composition as a coordinate
+("its centre about seventy percent across from the left edge") and by stating the emptiness as a
+positive instruction rather than assuming it:
+
+> CRITICAL: the entire left half of the frame is completely empty, flat, pure black — no light
+> shaft, no light beam, no volumetric ray, no glow, no haze, no bloom, no gradient, no fog, nothing
+> at all in it. No light source is visible anywhere in the frame; all corners are pure black.
+
+That paragraph is now the house boilerplate for every plate on this site. Generators will fill empty
+space unless told, repeatedly and specifically, not to.
+
+### When a plate can be reframed and when it cannot
+
+Three plates on this page are inset to 75 % and seated right on black, which buys back the type
+column for free. Two are not, and the difference is the whole rule:
+
+**Reframing works when the plate's background is genuinely, numerically black.** The impeller, the
+ignition bell and the liftoff plume all sit on true black, and a sampled luma step across the pad
+boundary measures **0 → 2 of 255** — about 1 %, invisible.
+
+**It fails when the background has content in it.** The orbit plate carries stars and Earth glow, so
+the pad read as a second, flatter black and the Earth's limb terminated in a hard horizontal line.
+That plate is protected with a scrim instead (`tone-deep`), which costs nothing and has no edge.
+
+Measure before assuming: sample the luma either side of the intended pad boundary.

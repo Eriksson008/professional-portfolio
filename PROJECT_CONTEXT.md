@@ -9,7 +9,24 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
-**2026-08-20 (latest) — the site is a six-beat launch narrative, and the frame renderer draws
+**2026-08-20 (latest) — six-beat launch narrative, repaired plates, and a phone layout measured
+rather than assumed.**
+
+Chapter 02 is no longer an exploded assembly: it is a machined impeller dissolving into its own
+engineering drawing — the line on paper and the thing that exists, in one object. The assembly
+illustrated the *noun* while the copy is about the *verb*, and it put two consecutive chapters of
+grey engine hardware back to back. The ignition plate was re-shot to remove a stray cable and a
+duplicated glow ring, and liftoff re-seeded from it. The mid-document orbiter still is gone.
+
+**Mobile was measured across nine viewports from 320 to 1920 px.** Three real failures were found
+and fixed: the receding chapter rendered as an empty glow on a phone (its subject is tiny, and a
+portrait cover-crop discarded the width it lives in — it now shows the plate whole as a band);
+chapters were *longer* than the hero on a phone (260vh against 200svh — now matched); and Selected
+work was a third of the page (nine cards of full bullet lists — now a native disclosure on phones
+only). Phone went 37.9 → 31.8 screens, small phone 47.4 → 39.5, desktop unchanged. Zero horizontal
+overflow and zero page errors at every width.
+
+**2026-08-20 — the site is a six-beat launch narrative, and the frame renderer draws
 between frames.** The opening hero is followed by **five** scroll-scrubbed chapters, before the
 document sections — hardware is **assembled**, it **ignites**, it **lifts off** carrying the career figures,
 it **flies**, and then it **recedes** to a sunrise on the limb — followed by a deliberately quiet
