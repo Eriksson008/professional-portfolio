@@ -78,16 +78,20 @@ To be measured, not assumed.
 
 Chapters, media source, and what is new. **Five of eight chapters need no new media at all.**
 
+**As shipped** (revised in a second round — see the revision note below).
+
 | # | Chapter | Media | Source | New? |
 | --- | --- | --- | --- | --- |
 | 01 | Exploration | Astronaut, helmet on | existing `astronaut-hero` | no |
-| 02 | The Engineer | Person reveal, helmet off | existing `astronaut-finale` | no |
-| 03 | Ignition | Engine bell → full thrust | **new** | **yes** |
-| 04 | Liftoff | Ascent + editorial metrics | **new** (same clip's tail) | shared |
-| 05 | Systems in flight | Real architecture, DOM/CSS | none | no |
-| 06 | Selected work | Differentiated project environments | none | no |
-| 07 | Experience | Editorial timeline | none | no |
-| 08 | Contact | Second half of the person reveal | existing `astronaut-finale` | no |
+| 02 | The Engineer | Exploded assembly closing together | **new** `assembly` | **yes** |
+| 03 | Ignition | Engine bell → full thrust | **new** `ignition` | **yes** |
+| 04 | Liftoff | Ascent + editorial figures | **new** `liftoff` | **yes** |
+| 05 | In flight | Orbiter coasting, Earth limb, one flare | **new** `orbit` | **yes** |
+| — | Systems in flight | Real architecture, DOM/CSS | none | no |
+| — | Selected work | Grouped by kind | none | no |
+| — | Media band | Orbit plate as a living still | reuse of `orbit` | no |
+| — | Experience | Editorial timeline | none | no |
+| — | Contact | The person reveal, played whole | existing `astronaut-finale` | no |
 
 ### Motion spec
 
@@ -128,6 +132,19 @@ CONTAINER none · MEDIA living-still · INTENSITY 1   ← deceleration to quiet
 
 Intensity curve: **5 · 4 · 5 · 4 · 2 · 2 · 1 · 1**. Rises, peaks twice, then falls and stays down.
 The page is not loud throughout, which is the point.
+
+### Revision (same day, second round)
+
+The first round split the person-reveal between chapter 02 and the contact scene. That was reverted:
+entering the contact scene at 0.55 of the clip meant the figure was already resolved and facing
+camera when the reader arrived, so the silhouette, the turn and the light coming up — the reason the
+plate is good — all happened before the scene opened. **A reveal that starts after the reveal is not
+a reveal.**
+
+Chapter 02 got its own footage instead, which turned out to be the better answer on its own terms:
+the site's one statement about *mechanical engineering* was being illustrated by a portrait, and is
+now illustrated by an exploded technical assembly. A fifth beat (`orbit`) was added after liftoff,
+and the orbit plate is reused once more as a still band in the middle of the document.
 
 ### Structural change and its trade-off
 

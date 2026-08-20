@@ -9,12 +9,19 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
-**2026-08-19 (latest) — the site became an eight-chapter launch narrative, and the frame renderer
-learned to draw between frames.** Three scroll-scrubbed chapters now sit between the opening hero
-and the document sections — the helmeted explorer becomes a person, that person's work ignites, and
-the career figures arrive on the ascent — followed by a new, deliberately quiet **Systems in flight**
-section that draws one real production pipeline. Page intensity runs 5·4·5·4·2·2·1·1: it peaks
-twice and then stays down.
+**2026-08-19 (latest) — the site became a launch narrative, and the frame renderer learned to draw
+between frames.** Four scroll-scrubbed chapters now sit between the opening hero and the document
+sections — hardware is **assembled**, it **ignites**, it **lifts off** carrying the career figures,
+and then it **flies** — followed by a deliberately quiet **Systems in flight** section that draws one
+real production pipeline, and a full-bleed **media band** that breaks up the longest stretch of
+reading. Page intensity runs 5·4·5·4·3 across the narrative and 2·2·1·1 through the document: it
+peaks in the middle of the launch and comes down from there rather than staying loud.
+
+- **Chapter 02 is about mechanical engineering, and now shows it.** An exploded technical assembly
+  closing itself back together, under "I started in mechanical engineering." The site's idiom is the
+  title block of an engineering drawing; an exploded view is that drawing's other half.
+- **The contact scene plays the person-reveal whole**, from silhouette to lit face. It was briefly
+  entered partway in so chapter 02 could share the plate; that removed the reveal from the reveal.
 
 - **Sub-frame blending.** The frame renderer rounded to the nearest frame and skipped the repaint
   when it had not changed, so slow scroll walked a staircase of held stills — a *temporal*
@@ -24,11 +31,10 @@ twice and then stays down.
 - **One renderer, not two.** The chapters are the frame-sequence hero generalised — same runway,
   same loader, same draw path (`CinematicChapter` → `useHeroRunway` + `useHeroFrames` +
   `drawBlendedFrame`). No second scroll system was introduced.
-- **The person-reveal is split, not moved.** Chapter 02 plays it from black to the point the face
-  begins to read; the contact scene picks the same move up at 0.55 of the clip and resolves it to
-  the lit frame. One plate, two beats, and contact keeps the face beside its call to action.
-- **Two new media masters**, generated with fal.ai for **$0.94** against a fixed allocation, and graded down
-  to the site's palette. Ledger: `docs/media-budget-ledger.md`.
+- **Four new media masters**, generated with fal.ai for **$2.00** against a fixed allocation.
+  Ignition, liftoff and assembly are graded down to the site's palette; the orbit plate is
+  deliberately *not*, because the colour in its lens flare is the one accent it was made for.
+  The allocation figure is intentionally not published — see the ledger's budget policy.
 - **Measured (production build):** all three chapters stall-free — 0 frames over 16.7 ms in slow,
   fast and reverse scrub. LCP 124 ms, CLS 0.0066. The chapters add **0 bytes and 0 requests to
   initial load**; frames are fetched on approach. Bundle 98.05 kB gz (+1.5 kB). Under reduced
