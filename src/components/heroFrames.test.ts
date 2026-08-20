@@ -241,3 +241,39 @@ test('range fractions outside 0..1 are clamped rather than indexing off the end'
 test('a degenerate sequence yields a zero-length window instead of -1', () => {
   assert.deepEqual(frameWindow(0, [0.2, 0.8]), { from: 0, to: 0 });
 });
+
+// --- focal point ------------------------------------------------------------
+//
+// Every plate composes its subject right of centre against an empty left half.
+// A portrait crop that centres therefore loses the subject off the right edge,
+// which is exactly what happened on a 390px viewport before this existed.
+
+test('the default focal point is dead centre, matching object-fit: cover', () => {
+  const centred = coverRect(1000, 1000, 1920, 1080);
+  const explicit = coverRect(1000, 1000, 1920, 1080, 0.5, 0.5);
+  assert.deepEqual(centred, explicit);
+});
+
+test('a right-biased focus pulls the subject back into a portrait crop', () => {
+  // 16:9 plate into a tall phone viewport: most of the width is cropped away.
+  const centred = coverRect(390, 780, 1920, 1080);
+  const biased = coverRect(390, 780, 1920, 1080, 0.68, 0.44);
+  // The subject at 68% of the image should land near the middle of the canvas.
+  const subjectAt = (fit) => fit.x + 0.68 * fit.width;
+  assert.ok(
+    Math.abs(subjectAt(biased) - 195) < Math.abs(subjectAt(centred) - 195),
+    'biasing did not move the subject closer to centre'
+  );
+});
+
+test('a focal point can never pull an empty edge into frame', () => {
+  for (const fx of [0, 0.2, 0.5, 0.8, 1]) {
+    for (const fy of [0, 0.5, 1]) {
+      const fit = coverRect(390, 780, 1920, 1080, fx, fy);
+      assert.ok(fit.x <= 1e-9, `left gap at focusX ${fx}`);
+      assert.ok(fit.y <= 1e-9, `top gap at focusY ${fy}`);
+      assert.ok(fit.x + fit.width >= 390 - 1e-9, `right gap at focusX ${fx}`);
+      assert.ok(fit.y + fit.height >= 780 - 1e-9, `bottom gap at focusY ${fy}`);
+    }
+  }
+});

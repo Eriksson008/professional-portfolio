@@ -61,7 +61,20 @@ export function coverRect(
   canvasWidth: number,
   canvasHeight: number,
   imageWidth: number,
-  imageHeight: number
+  imageHeight: number,
+  /**
+   * The point of the *image* to hold at the centre of the canvas, in 0..1.
+   * Defaults to dead centre, which is what `object-fit: cover` does.
+   *
+   * It exists because every plate on this page composes its subject right of
+   * centre against an empty left half — which is what makes room for the
+   * typography, and what makes a portrait crop throw the subject off the right
+   * edge. `object-position` solves this for the CSS poster underneath; the
+   * canvas has no such property, so the focal point has to be explicit or the
+   * two disagree at exactly the width where it matters.
+   */
+  focusX = 0.5,
+  focusY = 0.5
 ): { x: number; y: number; width: number; height: number } {
   if (imageWidth <= 0 || imageHeight <= 0) {
     return { x: 0, y: 0, width: canvasWidth, height: canvasHeight };
@@ -69,7 +82,16 @@ export function coverRect(
   const scale = Math.max(canvasWidth / imageWidth, canvasHeight / imageHeight);
   const width = imageWidth * scale;
   const height = imageHeight * scale;
-  return { x: (canvasWidth - width) / 2, y: (canvasHeight - height) / 2, width, height };
+  // Place the focal point at the canvas centre, then clamp so the image can
+  // never be pulled far enough to expose an empty edge.
+  const place = (canvasSpan: number, imageSpan: number, focus: number) =>
+    Math.min(0, Math.max(canvasSpan - imageSpan, canvasSpan / 2 - focus * imageSpan));
+  return {
+    x: place(canvasWidth, width, focusX),
+    y: place(canvasHeight, height, focusY),
+    width,
+    height,
+  };
 }
 
 /** A playhead that lies between two frames, for sub-frame cross-dissolve. */

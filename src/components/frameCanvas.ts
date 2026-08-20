@@ -36,7 +36,8 @@ export function drawBlendedFrame(
   canvas: HTMLCanvasElement,
   images: readonly HTMLImageElement[],
   position: FramePosition,
-  lastKey: string | null
+  lastKey: string | null,
+  focus: { x: number; y: number } = { x: 0.5, y: 0.5 }
 ): string | null {
   const base = nearestLoaded(images, position.index);
   if (!base) return lastKey;
@@ -51,7 +52,7 @@ export function drawBlendedFrame(
       ? exactNext
       : null;
 
-  const key = `${position.index}:${overlay ? blend : 0}:${base.src}`;
+  const key = `${position.index}:${overlay ? blend : 0}:${focus.x}:${focus.y}:${base.src}`;
   if (key === lastKey) return lastKey;
 
   const context = canvas.getContext('2d');
@@ -62,7 +63,9 @@ export function drawBlendedFrame(
       canvas.width,
       canvas.height,
       image.naturalWidth,
-      image.naturalHeight
+      image.naturalHeight,
+      focus.x,
+      focus.y
     );
     context.drawImage(image, x, y, width, height);
   };

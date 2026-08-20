@@ -207,12 +207,27 @@
   /* The subject sits right of centre in every plate; on a portrait crop that
      would push it off-frame, so bias the crop back toward it. */
   .chapter-media {
-    background-position: 68% center;
+    background-position: 68% 58%;
   }
-  .chapter-scrim {
+  /* The copy moves under the frame on phones, so the protection has to move
+     with it — bottom-heavy instead of left-heavy.
+     The second selector is not redundant: the tone-ignition rule above is
+     `.chapter-runway.is-scrub .chapter.tone-ignition .chapter-scrim`, which
+     out-specifies a bare `.chapter-scrim` and would otherwise keep painting
+     the desktop left-hand gradient on a phone — where there is no left-hand
+     column to protect and the plume is directly behind the text. Matching that
+     specificity and coming later in the file is what makes this win. */
+  .chapter-scrim,
+  .chapter-runway.is-scrub .chapter.tone-ignition .chapter-scrim {
     background:
-      linear-gradient(180deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.3) 38%, transparent 58%),
-      linear-gradient(180deg, transparent 42%, rgba(0, 0, 0, 0.72) 78%, rgba(0, 0, 0, 0.9) 100%);
+      linear-gradient(180deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.28) 34%, transparent 52%),
+      linear-gradient(
+        180deg,
+        transparent 32%,
+        rgba(0, 0, 0, 0.55) 58%,
+        rgba(0, 0, 0, 0.84) 78%,
+        rgba(0, 0, 0, 0.95) 100%
+      );
   }
   .chapter {
     align-items: flex-end;
