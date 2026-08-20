@@ -202,17 +202,18 @@
     linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, calc(0.6 + var(--lift) * 0.12)) 100%);
 }
 
-/* The orbit plate's camera pushes in across the shot, so by the end of the
-   runway the bright white fuselage has grown into the type column. Insetting
-   the plate on black was tried and rejected: its background is not pure black
-   (stars, Earth glow) so the pad read as a second, flatter black, and the
-   Earth's limb terminated in a hard horizontal line.
+/* `deep` — for plates whose subject grows or spreads into the type column over
+   the runway. Both the assembly (the camera arcs and widens it) and the orbit
+   plate (the camera pushes in) end far larger than they start.
 
+   Insetting those plates on black was tried and rejected for the orbit one: its
+   background is not pure black — stars, Earth glow — so the pad read as a
+   second, flatter black and the limb terminated in a hard horizontal line.
    Protecting the column with the scrim instead costs nothing, leaves the plate
    full-bleed, and has no seam to notice. The gradient holds near-opaque a good
-   way further right than the default so the copy sits on black at every point
+   way further right than the default, so the copy sits on black at every point
    in the shot rather than only at the start. */
-.chapter-runway.is-scrub .chapter.tone-orbit .chapter-scrim {
+.chapter-runway.is-scrub .chapter.tone-deep .chapter-scrim {
   background:
     linear-gradient(
       90deg,
@@ -251,7 +252,7 @@
      specificity and coming later in the file is what makes this win. */
   .chapter-scrim,
   .chapter-runway.is-scrub .chapter.tone-ignition .chapter-scrim,
-  .chapter-runway.is-scrub .chapter.tone-orbit .chapter-scrim {
+  .chapter-runway.is-scrub .chapter.tone-deep .chapter-scrim {
     background:
       linear-gradient(180deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.28) 34%, transparent 52%),
       linear-gradient(

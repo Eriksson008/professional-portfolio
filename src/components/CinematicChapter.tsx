@@ -40,10 +40,11 @@ export interface CinematicChapterProps {
   children?: ReactNode;
   /**
    * Which scrim treatment the plate needs. `ignition` deepens with scroll as
-   * the plume brightens; `orbit` holds the type column dark further right,
-   * because that plate's camera pushes in. Both are in chapters.css.
+   * the plume brightens; `deep` holds the type column dark much further right,
+   * for plates whose subject grows into it over the runway. Both live in
+   * chapters.css.
    */
-  tone?: 'cool' | 'ignition' | 'orbit';
+  tone?: 'cool' | 'ignition' | 'deep';
   /**
    * Fractional sub-range of the sequence to play, e.g. `[0, 0.68]`.
    * Used to split the person-reveal between this chapter and the contact
