@@ -466,6 +466,44 @@ img {
   /* Slight depth for the module settle-in animation. */
   perspective: 1200px;
 }
+
+/* Enterprise entries are the longest and the only sanitized ones — they run
+   full width so the explaining has room, and so the three kinds are told apart
+   by layout rather than by colour. */
+.project-grid.grid-enterprise {
+  grid-template-columns: 1fr;
+}
+
+.project-group + .project-group {
+  margin-top: clamp(2.4rem, 5vw, 3.6rem);
+}
+.project-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  margin: 0 0 1.15rem;
+  font-weight: 400;
+}
+.project-group-kind {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text);
+  flex: none;
+}
+.project-group-rule {
+  height: 1px;
+  width: clamp(1.5rem, 5vw, 3.5rem);
+  background: var(--line-strong);
+  flex: none;
+}
+.project-group-note {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--faint);
+}
 /* Card surface lives in premium.css (.glow-panel / .sys-card). */
 .pc-head {
   display: flex;
