@@ -118,9 +118,9 @@ export interface FramePosition {
  * is what the renderer used to draw. The cost is temporal: a sequence spread
  * over a multi-thousand-pixel runway advances one frame per ~10-15 px of scroll
  * at the densities this page ships, so scrolling slowly walks a staircase of
- * held stills. That is a
- * resolution problem, not a frame-time problem — the benchmark measured paint
- * cost (already stall-free) and could not see it.
+ * held stills. That is a resolution problem, not a frame-time problem — the
+ * benchmark measured paint cost, which was already stall-free, and could not
+ * see it.
  *
  * Returning the fraction lets the renderer dissolve between two adjacent frames
  * instead of snapping. Adjacent frames of a 24 fps camera move differ very

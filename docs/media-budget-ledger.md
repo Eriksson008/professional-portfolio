@@ -37,7 +37,9 @@ intended outcome: the expensive part of this work is the existing footage, and t
 for. No generation is initiated whose cost could push the cumulative total over the allocation.
 
 Chapter 08 (orbit/contact) is planned as a **free reuse** of the ascent sequence's tail frames as a
-living still. Priority 3 is only spent if that reuse is visibly inadequate.
+living still. Priority 3 is only spent if that reuse is visibly inadequate. *(This is the plan as
+written before generating; what actually shipped is recorded under the ledger below — the ascent
+tail turned out too busy for a quiet close, and splitting the person-reveal worked better.)*
 
 ## Ledger
 
@@ -54,9 +56,10 @@ Four paid calls. Three of the four produced keepers; the fourth ($0.12) is the o
 
 Priority 3 (a dedicated orbit/upper-atmosphere asset) was **planned but not bought.** The contact
 scene needed a visual anchor once the person-reveal moved to chapter 02, and the answer that worked
-was free: the reveal is *split* rather than duplicated — chapter 02 plays it from black to the point
-the face begins to read, and the contact scene picks the same move up at 0.55 of the clip and
-resolves it to the lit frame. Two windows on one continuous camera move. Buying a third clip would
+was free, so the brief's chapter 08 ships as the contact scene it already was rather than as a new
+plate. The reveal is *split* rather than duplicated: chapter 02 plays it from black to the point the
+face begins to read, and the contact scene picks the same move up at 0.55 of the clip and resolves
+it to the lit frame. Two windows on one continuous camera move. Buying a third clip would
 have cost $0.35 and made the contact section worse, because a face beside a call to action does work
 that a vapour trail does not.
 

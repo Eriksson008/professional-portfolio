@@ -107,12 +107,22 @@ How it works (`src/components/AstronautHero.tsx` + `src/styles/hero.css`):
   (`#b6bac5`), and white-alpha glass surfaces (bg `rgba(255,255,255,0.045)`, 1 px border
   `rgba(255,255,255,0.12)`, `backdrop-filter: blur(18px)`, radius 22 px). No colorful gradients,
   no neon; a cool `#8ec5ff` accent exists in tokens for sparing use.
-- **Sections** follow a mission frame: 01 Mission Summary → 02 Impact Telemetry (glass metric
-  cards) → 03 Project Modules (cards settle from a subtle rotateX) → 04 Systems & Skills →
-  05 Career Trajectory → 06 Contact Transmission (black glass panel).
+- **Structure** is a launch narrative followed by a document. Three unnumbered, scroll-scrubbed
+  film chapters sit under the opening hero — *The engineer* → *Ignition* → *Liftoff* — and then
+  the numbered sheets resume: 01 Mission Summary → 02 Impact Telemetry (glass metric cards) →
+  03 Systems in flight (one real production pipeline, drawn as a rail) → 04 Selected work
+  (grouped by kind; enterprise entries run full width) → 05 Systems & Skills → 06 Career
+  Trajectory → 07 Contact Transmission (black glass panel). The chapters carry no sheet number
+  on purpose: the numbered marks belong to the document, and interleaving the two numbering
+  systems would imply the film beats and the sections are the same kind of thing.
 - **Reduced motion:** the global kill rule plus explicit `animation: none` overrides in
   `hero.css` (needed because near-zero `animation-duration` does not cancel `animation-delay`) —
   the hero renders fully resolved and static on the poster.
+- **Cinematic media is generated, not committed.** `npm run dev`, `npm run build` and
+  `docker compose up --build` all ship chapters 02-04 as *static posters*, because the frame
+  sequences are git-ignored and only the Pages workflow runs the generator. To see them scrub
+  locally, run `node scripts/generate-hero-media.mjs` once (needs ffmpeg on PATH); it is
+  idempotent and skips anything already present. `--check` reports what is missing.
 - **Testing locally:** `npm run dev` (the printed port may shift to 8791/8792 etc. if 8790 is
   busy) — check ~1440 px, ~768 px, and ~375 px widths, and again with
   `prefers-reduced-motion: reduce` enabled in devtools.

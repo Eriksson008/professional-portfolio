@@ -30,12 +30,12 @@ export const clientAssistFlow: SystemStage[] = [
   {
     name: 'Extraction',
     tech: 'Logstash',
-    role: 'Pipelines stream those records continuously out of the platform.',
+    role: 'Pipelines stream those records out of the platform into the index.',
   },
   {
     name: 'Index',
     tech: 'Elasticsearch',
-    role: 'The data becomes queryable outside the CRM — and without consuming a read-only licence.',
+    role: 'The data becomes queryable outside the CRM — and without consuming a read-only license.',
   },
   {
     name: 'Retrieval',
@@ -50,7 +50,7 @@ export const clientAssistFlow: SystemStage[] = [
   {
     name: 'Interface',
     tech: 'React',
-    role: 'Business users ask in natural language and get an answer with its basis.',
+    role: 'Business users ask in natural language, and the answer comes back grounded in the indexed records.',
   },
 ];
 

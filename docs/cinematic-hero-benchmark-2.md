@@ -1,5 +1,14 @@
 # Experiment 2 — current MP4 vs optimized MP4 vs 97 frames vs 193 frames
 
+> **The frame renderer changed after this was measured (2026-08-19).** `B97`/`B193` now
+> cross-dissolve between adjacent frames instead of snapping to the nearest one, so the canvas
+> candidates do two `drawImage` calls per paint rather than one. The numbers below were taken on
+> the single-draw renderer and are **not** re-measured here. Chapters 02-04, which use the new
+> renderer, were measured separately and are stall-free on the same patterns
+> (`tasks/2026-08-19-cinematic-launch-narrative.md`); the conclusions of this experiment — pixels
+> not bits, frames over video, 97 over 193 — are unaffected, but a like-for-like re-run of
+> `?hero=frames-97` has not been done.
+
 Branch `experiment/cinematic-media-followup` (child of `experiment/cinematic-media-converter`).
 Experiment 1 lives in [`cinematic-hero-benchmark.md`](./cinematic-hero-benchmark.md) and is **not
 superseded** — its results stand and its branch is unchanged.

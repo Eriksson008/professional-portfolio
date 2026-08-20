@@ -73,19 +73,25 @@ test('every chapter names a sequence, an anchor id and an accessible label', () 
 });
 
 // Chapter copy is public-facing text in a public repo, and the repo's rule is
-// that only git-verifiable or directly documented figures may appear. Copy is
-// the easiest place to break that by accident, so any number written into a
-// chapter title or body has to already exist in highlights.ts.
-test('chapter copy introduces no figure that is not already a highlight', () => {
-  const known = new Set(
-    highlights.map((h) => h.value.replace(/[^0-9]/g, '')).filter(Boolean)
-  );
+// that only git-verifiable or directly documented figures may appear.
+//
+// The guard is "no digits at all" rather than "no digit that isn't a
+// highlight". Checking against highlight values is far too weak: highlights
+// contain 1, 3 and 7, so "took 3 weeks" or "one of 7 tools" would pass while
+// being exactly the invented figure the rule exists to stop. Every real figure
+// on these chapters is rendered from `liftoffFigures()`, so prose has no
+// legitimate reason to carry a number, and the strict form is both simpler and
+// harder to slip past.
+test('chapter prose states no figures — every number goes through highlights.ts', () => {
   const copy = [...source.matchAll(/^\s{2}(?:title|body): '([^']*)'/gm)].map((m) => m[1]);
   assert.ok(copy.length >= 6, `expected title+body for 3 chapters, found ${copy.length}`);
+  assert.ok(highlights.length > 0, 'highlights.ts is empty; the figures have nowhere to come from');
   for (const line of copy) {
-    for (const figure of line.match(/\d[\d,.]*/g) ?? []) {
-      const bare = figure.replace(/[^0-9]/g, '');
-      assert.ok(known.has(bare), `chapter copy states "${figure}", which is not in highlights.ts`);
-    }
+    const digits = line.match(/\d/g);
+    assert.equal(
+      digits,
+      null,
+      `chapter prose contains a figure ("${line.slice(0, 60)}…"). Put it in highlights.ts and render it as a figure instead.`
+    );
   }
 });

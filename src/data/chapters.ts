@@ -50,7 +50,10 @@ export const liftoffChapter: Chapter = {
   id: 'liftoff',
   eyebrow: 'Liftoff',
   title: 'What it has added up to.',
-  body: 'Figures that can be checked, not estimated — commit history, ticket history, and a performance record.',
+  // Names only the evidence the four displayed figures actually rest on:
+  // commit history (750+, #1), team scope (7 engineers), and the performance
+  // record (3 yrs). Ticket history backs a highlight this chapter does not show.
+  body: 'Figures that can be checked, not estimated — commit history, team scope, and a performance record.',
   sequence: 'liftoff',
   poster: media('liftoff-poster.jpg'),
   start: media('liftoff-start.jpg'),
