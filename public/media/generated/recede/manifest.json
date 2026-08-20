@@ -1,0 +1,49 @@
+{
+  "name": "recede",
+  "generatedBy": "cinematic-media-converter/scripts/extract-frames.mjs",
+  "generatedAt": "2026-08-20T14:33:27.150Z",
+  "command": "node extract-frames.mjs media-src/recede-source.mp4 --outdir public/media/generated --name recede --widths 1440,1080,720 --format webp --quality 82 --every 1",
+  "source": {
+    "file": "C:\\Users\\eriks\\Repositories\\professional-portfolio\\media-src\\recede-source.mp4",
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "duration": 5.041667,
+    "frames": 121
+  },
+  "every": 1,
+  "frameCount": 121,
+  "format": "webp",
+  "quality": 82,
+  "alpha": null,
+  "tiers": [
+    {
+      "width": 1440,
+      "height": 810,
+      "dir": "w1440",
+      "pattern": "frame-%04d.webp",
+      "count": 121,
+      "bytes": 2082334,
+      "averageBytes": 17209
+    },
+    {
+      "width": 1080,
+      "height": 608,
+      "dir": "w1080",
+      "pattern": "frame-%04d.webp",
+      "count": 121,
+      "bytes": 1432694,
+      "averageBytes": 11840
+    },
+    {
+      "width": 720,
+      "height": 406,
+      "dir": "w720",
+      "pattern": "frame-%04d.webp",
+      "count": 121,
+      "bytes": 835222,
+      "averageBytes": 6903
+    }
+  ],
+  "totalBytes": 4350250
+}

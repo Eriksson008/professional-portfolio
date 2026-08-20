@@ -34,7 +34,7 @@ const VIDEO_DIR = join(GENERATED, 'astronaut-hero-video');
  *
  * `every` is the source-frame decimation. The hero takes every other frame of a
  * 193-frame master (193 = 2*96 + 1, so frame 0 and frame 192 both survive); the
- * four launch-narrative beats take every frame of their 121-frame masters,
+ * five launch-narrative beats take every frame of their 121-frame masters,
  * because they are the page's highest-intensity stretch and the one place worth
  * spending frame density on.
  *
@@ -50,6 +50,7 @@ const SEQUENCES = [
   { name: 'ignition', source: 'media-src/ignition-source.mp4', every: 1 },
   { name: 'liftoff', source: 'media-src/liftoff-source.mp4', every: 1 },
   { name: 'orbit', source: 'media-src/orbit-source.mp4', every: 1 },
+  { name: 'recede', source: 'media-src/recede-source.mp4', every: 1 },
 ];
 
 /** The master the optimized desktop MP4 encode is built from (hero only). */

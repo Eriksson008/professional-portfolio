@@ -55,7 +55,7 @@ test('the engineer chapter still summarises the paragraph it came from', () => {
 });
 
 test('every chapter names a sequence, an anchor id and an accessible label', () => {
-  const CHAPTERS = 4;
+  const CHAPTERS = 5;
   const ids = [...source.matchAll(/^\s{2}id: '([^']+)'/gm)].map((m) => m[1]);
   assert.equal(ids.length, CHAPTERS, `expected ${CHAPTERS} chapters, found ${ids.length}`);
   assert.equal(new Set(ids).size, ids.length, 'two chapters share an anchor id');
@@ -90,7 +90,7 @@ test('every chapter names a sequence, an anchor id and an accessible label', () 
 // harder to slip past.
 test('chapter prose states no figures — every number goes through highlights.ts', () => {
   const copy = [...source.matchAll(/^\s{2}(?:title|body): '([^']*)'/gm)].map((m) => m[1]);
-  assert.ok(copy.length >= 8, `expected title+body for 4 chapters, found ${copy.length}`);
+  assert.ok(copy.length >= 10, `expected title+body for 5 chapters, found ${copy.length}`);
   assert.ok(highlights.length > 0, 'highlights.ts is empty; the figures have nowhere to come from');
   for (const line of copy) {
     const digits = line.match(/\d/g);

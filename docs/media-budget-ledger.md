@@ -80,6 +80,62 @@ coasting on orbit with its engines shut down") and every one of the four came ba
 The general lesson, which is why it is written down: when a generator keeps adding something,
 telling it *why* the thing should not be there works better than telling it not to add it.
 
+### Round 3 — retakes and the receding shot
+
+Two of round 2's keepers were rejected on review and are re-bought here. Both rejections are worth
+reading, because neither was a quality lottery — each had a nameable cause and a repeatable fix.
+
+| # | Asset | Model | Attempt | Cost | Keep? | Running total |
+| ---: | --- | --- | ---: | ---: | --- | ---: |
+| 10 | Assembly clip — retake, camera-only motion | Kling 2.5 Turbo Pro | 2 | $0.35 | pending | $2.35 |
+| 11 | Orbit still — retake, "unmarked hull" (4 images) | Seedream v4 | 3 | $0.12 | no — neon limb, text still present | $2.47 |
+| 12 | Receding still, round A (4 images) | Seedream v4 | 1 | $0.12 | no — side view, neon limb, glowing bells | $2.59 |
+| 13 | Orbit still — retake, softened limb (4 images) | Seedream v4 | 4 | $0.12 | **yes — `orbit-c-02`** | $2.71 |
+| 14 | Receding still, round B (4 images) | Seedream v4 | 2 | $0.12 | **yes — `recede-b-02`, mirrored** | $2.83 |
+| 15 | Receding clip | Kling 2.5 Turbo Pro | 1 | $0.35 | pending | $3.18 |
+| 16 | Orbit clip — retake from the clean plate | Kling 2.5 Turbo Pro | 2 | $0.35 | pending | $3.53 |
+
+**Why the assembly clip was rejected.** Its parts appeared to *merge* rather than connect: surfaces
+dissolved into each other as gaps closed, part count was not conserved between frames, and the
+convergence never actually completed. That is not a bad seed. Video models have no rigid-body solver
+and no contact constraints — an assembly shot asks for articulated part motion, contact events and
+conserved topology, which are the three things they are worst at, simultaneously. Re-prompting the
+same motion is buying lottery tickets against the architecture.
+
+**Three more things this round taught, all of them cheap and all of them repeatable:**
+
+1. **Naming a colour makes the model shout it.** Asking for a "thin luminous cyan airglow line" — an
+   attempt to deliver the site's cool accent physically — produced a hard neon band across the limb
+   in every image, worse than the plate it was meant to replace. Describing the *quality* instead
+   ("a soft low-contrast band of pale blue-white haze that fades gradually into black … subtle,
+   diffuse, softly out of focus, NOT a bright band, NOT a glowing line") produced exactly the
+   restrained limb wanted. Two rounds, $0.24, and the lesson is that colour words are amplitude
+   controls, not hue controls.
+2. **"Unmarked hull" language alone did not remove the lettering — scale did.** Round 3's first
+   orbit retake still carried faint markings. What actually worked was the third instruction:
+   *"the spacecraft is SMALL in the frame, occupying only about one sixth of the frame width, far
+   enough away that no surface detail smaller than a panel line is resolvable."* Glyphs cannot
+   render below roughly 15–20 px, so denying the resolution denies the text. Structural, not
+   persuasive.
+3. **Do not put brand names in a prompt, even as a style reference.** "Apple restraint" was in the
+   receding-shot prompt as a taste cue. One of the four images came back with a literal **Apple
+   logo** rendered in the corner of frame. Brand tokens are objects to these models, not adjectives.
+   The word is out of every prompt here.
+
+**The fix is to stop asking.** The parts are frozen and the *camera* moves instead — a slow lateral
+arc with a gentle push. Parallax over static geometry is the thing image-to-video does almost
+perfectly, because no part ever approaches another and there is no contact to hallucinate. It also
+reverses cleanly, which a convergence does not: played backwards, an assembly is a disassembly, and
+this page is scrubbed in both directions.
+
+**Why the orbit plate was rejected: invented lettering on the hull.** Negative prompts had no effect,
+and could not have: the text was in the *still* the clip was animated from, so the video model was
+faithfully reproducing it. And at the image stage, "space shuttle" carries NASA livery as part of the
+concept — a negative down-weights that prior rather than outweighing it. What works is to remove the
+prior instead: call it a *"white winged orbital spaceplane"*, describe the hull positively
+(*"pristine unmarked matte-white thermal tile panels, bare tile only, livery-free"*), and keep the
+vehicle small enough in frame that glyphs cannot resolve at all.
+
 ### Reframing instead of regenerating
 
 The assembly plate came back composed too far left — the subject ran nearly to the left edge, where

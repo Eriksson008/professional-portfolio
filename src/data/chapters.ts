@@ -64,6 +64,26 @@ export const orbitChapter: Chapter = {
   label: 'Operating in production',
 };
 
+/**
+ * The exhale. Intensity 2 — the quietest cinematic beat, and the last one
+ * before the page becomes a document. The plate is also the emptiest in the
+ * sequence, which is deliberate: the typography earns the most room exactly
+ * where the story stops pushing.
+ */
+export const recedeChapter: Chapter = {
+  id: 'recede',
+  eyebrow: 'Endurance',
+  title: 'The handover is part of the build.',
+  // experience.ts (code review, mentoring and onboarding, release ownership)
+  // and profile.about[2] ("a dependable owner for the people and platforms I
+  // support"). The closing clause is the site's own positioning line.
+  body: 'Code review, onboarding, and release ownership — so a system does not depend on the person who wrote it. Built to launch, scale, and endure.',
+  sequence: 'recede',
+  poster: media('recede-poster.jpg'),
+  start: media('recede-start.jpg'),
+  label: 'Handover and maintainability',
+};
+
 export const liftoffChapter: Chapter = {
   id: 'liftoff',
   eyebrow: 'Liftoff',

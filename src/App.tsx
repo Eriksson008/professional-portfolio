@@ -11,6 +11,7 @@ import {
   liftoffChapter,
   liftoffFigures,
   orbitChapter,
+  recedeChapter,
 } from './data/chapters';
 import { MediaBand } from './components/MediaBand';
 import { About } from './components/About';
@@ -43,14 +44,14 @@ export default function App() {
             experimental implementation (experiment/cinematic-media-converter). */}
         <HeroSwitch />
 
-        {/* The launch narrative: four scroll-scrubbed film beats between the
+        {/* The launch narrative: five scroll-scrubbed film beats between the
             opening hero and the document sections — hardware is assembled, it
-            ignites, it leaves the ground carrying the figures, and then it
-            flies. All four are one component over different frame sequences
-            (see CinematicChapter), and their intensity runs 4-5-4-3 so the
+            ignites, it leaves the ground carrying the figures, it flies, and
+            it goes on without us. All five are one component over sequences
+            (see CinematicChapter), and their intensity runs 4-5-4-3-2 so the
             page peaks in the middle of the launch and comes down from there
             rather than staying loud. */}
-        <CinematicChapter {...engineerChapter} />
+        <CinematicChapter {...engineerChapter} tone="deep" />
         <CinematicChapter {...ignitionChapter} tone="ignition" />
         <CinematicChapter {...liftoffChapter} tone="ignition">
           <dl className="chapter-figures">
@@ -65,9 +66,10 @@ export default function App() {
             ))}
           </dl>
         </CinematicChapter>
-        {/* The deceleration. Ignition and liftoff peak; this one glides, and
-            the page keeps coming down from here. */}
-        <CinematicChapter {...orbitChapter} tone="orbit" />
+        {/* The deceleration. Ignition and liftoff peak; these two glide, and
+            the page keeps coming down from here into the document. */}
+        <CinematicChapter {...orbitChapter} tone="deep" />
+        <CinematicChapter {...recedeChapter} tone="deep" />
 
         <About />
         <Highlights />
