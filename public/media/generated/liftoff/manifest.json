@@ -1,0 +1,49 @@
+{
+  "name": "liftoff",
+  "generatedBy": "cinematic-media-converter/scripts/extract-frames.mjs",
+  "generatedAt": "2026-08-20T02:39:35.270Z",
+  "command": "node extract-frames.mjs media-src/liftoff-source.mp4 --outdir public/media/generated --name liftoff --widths 1440,1080,720 --format webp --quality 82 --every 1",
+  "source": {
+    "file": "C:\\Users\\eriks\\Repositories\\professional-portfolio\\media-src\\liftoff-source.mp4",
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "duration": 5.041667,
+    "frames": 121
+  },
+  "every": 1,
+  "frameCount": 121,
+  "format": "webp",
+  "quality": 82,
+  "alpha": null,
+  "tiers": [
+    {
+      "width": 1440,
+      "height": 810,
+      "dir": "w1440",
+      "pattern": "frame-%04d.webp",
+      "count": 121,
+      "bytes": 3758742,
+      "averageBytes": 31064
+    },
+    {
+      "width": 1080,
+      "height": 608,
+      "dir": "w1080",
+      "pattern": "frame-%04d.webp",
+      "count": 121,
+      "bytes": 2707720,
+      "averageBytes": 22378
+    },
+    {
+      "width": 720,
+      "height": 406,
+      "dir": "w720",
+      "pattern": "frame-%04d.webp",
+      "count": 121,
+      "bytes": 1694162,
+      "averageBytes": 14001
+    }
+  ],
+  "totalBytes": 8160624
+}

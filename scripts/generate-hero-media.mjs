@@ -26,13 +26,27 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const force = process.argv.includes('--force');
 const checkOnly = process.argv.includes('--check');
 
-const SOURCE = join(root, 'media-src/astronaut-hero-source.mp4');
 const GENERATED = join(root, 'public/media/generated');
-const SEQUENCE = 'astronaut-hero-97';
 const VIDEO_DIR = join(GENERATED, 'astronaut-hero-video');
 
-/** Every other source frame. 193 = 2*96 + 1, so this keeps frame 0 and frame 192. */
-const EVERY = 2;
+/**
+ * Every scroll-scrubbed sequence on the page, and the master each derives from.
+ *
+ * `every` is the source-frame decimation. The hero and the person-reveal take
+ * every other frame of a 193-frame master (193 = 2*96 + 1, so frame 0 and frame
+ * 192 both survive); the two launch beats take every frame of a 121-frame
+ * master, because they are the page's highest-intensity moment and are the one
+ * place worth spending frame density on.
+ */
+const SEQUENCES = [
+  { name: 'astronaut-hero-97', source: 'media-src/astronaut-hero-source.mp4', every: 2 },
+  { name: 'astronaut-reveal-97', source: 'media-src/astronaut-finale-source.mp4', every: 2 },
+  { name: 'ignition', source: 'media-src/ignition-source.mp4', every: 1 },
+  { name: 'liftoff', source: 'media-src/liftoff-source.mp4', every: 1 },
+];
+
+/** The master the optimized desktop MP4 encode is built from (hero only). */
+const SOURCE = join(root, SEQUENCES[0].source);
 const TIERS = [1440, 1080, 720];
 const WEBP_QUALITY = 82;
 
@@ -63,22 +77,24 @@ if (!existsSync(SOURCE)) {
 // The tracked manifest is the runtime contract: the hero reads frame count,
 // tier widths and the filename pattern from it. Regenerating must satisfy it,
 // so it is read as the specification rather than rewritten.
-const manifestPath = join(GENERATED, SEQUENCE, 'manifest.json');
-if (!existsSync(manifestPath)) {
-  console.error(`Missing tracked manifest: ${manifestPath}`);
-  process.exit(2);
+for (const seq of SEQUENCES) {
+  const path = join(GENERATED, seq.name, 'manifest.json');
+  if (!existsSync(path)) {
+    console.error(`Missing tracked manifest: ${path}`);
+    process.exit(2);
+  }
+  seq.manifest = JSON.parse(readFileSync(path, 'utf8'));
 }
-const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 
-function tierComplete(width) {
-  const tier = manifest.tiers.find((t) => t.width === width);
+function tierComplete(seq, width) {
+  const tier = seq.manifest.tiers.find((t) => t.width === width);
   if (!tier) return false;
-  const dir = join(GENERATED, SEQUENCE, tier.dir);
+  const dir = join(GENERATED, seq.name, tier.dir);
   if (!existsSync(dir)) return false;
   return readdirSync(dir).filter((f) => f.endsWith('.webp')).length === tier.count;
 }
 
-const framesPresent = TIERS.every(tierComplete);
+const framesPresent = SEQUENCES.every((seq) => TIERS.every((w) => tierComplete(seq, w)));
 const encodePresent = existsSync(join(VIDEO_DIR, ENCODE.name));
 
 if (checkOnly) {
@@ -93,43 +109,49 @@ if (framesPresent && encodePresent && !force) {
 
 requireFfmpeg();
 
-// ---------- frame sequence ----------
-for (const width of TIERS) {
-  const tier = manifest.tiers.find((t) => t.width === width);
-  if (!tier) {
-    console.error(`Manifest has no tier for width ${width}; it and this script disagree.`);
-    process.exit(2);
-  }
-  const dir = join(GENERATED, SEQUENCE, tier.dir);
-  if (tierComplete(width) && !force) {
-    console.log(`  w${width} ... already complete (${tier.count} frames)`);
-    continue;
-  }
-  rmSync(dir, { recursive: true, force: true });
-  mkdirSync(dir, { recursive: true });
+// ---------- frame sequences ----------
+for (const seq of SEQUENCES) {
+  console.log(`${seq.name} (every ${seq.every}):`);
+  for (const width of TIERS) {
+    const tier = seq.manifest.tiers.find((t) => t.width === width);
+    if (!tier) {
+      console.error(`Manifest for ${seq.name} has no tier for width ${width}; it and this script disagree.`);
+      process.exit(2);
+    }
+    const dir = join(GENERATED, seq.name, tier.dir);
+    if (tierComplete(seq, width) && !force) {
+      console.log(`  w${width} ... already complete (${tier.count} frames)`);
+      continue;
+    }
+    rmSync(dir, { recursive: true, force: true });
+    mkdirSync(dir, { recursive: true });
 
-  process.stdout.write(`  w${width} ... `);
-  try {
-    run('ffmpeg', [
-      '-v', 'error', '-y', '-i', SOURCE,
-      '-vf', `select='not(mod(n\\,${EVERY}))',scale=${width}:-2:flags=lanczos`,
-      '-fps_mode', 'passthrough',
-      '-c:v', 'libwebp', '-lossless', '0', '-quality', String(WEBP_QUALITY), '-preset', 'picture',
-      join(dir, tier.pattern),
-    ]);
-  } catch (err) {
-    console.error(`\nffmpeg failed for width ${width}:\n${err.stderr?.toString().slice(0, 800) ?? err.message}`);
-    process.exit(1);
-  }
+    process.stdout.write(`  w${width} ... `);
+    try {
+      run('ffmpeg', [
+        '-v', 'error', '-y', '-i', join(root, seq.source),
+        '-vf', `select='not(mod(n\,${seq.every}))',scale=${width}:-2:flags=lanczos`,
+        '-fps_mode', 'passthrough',
+        '-c:v', 'libwebp', '-lossless', '0', '-quality', String(WEBP_QUALITY), '-preset', 'picture',
+        join(dir, tier.pattern),
+      ]);
+    } catch (err) {
+      console.error(`
+ffmpeg failed for ${seq.name} w${width}:
+${err.stderr?.toString().slice(0, 800) ?? err.message}`);
+      process.exit(1);
+    }
 
-  const files = readdirSync(dir).filter((f) => f.endsWith('.webp'));
-  // A short sequence would silently skip frames at runtime; fail the build instead.
-  if (files.length !== tier.count) {
-    console.error(`\nExpected ${tier.count} frames at w${width}, produced ${files.length}. Refusing to ship a short sequence.`);
-    process.exit(1);
+    const files = readdirSync(dir).filter((f) => f.endsWith('.webp'));
+    // A short sequence would silently skip frames at runtime; fail the build instead.
+    if (files.length !== tier.count) {
+      console.error(`
+Expected ${tier.count} frames at ${seq.name} w${width}, produced ${files.length}. Refusing to ship a short sequence.`);
+      process.exit(1);
+    }
+    const bytes = files.reduce((sum, f) => sum + statSync(join(dir, f)).size, 0);
+    console.log(`${files.length} frames, ${fmt(bytes)}`);
   }
-  const bytes = files.reduce((sum, f) => sum + statSync(join(dir, f)).size, 0);
-  console.log(`${files.length} frames, ${fmt(bytes)}`);
 }
 
 // ---------- optimized desktop encode ----------
@@ -159,4 +181,4 @@ if (encodePresent && !force) {
   console.log(fmt(statSync(encodePath).size));
 }
 
-console.log('Hero media ready.');
+console.log('Cinematic media ready.');
