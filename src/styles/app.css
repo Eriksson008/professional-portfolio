@@ -575,8 +575,10 @@ img {
     text-transform: uppercase;
     color: var(--silver-2);
     border-top: 1px solid var(--line-soft);
-    /* A comfortable thumb target without a button's visual weight. */
+    /* A comfortable thumb target without a button's visual weight. The padding
+       above plus the line box lands at 42px, so the floor is stated. */
     min-height: 44px;
+    box-sizing: border-box;
   }
   .pc-more-toggle::after {
     content: '+';
@@ -587,6 +589,14 @@ img {
   }
   .pc-more[open] > .pc-more-toggle::after {
     content: '–';
+  }
+  /* Inline text links inside a card are ~24px of line box, which is a poor
+     thumb target. Padding them out to the 44px floor costs nothing visually
+     because they already sit alone at the end of the card. */
+  .pc-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
   .pc-more-toggle:focus-visible {
     outline: 2px solid var(--accent-bright);

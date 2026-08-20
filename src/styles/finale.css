@@ -267,3 +267,14 @@
     top: calc(100dvh - 56.25vw);
   }
 }
+
+@media (max-width: 719px) {
+  /* The source link is an 18px line box on a phone — under any reasonable
+     thumb-target floor. It sits alone at the end of the scene, so padding it
+     out to 44px changes nothing about the composition. */
+  .finale-repo a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
