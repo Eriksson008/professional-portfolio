@@ -151,7 +151,9 @@ the face it would have replaced.
 
 ## PASS 3 — Cost plan
 
-See `docs/media-budget-ledger.md`. The cap is a fixed allocation agreed in advance.
+See `docs/media-budget-ledger.md` for the policy, the verified pricing and every paid call. The
+cap is a fixed allocation agreed with the repository owner and is deliberately not written down in
+this public repo; spend is.
 
 ## Verification
 

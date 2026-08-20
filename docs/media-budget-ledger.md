@@ -1,10 +1,29 @@
 # Media budget ledger — fal.ai
 
-**Budget: a fixed allocation agreed in advance. Hard cap — not a target.**
+## Budget policy
 
-Every paid generation is recorded below, before and after. Pricing is **verified against the fal.ai
-model pages, not assumed**; the verification date is recorded so a future session knows how stale it
-is.
+Generated media for this site runs against a **fixed allocation agreed with the repository owner
+before any generation starts.** It is a hard cap, not a target. The figure itself is deliberately
+**not published here**: this repository is public, and an account balance is personal detail with no
+public value. It stays with the owner; what stays here is everything needed to audit spending
+against it.
+
+The rules the allocation is spent under:
+
+1. **Reuse before regenerate.** Media that already exists is free. Nothing is remade because a new
+   direction appeared — only because the existing asset genuinely cannot serve.
+2. **Verify pricing before every call.** Prices are read from the provider's own model page and
+   recorded below with the date checked. Never assumed, never remembered.
+3. **Cheap test, then one keeper.** Draft at the lowest sensible cost, inspect, refine the prompt,
+   buy the production asset once. No buying five variants hoping one lands.
+4. **Stop when it is good enough.** Remaining allocation is not a reason to spend.
+5. **Secondary work waits.** A supporting asset is only bought once the primary sequence it supports
+   is already satisfactory.
+6. **Record every paid call**, including the ones that produced nothing usable. A ledger that hides
+   its failures is not a ledger.
+
+Per-call costs are recorded in full, because model pricing is public and the running total is what
+makes the policy checkable without the cap being stated.
 
 ## Verified pricing (checked 2026-08-19)
 
@@ -14,34 +33,12 @@ is.
 | Kling 2.5 Turbo Pro (image-to-video) | `fal-ai/kling-video/v2.5-turbo/pro/image-to-video` | **$0.35 / 5 s clip**, $0.07/s beyond | fal.ai model page |
 | Veo 3.1 (image-to-video) | `fal-ai/veo3.1/image-to-video` | **$0.20/s no audio** (720p/1080p), $0.40/s with audio | fal.ai model page |
 
-Audio is never wanted here — the sequence is decoded to silent canvas frames — so any Veo call must
-disable it. Paying the audio rate would be pure waste.
-
-## Plan (PASS 3)
-
-Priority order is the brief's. The ceiling below is the **maximum** projected spend, assuming every
-planned attempt is used; the expectation is to stop earlier.
-
-| Pri | Asset | Model | Attempts planned | Unit | Max projected |
-| --- | --- | --- | ---: | ---: | ---: |
-| 1 | Canonical shuttle/engine still | Seedream v4 | 12 images | $0.03 | $0.36 |
-| 2 | Ignition draft — camera & prompt test | Kling 2.5 Turbo Pro 5 s | 3 | $0.35 | $1.05 |
-| 2 | Ignition production keeper | Kling 2.5 Turbo Pro 5 s | 3 | $0.35 | $1.05 |
-| 2 | Keeper fallback if Kling underperforms | Veo 3.1 5 s, audio off | 2 | $1.00 | $2.00 |
-| 3 | Orbit / upper-atmosphere close (only if needed) | Kling 2.5 Turbo Pro 5 s | 2 | $0.35 | $0.70 |
-| — | Contingency for re-prompts | — | — | — | $3.00 |
-| | | | | **Ceiling** | **$8.16** |
-
-**$8.16 maximum projected against the allocation.** The plan does not approach the cap, which is the
-intended outcome: the expensive part of this work is the existing footage, and that is already paid
-for. No generation is initiated whose cost could push the cumulative total over the allocation.
-
-Chapter 08 (orbit/contact) is planned as a **free reuse** of the ascent sequence's tail frames as a
-living still. Priority 3 is only spent if that reuse is visibly inadequate. *(This is the plan as
-written before generating; what actually shipped is recorded under the ledger below — the ascent
-tail turned out too busy for a quiet close, and splitting the person-reveal worked better.)*
+Audio is never wanted here — every sequence is decoded to silent canvas frames — so any Veo call
+must disable it. Paying the audio rate would be pure waste.
 
 ## Ledger
+
+### Round 1 — ignition and launch
 
 | # | Asset | Model | Attempt | Cost | Keep? | Running total |
 | ---: | --- | --- | ---: | ---: | --- | ---: |
@@ -50,28 +47,46 @@ tail turned out too busy for a quiet close, and splitting the person-reveal work
 | 3 | Ignition clip (ch 03), i2v from `A-01`, 5 s | Kling 2.5 Turbo Pro | 1 | $0.35 | **yes — first attempt, keeper** | $0.59 |
 | 4 | Liftoff clip (ch 04), i2v from clip 3's last frame, 5 s | Kling 2.5 Turbo Pro | 1 | $0.35 | **yes — first attempt, keeper** | $0.94 |
 
-**Final — spent: $0.94 · remaining: most of the allocation.**
+Three of four calls produced keepers. Round B ($0.12) is the only waste: asking for the nozzle in
+the "lower right quadrant" produced a mirrored composition in all four images, and round A's best
+frame was already sitting where it needed to be.
 
-Four paid calls. Three of the four produced keepers; the fourth ($0.12) is the only waste.
+Rule 3 is why this was cheap — the ignition and liftoff clips both landed on their first attempt,
+and no variants were bought once they had.
 
-Priority 3 (a dedicated orbit/upper-atmosphere asset) was **planned but not bought.** The contact
-scene needed a visual anchor once the person-reveal moved to chapter 02, and the answer that worked
-was free, so the brief's chapter 08 ships as the contact scene it already was rather than as a new
-plate. The reveal is *split* rather than duplicated: chapter 02 plays it from black to the point the
-face begins to read, and the contact scene picks the same move up at 0.55 of the clip and resolves
-it to the lit frame. Two windows on one continuous camera move. Buying a third clip would
-have cost $0.35 and made the contact section worse, because a face beside a call to action does work
-that a vapour trail does not.
+### Round 2 — assembly and orbit
 
-Priority 4 (nice-to-haves) was not started. Nothing on the page needed it.
+Bought under rule 5: the primary ignition/launch sequence was already satisfactory and unchanged
+before any of this was requested, and both launch clips are untouched by this round.
 
-### Notes on why this came in so far under plan
+| # | Asset | Model | Attempt | Cost | Keep? | Running total |
+| ---: | --- | --- | ---: | ---: | --- | ---: |
+| 5 | Exploded-assembly still (4 images) | Seedream v4 | 1 | $0.12 | **yes — `04` is the canonical plate** | $1.06 |
+| 6 | Orbit still, round A (4 images) | Seedream v4 | 1 | $0.12 | no — main engines lit | $1.18 |
+| 7 | Orbit still, round B (4 images) | Seedream v4 | 2 | $0.12 | **yes — `b-02` is the canonical plate** | $1.30 |
+| 8 | Assembly clip (ch 02), i2v from still 5, 5 s | Kling 2.5 Turbo Pro | 1 | $0.35 | **yes — first attempt, keeper** | $1.65 |
+| 9 | Orbit clip (ch 05), i2v from still 7, 5 s | Kling 2.5 Turbo Pro | 1 | $0.35 | **yes — first attempt, keeper** | $2.00 |
 
-Round A produced a usable canonical still immediately, and the ignition clip landed on its first
-attempt — locked camera, credible ignition ramp, blue-white core with the orange confined to the
-transient, and the left half of frame preserved as black type space. The brief's instruction was to
-stop when the result is good enough rather than buy variations, so no further attempts were bought.
+**Spent across both rounds: $2.00.**
 
-Round B ($0.12) is the one wasted spend: asking for the nozzle in the "lower right quadrant"
-produced a mirrored composition in all four images. Round A's best frame already sat at roughly 70 %
-across and 65 % down — close to the held helmet it has to cut from — so the reframe was unnecessary.
+Round A of the orbit still ($0.12) is round 2's only waste, and it is a useful failure to record:
+the composition, the flare palette and the Earth limb were all right, but the three main engine
+bells glowed bright cyan. That is both physically wrong — an orbiter coasting on orbit has its main
+engines shut down — and precisely the "arcade-style glowing engines" the direction ruled out. It was
+not fixable by grading, because the glow is light in the plate rather than a colour cast over it.
+Round B named the physics explicitly ("COLD, DARK and COMPLETELY UNLIT … because the vehicle is
+coasting on orbit with its engines shut down") and every one of the four came back correct.
+
+The general lesson, which is why it is written down: when a generator keeps adding something,
+telling it *why* the thing should not be there works better than telling it not to add it.
+
+### Reframing instead of regenerating
+
+The assembly plate came back composed too far left — the subject ran nearly to the left edge, where
+every other plate on this page leaves the left half empty for the typography. That is normally a
+regenerate. It was not, because a 16:9 plate rendered into a 16:9-ish viewport has no horizontal
+crop room left at render time, so no amount of focal-point adjustment could fix it either.
+
+Instead the master is reframed in ffmpeg: the content is inset to 75 % and placed right of centre on
+black. The plate is already black, so the pad is invisible and the left third comes free. Cost: zero.
+The exact command is in the commit that added it.

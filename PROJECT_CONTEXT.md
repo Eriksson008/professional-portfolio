@@ -27,7 +27,7 @@ twice and then stays down.
 - **The person-reveal is split, not moved.** Chapter 02 plays it from black to the point the face
   begins to read; the contact scene picks the same move up at 0.55 of the clip and resolves it to
   the lit frame. One plate, two beats, and contact keeps the face beside its call to action.
-- **Two new media masters**, generated with fal.ai for **$0.94 of the allocation** and graded down
+- **Two new media masters**, generated with fal.ai for **$0.94** against a fixed allocation, and graded down
   to the site's palette. Ledger: `docs/media-budget-ledger.md`.
 - **Measured (production build):** all three chapters stall-free — 0 frames over 16.7 ms in slow,
   fast and reverse scrub. LCP 124 ms, CLS 0.0066. The chapters add **0 bytes and 0 requests to
