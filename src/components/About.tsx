@@ -4,7 +4,7 @@ import { profile } from '../data/profile';
 
 export function About() {
   return (
-    <Section id="about">
+    <Section id="about" alt>
       <SectionHeader
         index="01"
         eyebrow="Mission Summary"

@@ -295,8 +295,30 @@ img {
    ============================================================ */
 .section {
   padding-block: clamp(4.5rem, 9vw, 7rem);
-  border-bottom: 1px solid var(--line-soft);
+  /* --section-line, not --line-soft: this rule is transparent in the light
+     appearance and engraved in the dark one. See the token for the measurement
+     that decided it. The other --line-soft borders on this page (nav, cards,
+     the footer's top edge) are unaffected and keep their hairline. */
+  border-bottom: 1px solid var(--section-line);
 }
+/* The tinted band strictly alternates: about, systems and skills sit on it;
+   highlights, projects and experience sit on paper. No two adjacent document
+   sections share a surface, which is what makes the surface itself the section
+   boundary now that light draws no rule between them - see --section-line.
+   `every document section alternates its surface` in appearance.test.ts holds
+   this; it is not an incidental arrangement.
+
+   It was previously assigned by meaning rather than by position - the three
+   instrument sections tinted, the three narrative ones on paper - which put
+   highlights and systems adjacent and identically tinted. That intent was
+   invisible at any tint the contrast floor allows, and what it actually
+   produced was two sections the reader could not tell apart. Alternation is
+   the thing a reader can perceive, so it wins.
+
+   Starting the alternation on the tinted surface rather than the paper one is
+   deliberate: it keeps the tint the minority surface (a third of the document
+   by height, as before). Starting on paper would have inverted that and left
+   two thirds of the document tinted. */
 .section-alt {
   background: var(--ink-2);
 }

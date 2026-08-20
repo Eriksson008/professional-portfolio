@@ -7,7 +7,7 @@ import { highlights } from '../data/highlights';
 
 export function Highlights() {
   return (
-    <Section id="highlights" alt>
+    <Section id="highlights">
       <SectionHeader
         index="02"
         eyebrow="Impact Telemetry"

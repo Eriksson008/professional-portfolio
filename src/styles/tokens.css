@@ -9,7 +9,7 @@
   /* Surfaces */
   --black: #f4f4f1;
   --ink: #eeeee9;
-  --ink-2: #e7e7e2;
+  --ink-2: #dfdfd9;
 
   /* Glass */
   --panel: rgba(255, 255, 255, 0.74);
@@ -24,6 +24,22 @@
   --line-soft: rgba(17, 19, 24, 0.08);
   --line-strong: rgba(17, 19, 24, 0.24);
 
+  /* The rule between document sections - deliberately its own token, not
+     --line-soft, because the two appearances want opposite things here.
+
+     In light it is transparent. Measured on the rendered page, a full-bleed
+     dark hairline on paper was 1.18:1 against the page while the band change
+     it was announcing was only 1.13:1 - the divider was a stronger edge than
+     the division. It also ran across the empty gutters, where there is nothing
+     to separate, and it disappeared completely where the page's biggest
+     division is (against the black finale, a dark line on black). Light marks
+     a section with the surface step and the numbered masthead instead.
+
+     Kept as a transparent border rather than deleted so both appearances lay
+     out to the same pixel. Dark keeps the rule: white at 7% on black is
+     engraved instrument chrome, which is the device this always was. */
+  --section-line: transparent;
+
   /* Scrim behind a full-screen surface. Deliberately NOT redefined in the dark
      block: it darkens what is behind it in either appearance, so inverting it
      would make it a light wash over a light page and stop it doing its job. */
@@ -34,19 +50,29 @@
   --muted: #505864;
   /* Was #69717c, which measured 3.98-4.48:1 depending on the surface - under
      the 4.5:1 AA floor everywhere in the light appearance, and invisible
-     without computing it. The binding surface is --ink-2 (#e7e7e2, the
-     .section-alt band), where .sheet-no and .sheet-eyebrow both sit; this
-     value clears 4.61:1 there and more on lighter surfaces. Same hue, same
-     R+8/R+19 channel offsets - only darker. See appearance.test.ts, which
-     fails if any small-text token drops back under the floor. */
-  --faint: #5f6772;
+     without computing it. Darkened again from #5f6772 when the .section-alt
+     band moved to #dfdfd9: with no section rule in light, the band step is
+     what separates one section from the next, and these greys are exactly
+     what caps how far that step can go. They move as one package - darkening
+     the band without darkening them drops .sheet-no under AA.
+
+     The binding surface is --ink-2 (#dfdfd9, the .section-alt band), where
+     .sheet-no and .sheet-eyebrow both sit; this value clears 4.90:1 there and
+     more on lighter surfaces. Same hue, same R+8/R+19 channel offsets - only
+     darker. See contrast.test.ts, which fails if any small-text token drops
+     back under the floor. */
+  --faint: #565e69;
 
   /* Silver - labels, hairlines, resting states */
+  /* Unchanged when the band darkened, and now the tightest pair in the light
+     palette: 4.68:1 on --ink-2, against --faint's 4.90:1. Still more margin
+     than the palette had before (4.61:1), but it is the one to move first if
+     --ink-2 is ever darkened again. */
   --silver: #59616c;
   /* Identical to --faint in this appearance (they diverge only in dark), so it
      failed identically and is corrected identically. Kept as its own token
      rather than merged: the dark palette gives them different values. */
-  --silver-2: #5f6772;
+  --silver-2: #565e69;
   --silver-line: rgba(61, 68, 78, 0.28);
   --silver-wash: rgba(61, 68, 78, 0.08);
 
@@ -132,6 +158,7 @@
     --line: rgba(255, 255, 255, 0.12);
     --line-soft: rgba(255, 255, 255, 0.07);
     --line-strong: rgba(255, 255, 255, 0.22);
+    --section-line: rgba(255, 255, 255, 0.07);
 
     --text: #f7f7f5;
     --muted: #b6bac5;
@@ -174,7 +201,13 @@
 }
 
 /* The opening film, closing film, and navigation are one uninterrupted black
-   mission-control frame. They intentionally do not invert with the document. */
+   mission-control frame. They intentionally do not invert with the document.
+
+   .site-footer is deliberately NOT in this list. Pinning it dark was tried when
+   the light appearance was reviewed - it closes the frame, so the page ends the
+   way it opens - and was rejected: in light the footer reads better as the
+   document's own last surface than as end credits. The pale strip below the
+   black finale is intended. */
 .hero,
 .chapter,
 .finale,

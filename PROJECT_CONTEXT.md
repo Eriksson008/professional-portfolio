@@ -9,7 +9,61 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
-**2026-08-20 (latest) — the launch is one continuous film, plates repaired, and a phone layout
+**2026-08-20 (latest) — the light appearance separates sections by surface, not by a rule.**
+
+The hairline between document sections looked wrong, and measuring it said why: rendered on the
+page, the rule was **1.18:1** against the paper while the band change it was announcing was only
+**1.13:1**. *The divider was a stronger edge than the division.* It also ran full-bleed across the
+empty gutters, where there is nothing to separate, and it disappeared entirely at the page's
+biggest division — a dark line drawn on the black finale. At the Impact → Systems seam it was worse
+still: a **12-level dark line across a field measuring 230.6 on both sides**, a rule dividing
+nothing. The device itself was sound; it was **dark-appearance grammar inherited into light without
+being re-judged** — white at 7% on black is engraved instrument chrome, the same rule on warm paper
+is a crack.
+
+So the appearances now use **opposite devices**, which is what the new `--section-line` token
+encodes: `transparent` in light, `rgba(255,255,255,0.07)` in dark. It is deliberately its own token
+rather than `--line-soft`, which still draws every other hairline on the page (nav, cards, the
+footer's top edge). Light is left with the surface step doing the dividing, so the step had to
+become something a reader can actually feel: `--ink-2` **#e7e7e2 → #dfdfd9**, a band step of
+**1.13:1 → 1.214:1** (ΔL\* 7.4, 21 levels).
+
+**That step was capped by the text tokens, and this is the durable part.** `--faint`/`--silver-2`
+at `#5f6772` needed 4.5:1 against the band, which held `--ink-2` no darker than ≈`#e5e5e0` — a
+change of ΔL\* 0.7, imperceptible. **A felt band step was arithmetically impossible without
+darkening the small-text greys too**, so both moved as one package (`#5f6772` → `#565e69`, same hue
+and the same R+8/R+19 channel offsets). Accessibility improved rather than degraded: the tightest
+pair in the light palette is now `--silver` on `--ink-2` at **4.68:1**, against the old palette's
+tightest of 4.61:1. The dark palette is untouched — it redefines every changed token — and the
+section rule there resolves to the identical `rgba(255,255,255,0.07)` it always had.
+
+Why 21 levels and not more: the film-grain overlay modulates **±3 levels**, so the old 13-level
+step sat at ~4× grain and dissolved into it, while 21 is ~7× and reads clean. Past roughly ΔL\* 12
+a tint stops reading as a surface and starts reading as a coloured stripe. The border is kept as a
+*transparent* 1px rather than removed, so both appearances lay out to the same pixel.
+
+**The document sections now strictly alternate**, because with no rule between them two adjacent
+sections sharing a background have nothing between them at all — which is exactly what Impact and
+Systems had. The band had been assigned by *meaning* (instrument sections tinted, narrative
+sections on paper); that intent was invisible at any tint the contrast floor allows, and what it
+produced was two sections a reader could not tell apart. Position beats meaning here because
+position is the thing that can be perceived. The alternation **starts on the tinted surface**
+(`about`), which is not cosmetic: starting on paper would have required four component changes
+instead of two and left **two thirds of the document tinted**, since Projects is by far the largest
+section. Starting on the tint keeps it the minority surface at **33.6%**, as it was before.
+`every document section alternates its surface` in `src/appearance.test.ts` holds this — it reads
+render order from `App.tsx` and the `alt` flag from each component, and was confirmed to fail on the
+old arrangement before being kept.
+
+Known trade-off, accepted: Impact's metric cards moved from tint to paper, so they sit **8 levels**
+above their surface instead of 24. The drop shadow carries them.
+
+**Pinning `.site-footer` into the black frame was tried and rejected.** It closes the frame — the
+page would end the way it opens — but in light the footer reads better as the document's own last
+surface than as end credits. The rejection is recorded in `tokens.css` beside the pinned-dark
+selector list so it is not silently re-tried.
+
+**2026-08-20 — the launch is one continuous film, plates repaired, and a phone layout
 measured rather than assumed.**
 
 **Ignition and liftoff are a single chapter.** They were two, which unpinned and repinned the sticky
@@ -147,6 +201,12 @@ elements on the page with alpha-composited backgrounds: worst case 4.61:1 light,
 opaque surface token and was confirmed to **fail on the old value** before being kept, plus a
 second test guarding the grey scale's ordering so a future contrast fix can't invert the hierarchy.
 Not a redesign: the tokens stay separate (they diverge in dark) and only the value moved.
+
+> **Superseded 2026-08-20 (values only, not the finding).** `--faint`/`--silver-2` are now
+> `#565e69` and `--ink-2` is `#dfdfd9`, measuring **4.90:1** on the band rather than 4.61:1. They
+> moved again for a different reason — the band had to darken enough to separate sections on its
+> own, and these greys are what caps how far it can go. The finding above still stands, and
+> `contrast.test.ts` is what binds both changes.
 
 **2026-08-14 — Ask Fredrik became a real mobile concierge instead of a floating widget.** Driven by
 real-device iPhone testing: with the keyboard up, the welcome text, the suggestion chips and the
