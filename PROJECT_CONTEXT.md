@@ -9,7 +9,38 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
-**2026-08-14 (latest) — the cinematic hero was measured against four alternatives; the default did
+**2026-08-19 (latest) — the site became an eight-chapter launch narrative, and the frame renderer
+learned to draw between frames.** Three scroll-scrubbed chapters now sit between the opening hero
+and the document sections — the helmeted explorer becomes a person, that person's work ignites, and
+the career figures arrive on the ascent — followed by a new, deliberately quiet **Systems in flight**
+section that draws one real production pipeline. Page intensity runs 5·4·5·4·2·2·1·1: it peaks
+twice and then stays down.
+
+- **Sub-frame blending.** The frame renderer rounded to the nearest frame and skipped the repaint
+  when it had not changed, so slow scroll walked a staircase of held stills — a *temporal*
+  resolution problem that benchmark 2 could not see, because it measured paint cost (already
+  stall-free). The renderer now cross-dissolves adjacent frames. Measured: **12 distinct rendered
+  images across 11 px of scroll**, one full frame interval, where the old renderer produced 1.
+- **One renderer, not two.** The chapters are the frame-sequence hero generalised — same runway,
+  same loader, same draw path (`CinematicChapter` → `useHeroRunway` + `useHeroFrames` +
+  `drawBlendedFrame`). No second scroll system was introduced.
+- **The person-reveal is split, not moved.** Chapter 02 plays it from black to the point the face
+  begins to read; the contact scene picks the same move up at 0.55 of the clip and resolves it to
+  the lit frame. One plate, two beats, and contact keeps the face beside its call to action.
+- **Two new media masters**, generated with fal.ai for **$0.94 of the allocation** and graded down
+  to the site's palette. Ledger: `docs/media-budget-ledger.md`.
+- **Measured (production build):** all three chapters stall-free — 0 frames over 16.7 ms in slow,
+  fast and reverse scrub. LCP 124 ms, CLS 0.0066. The chapters add **0 bytes and 0 requests to
+  initial load**; frames are fetched on approach. Bundle 98.05 kB gz (+1.5 kB). Under reduced
+  motion: 0 frames, 0 manifests, 0 videos, and all three chapters still fully composed.
+- **A production-only bug was found and fixed by measuring the production build.** The chapters
+  fetched no frames at all outside `vite dev`: `useNearViewport` read `ref.current` in an effect
+  keyed on the ref object, which is null on first commit and never re-ran. StrictMode's
+  double-invoke hid it in development entirely. The hook now takes the element.
+
+Full detail and the measurement tables: `tasks/2026-08-19-cinematic-launch-narrative.md`.
+
+**2026-08-14 — the cinematic hero was measured against four alternatives; the default did
 not change, but two candidates now ship alongside it for real-device comparison.** Two experiments
 compared the shipped MP4 scrub against a Three.js/R3F scene, 193- and 97-frame canvas sequences, and
 an optimized re-encode. **Three.js lost decisively** — 222 kB gzipped, the worst LCP of every

@@ -46,9 +46,21 @@ living still. Priority 3 is only spent if that reuse is visibly inadequate.
 | 1 | Canonical engine-bell still, round A (4 images) | Seedream v4 | 1 | $0.12 | **yes — `A-01` is the canonical still** | $0.12 |
 | 2 | Canonical still, round B — explicit placement (4 images) | Seedream v4 | 2 | $0.12 | no — model mirrored the composition | $0.24 |
 | 3 | Ignition clip (ch 03), i2v from `A-01`, 5 s | Kling 2.5 Turbo Pro | 1 | $0.35 | **yes — first attempt, keeper** | $0.59 |
-| 4 | Liftoff clip (ch 04 + 08 tail), i2v from clip 3's last frame, 5 s | Kling 2.5 Turbo Pro | 1 | $0.35 | pending inspection | $0.94 |
+| 4 | Liftoff clip (ch 04), i2v from clip 3's last frame, 5 s | Kling 2.5 Turbo Pro | 1 | $0.35 | **yes — first attempt, keeper** | $0.94 |
 
-**Spent: $0.94 · Remaining: the balance of the allocation**
+**Final — spent: $0.94 · remaining: most of the allocation.**
+
+Four paid calls. Three of the four produced keepers; the fourth ($0.12) is the only waste.
+
+Priority 3 (a dedicated orbit/upper-atmosphere asset) was **planned but not bought.** The contact
+scene needed a visual anchor once the person-reveal moved to chapter 02, and the answer that worked
+was free: the reveal is *split* rather than duplicated — chapter 02 plays it from black to the point
+the face begins to read, and the contact scene picks the same move up at 0.55 of the clip and
+resolves it to the lit frame. Two windows on one continuous camera move. Buying a third clip would
+have cost $0.35 and made the contact section worse, because a face beside a call to action does work
+that a vapour trail does not.
+
+Priority 4 (nice-to-haves) was not started. Nothing on the page needed it.
 
 ### Notes on why this came in so far under plan
 

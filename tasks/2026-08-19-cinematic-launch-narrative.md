@@ -87,7 +87,7 @@ Chapters, media source, and what is new. **Five of eight chapters need no new me
 | 05 | Systems in flight | Real architecture, DOM/CSS | none | no |
 | 06 | Selected work | Differentiated project environments | none | no |
 | 07 | Experience | Editorial timeline | none | no |
-| 08 | Final orbit / contact | Ascent tail as a living still | **reuse of 03/04** | no |
+| 08 | Contact | Second half of the person reveal | existing `astronaut-finale` | no |
 
 ### Motion spec
 
@@ -133,11 +133,21 @@ The page is not loud throughout, which is the point.
 
 The person reveal currently *is* the contact section (`AstronautFinale`, `id="contact"`) — media and
 contact CTAs share one component. Moving the reveal to chapter 02, as the brief directs, would strip
-contact of its visual.
+contact of its visual, and a face beside a call to action does work that a vapour trail does not.
 
-**Resolution:** the reveal moves to chapter 02; contact is re-anchored on the ascent tail as a
-living still (chapter 08). This costs no extra generation, and it completes the arc — person →
-ignition → flight → orbit → contact — rather than ending on the person we already met at the top.
+**Resolution (revised during implementation): split the reveal rather than move it.** Chapter 02
+plays the clip from black to the point the face begins to read (`range={[0, 0.68]}` over the frame
+sequence); the contact scene picks the same camera move up at 0.55 of the clip (`FILM_FROM`) and
+resolves it to the lit frame. The windows overlap slightly on purpose so the two read as continuous.
+
+One plate, two beats, no repeat — the reader meets the person in shadow at the top of the page and
+sees them resolved next to the contact actions. This also avoided buying a third clip for chapter 08
+and avoided surgery on `AstronautFinale`, which is the most intricate component in the repo (pinned
+and in-flow modes, two springs, a WebKit priming dance) and had no need to change beyond one offset.
+
+The original plan — re-anchor contact on the ascent tail as a living still — was dropped because the
+liftoff clip's tail is busy with sparks and vapour rather than quiet, so it made a worse close than
+the face it would have replaced.
 
 ## PASS 3 — Cost plan
 
@@ -147,3 +157,70 @@ See `docs/media-budget-ledger.md`. The cap is a fixed allocation agreed in advan
 
 `npm run lint`, `npm test`, `npm run build`, plus a browser walkthrough of every scroll section at
 slow/fast/reverse scrub, mobile width, and forced reduced motion.
+
+## PASS 9/10 — Measured results
+
+Production build (`npm run build`) served by `vite preview`, Chrome via Playwright, desktop
+1440×900 DPR 1, localhost. Sequences fully loaded before measuring, so these are scrubbing figures
+rather than loading figures — the same protocol as `docs/cinematic-hero-benchmark-2.md`.
+
+### Scroll smoothness — *frames over 16.7 ms / over 50 ms · longest frame*
+
+| Chapter | slow (8 s) | fast (1.2 s) | reverse (1.2 s) |
+| --- | --- | --- | --- |
+| 02 engineer | 0 / 0 · 8.6 ms † | 0 / 0 · 8.6 ms | 0 / 0 · 8.1 ms |
+| 03 ignition | 0 / 0 · 8.6 ms | 0 / 0 · 8.1 ms | 0 / 0 · 8.5 ms |
+| 04 liftoff | 0 / 0 · 9.5 ms | 0 / 0 · 8.1 ms | 0 / 0 · 8.6 ms |
+
+† Median of 5 runs. One run in five showed a single 23.2 ms frame; four showed none. An earlier
+first-run-after-load measurement showed one 52.9 ms frame that did not reproduce in any of nine
+subsequent runs.
+
+**Stall-free**, matching what benchmark 2 measured for the 97-frame hero candidate. Adding the
+sub-frame dissolve did not cost smoothness — it is one extra `drawImage` on an already-cheap paint.
+
+### The stepping fix, measured directly
+
+Sampling the ignition canvas at 1 px scroll increments across 11 px — one full frame interval at
+this runway length — produced **12 distinct rendered images out of 12 samples**. The previous
+renderer produced exactly **1** across the same span by construction: it rounded to the nearest
+frame and returned early when that frame had not changed.
+
+### Load and weight (cold cache, desktop)
+
+| | Value |
+| --- | --- |
+| LCP | **124 ms** |
+| CLS | **0.0066** |
+| Initial transfer | 9.24 MB over 16 requests |
+| — of which the pre-existing hero MP4 | 8.70 MB |
+| **Added by the three new chapters, before scrolling** | **0 bytes, 0 requests** |
+| After scrolling the whole page | 16.29 MB, 250 requests |
+| JS heap after full scroll | 15 MB |
+| JS bundle | 98.05 kB gzip (was 96.5 kB — **+1.5 kB** for three chapters and a new section) |
+
+The chapters cost nothing until they are approached, which is the whole point of gating the loader
+on `useNearViewport`. Desktop tier per chapter: reveal 2.44 MB, ignition 4.12 MB, liftoff 3.58 MB.
+
+### Mobile (390×844)
+
+All three chapters serve the **w720** tier — 97 + 121 + 121 = 339 frames, 1.05 / 1.69 / 1.62 MB,
+each fetched only on approach. Per benchmark 2, mobile has no smoothness problem in any
+representation and the decision there is bytes; these are in the same range as the 1.85 MB phone
+tier that benchmark already accepted.
+
+### Reduced motion
+
+Forced `prefers-reduced-motion: reduce`, whole page scrolled:
+
+- **0** frame requests, **0** manifest requests, **0** video requests.
+- All three chapters still fully composed — copy, eyebrow, all four editorial figures.
+- Runways collapse 2303 px → 641 px; no canvas is mounted at all.
+
+### Known gaps
+
+- `AstronautHeroFrames` (the `?hero=frames-97` candidate, not the default) still centre-crops on
+  phones where the MP4 hero pans via `object-position`. Pre-existing, and deliberately not changed
+  here because that component is the benchmarked candidate.
+- Per-tier frame decimation (fewer frames in `w720` than `w1440`) would cut mobile bytes further.
+  The manifest format already supports a different `count` per tier; the extractor does not.

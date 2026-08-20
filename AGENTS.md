@@ -118,11 +118,25 @@ too**; keep the two in sync when a shared fact changes.
   switcher is stripped from production builds; the query parameter works on the live site so the
   candidates can be compared on real devices. **The default is not changed by this** — adopting a
   new default is a separate decision.
-- **Generated hero media is regenerated in CI, never committed.** `.github/workflows/deploy.yml`
-  runs the workspace skills' scripts against `media-src/` before the Vite build. Adding ~10 MB of
+- **Generated cinematic media is regenerated in CI, never committed.** `.github/workflows/deploy.yml`
+  runs `scripts/generate-hero-media.mjs` against `media-src/` before the Vite build. Adding ~30 MB of
   WebP frames and ~7 MB of MP4 to a public repo would be permanent (a force-push does not
-  un-publish), and the source they derive from is already tracked. If a frame hero is ever made
-  the default, this step becomes load-bearing rather than optional.
+  un-publish), and the sources they derive from are already tracked. **This step is now
+  load-bearing, not optional:** the launch chapters (2026-08-19) render frame sequences by default,
+  so skipping it ships a page whose chapters 02–04 silently fall back to posters.
+  - Four sequences are generated: `astronaut-hero-97` and `astronaut-reveal-97` (every other frame
+    of a 193-frame master) and `ignition` and `liftoff` (every frame of a 121-frame master — the
+    launch beats are the page's highest-intensity moment and get the frame density).
+  - Each sequence's `manifest.json` is **tracked** and is read as the specification; the script
+    fails the build rather than shipping a short sequence. Adding a sequence means adding it to
+    `SEQUENCES` *and* committing its manifest.
+- **The launch narrative is one component over four sequences.** `CinematicChapter` composes
+  `useHeroRunway` + `useHeroFrames` + `drawBlendedFrame`. Add a chapter by adding data to
+  `src/data/chapters.ts`, not by writing a second scroll system — a second one driving the same page
+  fights the first.
+- **`useNearViewport` takes an element, not a ref, and that is deliberate.** A ref is null on first
+  commit and an effect keyed on the ref object never re-runs; StrictMode's double-invoke hides this
+  in dev and the observer is simply never created in production. Do not "simplify" it back.
 - Content lives in `src/data/` (typed modules) — it is the single source of truth. Update data
   there, not inline in components.
 - Do **not** add a backend, database, auth, or external services unless explicitly requested.
