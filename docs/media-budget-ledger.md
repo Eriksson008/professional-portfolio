@@ -188,3 +188,13 @@ the pad read as a second, flatter black and the Earth's limb terminated in a har
 That plate is protected with a scrim instead (`tone-deep`), which costs nothing and has no edge.
 
 Measure before assuming: sample the luma either side of the intended pad boundary.
+
+### Round 5 — merging ignition and liftoff: $0.00
+
+Worth a line precisely because it cost nothing. Combining the two launch chapters into one
+continuous film was an **editing** problem, not a generation problem: the two masters already joined
+seamlessly, so the fix was `ffmpeg concat` plus a runway and copy change. **Total spend remains
+$5.06.**
+
+The reusable form: before buying a new generation, check whether the assets already bought can be
+cut together. Continuity is often a timeline decision rather than a prompt.

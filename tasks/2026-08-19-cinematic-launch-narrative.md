@@ -83,9 +83,8 @@ Chapters, media source, and what is new. **Five of eight chapters need no new me
 | # | Chapter | Media | Source | New? |
 | --- | --- | --- | --- | --- |
 | 01 | Exploration | Astronaut, helmet on | existing `astronaut-hero` | no |
-| 02 | The Engineer | Exploded assembly closing together | **new** `assembly` | **yes** |
-| 03 | Ignition | Engine bell → full thrust | **new** `ignition` | **yes** |
-| 04 | Liftoff | Ascent + editorial figures | **new** `liftoff` | **yes** |
+| 02 | The Engineer | Machined impeller dissolving into its drawing | **new** `impeller` | **yes** |
+| 03–04 | Ignition → Liftoff | One continuous film, two beats of copy | **new** `ascent` (241 f) | **yes** |
 | 05 | In flight | Orbiter coasting, Earth limb, one flare | **new** `orbit` | **yes** |
 | 06 | Endurance | Orbiter receding to a sunrise on the limb | **new** `recede` | **yes** |
 | — | Systems in flight | Real architecture, DOM/CSS | none | no |
@@ -295,3 +294,25 @@ approach.
 | recede | 121 | ~2.0 MB | ~0.9 MB |
 
 The two newest plates are the lightest on the page: they are mostly black, and black compresses.
+
+## Merging ignition and liftoff (2026-08-20)
+
+Two chapters became one. The seam between them was a sticky unpin/repin *and* a canvas swap from one
+frame sequence to another, at the exact moment the launch should have been most continuous.
+
+- Master: `ignition-source.mp4` + `liftoff-source.mp4` concatenated to **241 frames**, dropping
+  liftoff's frame 0 (the generator's re-render of ignition's last — the same instant twice).
+- Runway doubled (`runway="long"`, 560vh desktop / 400svh phone) so the frame density per pixel of
+  scroll is unchanged.
+- Copy carried as **beats** with `from`/`until` windows. The hand-over is *not* a cross-fade:
+  overlapping windows put two eyebrows and two headlines on top of each other. Ignition clears at
+  0.48, liftoff arrives at 0.50.
+- Beats stack in one grid cell while scrubbing; without a runway they flow as consecutive stanzas.
+  Both stay in the DOM and the accessibility tree throughout.
+
+**Measured:** beat opacities 1/0 → 0/0 → 0/1 with no overlap; **0 frames over 16.7 ms** on a
+12-second slow scrub, fast and reverse (longest 7.1 ms) despite being the longest single scrub on
+the page; 0 horizontal overflow at eight viewports 320–1920; reduced motion fetches nothing and
+renders both beats as visible stanzas.
+
+**Cost: $0.** A concatenation of existing masters.

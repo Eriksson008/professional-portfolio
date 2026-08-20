@@ -9,8 +9,18 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
-**2026-08-20 (latest) — six-beat launch narrative, repaired plates, and a phone layout measured
-rather than assumed.**
+**2026-08-20 (latest) — the launch is one continuous film, plates repaired, and a phone layout
+measured rather than assumed.**
+
+**Ignition and liftoff are a single chapter.** They were two, which unpinned and repinned the sticky
+runway — and swapped the canvas from one frame sequence to another — at exactly the moment the
+launch should have been most continuous. The master is now one 241-frame concatenation (the
+duplicated seed frame between them dropped), on a doubled runway, and the **copy** hands over
+instead: a chapter can carry *beats*, stanzas that fade in and out on their own windows of the same
+scroll while the film underneath never stops. The hand-over is deliberately not a cross-fade —
+overlapping two eyebrows and two headlines reads as a rendering fault, so ignition's copy is clear
+before liftoff's arrives, leaving a hairline of pure film between them. Cost: nothing; it is a
+concatenation of masters already paid for.
 
 Chapter 02 is no longer an exploded assembly: it is a machined impeller dissolving into its own
 engineering drawing — the line on paper and the thing that exists, in one object. The assembly
