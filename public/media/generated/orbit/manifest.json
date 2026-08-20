@@ -1,7 +1,7 @@
 {
   "name": "orbit",
   "generatedBy": "cinematic-media-converter/scripts/extract-frames.mjs",
-  "generatedAt": "2026-08-20T03:59:17.183Z",
+  "generatedAt": "2026-08-20T14:34:37.706Z",
   "command": "node extract-frames.mjs media-src/orbit-source.mp4 --outdir public/media/generated --name orbit --widths 1440,1080,720 --format webp --quality 82 --every 1",
   "source": {
     "file": "C:\\Users\\eriks\\Repositories\\professional-portfolio\\media-src\\orbit-source.mp4",
@@ -23,8 +23,8 @@
       "dir": "w1440",
       "pattern": "frame-%04d.webp",
       "count": 121,
-      "bytes": 4198760,
-      "averageBytes": 34700
+      "bytes": 2989872,
+      "averageBytes": 24710
     },
     {
       "width": 1080,
@@ -32,8 +32,8 @@
       "dir": "w1080",
       "pattern": "frame-%04d.webp",
       "count": 121,
-      "bytes": 3028126,
-      "averageBytes": 25026
+      "bytes": 2076052,
+      "averageBytes": 17157
     },
     {
       "width": 720,
@@ -41,9 +41,9 @@
       "dir": "w720",
       "pattern": "frame-%04d.webp",
       "count": 121,
-      "bytes": 1849650,
-      "averageBytes": 15286
+      "bytes": 1206306,
+      "averageBytes": 9969
     }
   ],
-  "totalBytes": 9076536
+  "totalBytes": 6272230
 }
