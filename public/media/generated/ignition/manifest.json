@@ -1,7 +1,7 @@
 {
   "name": "ignition",
   "generatedBy": "cinematic-media-converter/scripts/extract-frames.mjs",
-  "generatedAt": "2026-08-20T02:39:24.506Z",
+  "generatedAt": "2026-08-20T15:08:33.012Z",
   "command": "node extract-frames.mjs media-src/ignition-source.mp4 --outdir public/media/generated --name ignition --widths 1440,1080,720 --format webp --quality 82 --every 1",
   "source": {
     "file": "C:\\Users\\eriks\\Repositories\\professional-portfolio\\media-src\\ignition-source.mp4",
@@ -23,8 +23,8 @@
       "dir": "w1440",
       "pattern": "frame-%04d.webp",
       "count": 121,
-      "bytes": 4318410,
-      "averageBytes": 35689
+      "bytes": 4770204,
+      "averageBytes": 39423
     },
     {
       "width": 1080,
@@ -32,8 +32,8 @@
       "dir": "w1080",
       "pattern": "frame-%04d.webp",
       "count": 121,
-      "bytes": 3015732,
-      "averageBytes": 24923
+      "bytes": 3297508,
+      "averageBytes": 27252
     },
     {
       "width": 720,
@@ -41,9 +41,9 @@
       "dir": "w720",
       "pattern": "frame-%04d.webp",
       "count": 121,
-      "bytes": 1768586,
-      "averageBytes": 14616
+      "bytes": 1858968,
+      "averageBytes": 15363
     }
   ],
-  "totalBytes": 9102728
+  "totalBytes": 9926680
 }
