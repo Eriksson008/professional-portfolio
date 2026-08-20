@@ -4,6 +4,8 @@ import { MobileDock } from './components/MobileDock';
 import { useAnchorGlide } from './components/useAnchorGlide';
 import { useAskFredrik } from './components/useAskFredrik';
 import { HeroSwitch } from './components/HeroSwitch';
+import { CinematicChapter } from './components/CinematicChapter';
+import { engineerChapter, ignitionChapter, liftoffChapter, liftoffFigures } from './data/chapters';
 import { About } from './components/About';
 import { Highlights } from './components/Highlights';
 import { Projects } from './components/Projects';
@@ -32,6 +34,25 @@ export default function App() {
         {/* Renders AstronautHero unchanged unless ?hero= selects an
             experimental implementation (experiment/cinematic-media-converter). */}
         <HeroSwitch />
+
+        {/* The launch narrative. Three scroll-scrubbed film beats between the
+            opening hero and the document sections: the helmeted explorer of the
+            hero becomes a person, the person's work ignites, and the figures
+            arrive on the ascent. All three are the same component over
+            different frame sequences — see CinematicChapter. */}
+        <CinematicChapter {...engineerChapter} range={[0, 0.68]} />
+        <CinematicChapter {...ignitionChapter} tone="ignition" />
+        <CinematicChapter {...liftoffChapter} tone="ignition">
+          <dl className="chapter-figures">
+            {liftoffFigures().map((figure) => (
+              <div className="chapter-figure" key={figure.label}>
+                <dt>{figure.value}</dt>
+                <dd>{figure.label}</dd>
+              </div>
+            ))}
+          </dl>
+        </CinematicChapter>
+
         <About />
         <Highlights />
         <Projects />

@@ -36,6 +36,17 @@ const FILM_START = 0.18;
 const FILM_END = 0.78;
 
 /**
+ * Where in the source clip this scene starts.
+ *
+ * The person-reveal plate is shared with chapter 02 (`astronaut-reveal-97`),
+ * which plays it from black up to the point the face begins to read. This scene
+ * picks the same move up near there and carries it to the lit frame, so the
+ * asset is used twice without being seen twice. Kept as a fraction of duration
+ * rather than a timestamp so a re-encode of the master cannot silently move it.
+ */
+const FILM_FROM = 0.55;
+
+/**
  * In-flow mode: a progress ramp completes when the measured element's
  * top has risen to this fraction of the viewport.
  */
@@ -172,7 +183,15 @@ export function AstronautFinale() {
       // so the settled state still lands on the exact scrub-visible poster.
       const smoothed = clamp01(filmSmooth.get());
       const progress = smoothed >= 1 - FRAME / (dur - 0.05) ? 1 : smoothed;
-      const t = progress * (dur - 0.05);
+      // Play only the back of the clip. The same reveal now opens chapter 02,
+      // where it runs from black to the point the face begins to read; picking
+      // it up again here resolves that move to the lit frame instead of
+      // replaying it. Two windows on one continuous camera move — the reader
+      // meets the person in shadow at the top of the page and sees them
+      // resolved next to the contact actions, which is the one place a face
+      // earns its keep. Overlaps chapter 02's window slightly on purpose, so
+      // the two read as continuous rather than butt-jointed.
+      const t = (FILM_FROM + progress * (1 - FILM_FROM)) * (dur - 0.05);
       if (force || Math.abs(t - video.currentTime) > FRAME) video.currentTime = t;
     };
 

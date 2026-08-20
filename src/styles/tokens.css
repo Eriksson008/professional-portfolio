@@ -176,6 +176,7 @@
 /* The opening film, closing film, and navigation are one uninterrupted black
    mission-control frame. They intentionally do not invert with the document. */
 .hero,
+.chapter,
 .finale,
 .nav,
 .dock {

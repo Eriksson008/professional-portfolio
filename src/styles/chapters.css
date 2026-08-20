@@ -1,0 +1,246 @@
+/* ============================================================
+   Cinematic chapters — the launch narrative between the hero
+   and the quiet sections.
+
+   Chapters 02 (the engineer), 03 (ignition) and 04 (liftoff)
+   are all the same component over different frame sequences,
+   so they are all the same CSS. Each pins a frame under the
+   nav over a tall runway and publishes smoothed scroll
+   progress as --p (0..1) on .chapter, exactly as the hero
+   publishes it on .hero — the choreography block at the end
+   of this file reads it.
+
+   The copy sits centre-LEFT here, where the hero anchors it
+   bottom-left. Both existing plates and both generated ones
+   keep their subject right of centre and their left half
+   black, so the type column never moves across the cut from
+   02 into 03 — which is the seam that has to be invisible.
+   ============================================================ */
+
+.chapter-runway {
+  position: relative;
+}
+.chapter-runway.is-scrub {
+  height: 300vh;
+}
+
+@media (min-width: 720px) {
+  .chapter-runway.is-scrub {
+    height: 280vh;
+  }
+  /* Same compositor isolation the hero uses: the canvas repaints every frame
+     and must not drag the copy's layer into the recalc with it. */
+  .chapter-runway.is-scrub .chapter-canvas {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  .chapter-runway.is-scrub .chapter-panel > * {
+    will-change: transform, opacity;
+  }
+}
+
+.chapter {
+  position: relative;
+  min-height: calc(100svh - var(--nav-h));
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--black);
+  border-bottom: 1px solid var(--line-soft);
+}
+.chapter-runway.is-scrub .chapter {
+  position: sticky;
+  top: var(--nav-h);
+  height: calc(100svh - var(--nav-h));
+  min-height: 0;
+}
+
+/* ---- Media layer ---- */
+.chapter-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--black) center / cover no-repeat;
+}
+.chapter-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* Matches the hero's canvas reveal: the poster underneath is what shows
+     until enough of the sequence has landed to scrub. */
+  transition: opacity 0.6s var(--ease);
+}
+
+/* Scrim. The left-hand column is where the type lives, so that is where the
+   protection is heaviest; the right stays open so the hardware reads. */
+.chapter-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.86) 0%, rgba(0, 0, 0, 0.6) 34%, transparent 62%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, transparent 26%),
+    linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+/* ---- Copy ---- */
+.chapter-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+.chapter-panel {
+  max-width: 30rem;
+}
+.chapter-title {
+  margin: 0.75rem 0 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+  color: var(--text);
+  text-wrap: balance;
+}
+.chapter-body {
+  margin: 1.1rem 0 0;
+  max-width: 34ch;
+  color: var(--muted);
+  font-size: clamp(0.98rem, 1.25vw, 1.08rem);
+  line-height: 1.62;
+}
+
+/* ---- Editorial metrics (chapter 04) ----
+   Large numerals rather than dashboard cards: the figures carry the section,
+   so they are set at display scale with the label subordinate to them. */
+/* Two columns, not auto-fit. Four figures in a 30rem panel auto-fit to three,
+   which strands the fourth on a row of its own; and the labels are of unequal
+   height, so a 2x2 keeps the numerals on two clean baselines instead of three
+   ragged ones. */
+.chapter-figures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.1rem, 2.4vw, 1.9rem) clamp(1.25rem, 3vw, 2.4rem);
+  margin: 2.1rem 0 0;
+  padding: 0;
+  max-width: 26rem;
+}
+.chapter-figure dt {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.8rem, 3.6vw, 2.7rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.chapter-figure dd {
+  margin: 0.45rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  line-height: 1.4;
+  color: var(--faint);
+}
+
+/* ============================================================
+   Scroll choreography — reads --p, published by useHeroRunway.
+
+   Everything is opacity and translate. No filter: blur here,
+   for the reason motion.ts documents — re-rasterising a blur
+   on every scroll frame is main-thread work this page cannot
+   spare while a canvas is also repainting.
+   ============================================================ */
+
+.chapter-runway.is-scrub .chapter {
+  --p: 0;
+}
+
+.chapter-runway.is-scrub .chapter-panel > * {
+  /* --t is each element's own eased window within the runway. */
+  opacity: var(--t, 1);
+  transform: translate3d(0, calc((1 - var(--t, 1)) * 14px), 0);
+}
+
+.chapter-runway.is-scrub .sheet-mark {
+  --t: clamp(0, calc((var(--p) - 0.04) / 0.12), 1);
+}
+.chapter-runway.is-scrub .chapter-title {
+  --t: clamp(0, calc((var(--p) - 0.09) / 0.14), 1);
+}
+.chapter-runway.is-scrub .chapter-body {
+  --t: clamp(0, calc((var(--p) - 0.15) / 0.14), 1);
+}
+.chapter-runway.is-scrub .chapter-figures {
+  --t: clamp(0, calc((var(--p) - 0.22) / 0.16), 1);
+}
+
+/* The ignition beats brighten a great deal between the first frame and the
+   last. Deepening the type-side scrim as --p climbs keeps the copy at the same
+   contrast throughout instead of letting the plume wash it out at full thrust —
+   the one place the film's light is allowed to change the interface. */
+.chapter-runway.is-scrub .chapter.tone-ignition .chapter-scrim {
+  --lift: clamp(0, calc((var(--p) - 0.3) / 0.4), 1);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, calc(0.86 + var(--lift) * 0.1)) 0%,
+      rgba(0, 0, 0, calc(0.6 + var(--lift) * 0.18)) 34%,
+      transparent 62%
+    ),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, transparent 26%),
+    linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, calc(0.6 + var(--lift) * 0.12)) 100%);
+}
+
+/* ---- Phones ---- */
+@media (max-width: 719px) {
+  .chapter-runway.is-scrub {
+    height: 260vh;
+  }
+  .chapter-panel {
+    max-width: none;
+  }
+  .chapter-body {
+    max-width: none;
+  }
+  /* The subject sits right of centre in every plate; on a portrait crop that
+     would push it off-frame, so bias the crop back toward it. */
+  .chapter-media {
+    background-position: 68% center;
+  }
+  .chapter-scrim {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.3) 38%, transparent 58%),
+      linear-gradient(180deg, transparent 42%, rgba(0, 0, 0, 0.72) 78%, rgba(0, 0, 0, 0.9) 100%);
+  }
+  .chapter {
+    align-items: flex-end;
+    padding-bottom: clamp(2rem, 9vh, 4.5rem);
+  }
+}
+
+/* ---- Reduced motion ----
+   No runway, no canvas, no frames fetched. The chapter becomes a single
+   composed still with its copy over it — a complete composition rather than
+   the scrubbed one with the movement removed. */
+@media (prefers-reduced-motion: reduce) {
+  .chapter-runway,
+  .chapter-runway.is-scrub {
+    height: auto;
+  }
+  .chapter-runway.is-scrub .chapter {
+    position: relative;
+    top: auto;
+  }
+  .chapter {
+    min-height: min(78svh, 42rem);
+  }
+  .chapter-canvas {
+    transition: none;
+  }
+  .chapter-runway .chapter-panel > * {
+    opacity: 1;
+    transform: none;
+  }
+}

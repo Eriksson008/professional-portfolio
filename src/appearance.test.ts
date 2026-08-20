@@ -63,7 +63,13 @@ test('shared theme tokens provide intentional light and dark palettes', () => {
   assert.match(tokens, /color-scheme:\s*light;/);
   assert.match(tokens, /@media\s*\(prefers-color-scheme:\s*dark\)/);
   assert.match(tokens, /color-scheme:\s*dark;/);
-  assert.match(tokens, /\.hero,\s*\n\.finale,\s*\n\.nav/);
+  // Every cinematic surface is pinned dark in both appearances, so the film
+  // runs as one uninterrupted black frame rather than inverting mid-narrative.
+  // The chapters joined that list when the launch sequence was added; asserting
+  // the whole set is what stops a new one being added and quietly inverting.
+  // The last selector in the list is followed by ` {`, not a comma, so the
+  // block is matched whole rather than line by line.
+  assert.match(tokens, /\.hero,\s*\n\.chapter,\s*\n\.finale,\s*\n\.nav,\s*\n\.dock\s*\{/);
   assert.match(app, /#root:empty\s*\{[^}]*background:\s*#000000;/s);
 });
 

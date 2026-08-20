@@ -4,6 +4,7 @@ import App from './App.tsx';
 import './styles/tokens.css';
 import './styles/app.css';
 import './styles/hero.css';
+import './styles/chapters.css';
 import './styles/premium.css';
 import './styles/finale.css';
 import './styles/ask-fredrik.css';
