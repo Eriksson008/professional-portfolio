@@ -13,7 +13,6 @@ import {
   orbitChapter,
   recedeChapter,
 } from './data/chapters';
-import { MediaBand } from './components/MediaBand';
 import { About } from './components/About';
 import { Highlights } from './components/Highlights';
 import { SystemsInFlight } from './components/SystemsInFlight';
@@ -69,20 +68,12 @@ export default function App() {
         {/* The deceleration. Ignition and liftoff peak; these two glide, and
             the page keeps coming down from here into the document. */}
         <CinematicChapter {...orbitChapter} tone="deep" />
-        <CinematicChapter {...recedeChapter} tone="deep" />
+        <CinematicChapter {...recedeChapter} tone="deep" phoneFit="contain" />
 
         <About />
         <Highlights />
         <SystemsInFlight />
         <Projects />
-        {/* A breath in the longest stretch of reading on the page. Reuses the
-            orbit chapter's own plate — the same flight seen once in passing,
-            which is why a second look at it is not a repeat. */}
-        <MediaBand
-          src={`${import.meta.env.BASE_URL}media/orbit-band.jpg`}
-          alt="The orbiter coasting in sunlight above the curve of the Earth"
-          caption="Still flying"
-        />
         <Skills />
         <Experience />
         <AstronautFinale />

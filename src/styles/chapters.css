@@ -228,8 +228,16 @@
 
 /* ---- Phones ---- */
 @media (max-width: 719px) {
+  /* Matches the hero's phone runway (200svh in hero.css), and for the same
+     reasons. It was 260vh, which made every chapter *longer* than the opening
+     film on a phone — backwards, since the hero is the beat that has earned the
+     most scroll. Five chapters at 60vh less is three screens off the page.
+
+     `svh` rather than `vh`: on a phone `vh` is the *largest* viewport, so with
+     the toolbar showing, a `vh` runway is taller than it measures and the film
+     never quite reaches its final frame before unpinning. */
   .chapter-runway.is-scrub {
-    height: 260vh;
+    height: 200svh;
   }
   .chapter-panel {
     max-width: none;
@@ -241,6 +249,13 @@
      would push it off-frame, so bias the crop back toward it. */
   .chapter-media {
     background-position: 68% 58%;
+  }
+  /* Band chapters show the plate whole rather than cropping to fill, so the
+     poster underneath has to agree with the canvas or it shows through the
+     letterbox as a different framing during load. */
+  .chapter-runway.fit-band .chapter-media {
+    background-size: contain;
+    background-position: center 30%;
   }
   /* The copy moves under the frame on phones, so the protection has to move
      with it — bottom-heavy instead of left-heavy.
@@ -290,105 +305,6 @@
   }
   .chapter-runway .chapter-panel > * {
     opacity: 1;
-    transform: none;
-  }
-}
-
-/* ============================================================
-   Media band — a quiet full-bleed still between text sections.
-
-   Not a chapter: no runway, no canvas, no frame sequence. By
-   the time the reader reaches it the page has spent three
-   sections coming down from the launch, and a fourth scrubbed
-   sequence would restart an intensity that was deliberately
-   released — for another few megabytes and a hundred requests.
-   One image, one slow drift.
-   ============================================================ */
-
-.media-band {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  height: clamp(15rem, 42vh, 26rem);
-  background: var(--black);
-  border-block: 1px solid var(--line-soft);
-  /* The document sections sit inside .wrap; this deliberately does not, so it
-     reads as a break in the page rather than as another block within it. */
-  margin-inline: 0;
-}
-
-.media-band-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* The plate composes its subject right of centre against black, the same as
-     every other plate on the page. On a wide, short band the interesting third
-     is the upper right, so bias there rather than centre-cropping it out. */
-  object-position: 62% 42%;
-  /* A drift slow enough to be felt rather than watched: it crosses about 4% of
-     its own width over half a minute, and reverses rather than looping, so
-     there is no seam to notice. */
-  animation: band-drift 34s ease-in-out infinite alternate;
-  will-change: transform;
-}
-
-@keyframes band-drift {
-  from {
-    transform: scale(1.04) translate3d(0.6%, 0, 0);
-  }
-  to {
-    transform: scale(1.04) translate3d(-0.6%, -0.8%, 0);
-  }
-}
-
-.media-band-scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.24) 42%, transparent 70%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, transparent 30%),
-    linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
-}
-
-.media-band-caption {
-  position: absolute;
-  z-index: 2;
-  left: 50%;
-  bottom: clamp(1.2rem, 4vh, 2.2rem);
-  transform: translateX(-50%);
-  /* Matches .wrap exactly, so the caption sits on the same left edge as every
-     section heading above and below it rather than a gutter's width outside. */
-  width: 100%;
-  max-width: var(--wrap);
-  box-sizing: border-box;
-  padding-inline: calc(var(--gutter) + env(safe-area-inset-left, 0px))
-    calc(var(--gutter) + env(safe-area-inset-right, 0px));
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.13em;
-  color: var(--silver-2);
-}
-
-@media (max-width: 719px) {
-  .media-band {
-    height: clamp(12rem, 34vh, 18rem);
-  }
-  .media-band-img {
-    object-position: 66% 45%;
-  }
-}
-
-/* Reduced motion: the drift stops and the band is still a complete
-   composition. If removing it left something that looked unfinished, the
-   movement was carrying the design. */
-@media (prefers-reduced-motion: reduce) {
-  .media-band-img {
-    animation: none;
     transform: none;
   }
 }
