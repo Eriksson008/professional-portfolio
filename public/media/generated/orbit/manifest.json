@@ -4,7 +4,7 @@
   "generatedAt": "2026-08-20T14:34:37.706Z",
   "command": "node extract-frames.mjs media-src/orbit-source.mp4 --outdir public/media/generated --name orbit --widths 1440,1080,720 --format webp --quality 82 --every 1",
   "source": {
-    "file": "C:\\Users\\eriks\\Repositories\\professional-portfolio\\media-src\\orbit-source.mp4",
+    "file": "media-src/orbit-source.mp4",
     "width": 1920,
     "height": 1080,
     "fps": 24,

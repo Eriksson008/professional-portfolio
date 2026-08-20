@@ -2,9 +2,9 @@
   "name": "astronaut-hero",
   "generatedBy": "cinematic-media-converter/scripts/extract-frames.mjs",
   "generatedAt": "2026-08-14T20:13:12.478Z",
-  "command": "node extract-frames.mjs C:/Users/eriks/Repositories/professional-portfolio/media-src/astronaut-hero-source.mp4 --outdir C:/Users/eriks/Repositories/professional-portfolio/public/media/generated --name astronaut-hero --widths 1440,1080,720 --format webp --quality 82",
+  "command": "node extract-frames.mjs media-src/astronaut-hero-source.mp4 --outdir public/media/generated --name astronaut-hero --widths 1440,1080,720 --format webp --quality 82",
   "source": {
-    "file": "C:\\Users\\eriks\\Repositories\\professional-portfolio\\media-src\\astronaut-hero-source.mp4",
+    "file": "media-src/astronaut-hero-source.mp4",
     "width": 3840,
     "height": 2160,
     "fps": 24,

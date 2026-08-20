@@ -4,7 +4,7 @@
   "generatedAt": "2026-08-14T20:49:14.472Z",
   "command": "node extract-frames.mjs media-src/astronaut-hero-source.mp4 --outdir public/media/generated --name astronaut-hero-97 --widths 1440,1080,720 --format webp --quality 82 --every 2",
   "source": {
-    "file": "C:\\Users\\eriks\\Repositories\\professional-portfolio\\media-src\\astronaut-hero-source.mp4",
+    "file": "media-src/astronaut-hero-source.mp4",
     "width": 3840,
     "height": 2160,
     "fps": 24,
