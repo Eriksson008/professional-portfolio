@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useReducedMotion } from 'framer-motion';
-import { frameIndexForProgress } from './heroFrames';
-import { nearestLoaded, useDecodeWindow, useHeroFrames } from './useHeroFrames';
+import { framePositionForProgress } from './heroFrames';
+import { drawBlendedFrame } from './frameCanvas';
+import { useDecodeWindow, useHeroFrames } from './useHeroFrames';
 import { useHeroRunway } from './useHeroRunway';
 import { HeroShell } from './HeroShell';
 
@@ -31,7 +32,7 @@ const MAX_DPR = 2;
 export function AstronautHeroFrames({ sequence }: { sequence: string }) {
   const reduced = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const lastDrawn = useRef<HTMLImageElement | null>(null);
+  const lastDrawn = useRef<string | null>(null);
   const decodeAround = useDecodeWindow();
 
   const frames = useHeroFrames(sequence, !reduced);
@@ -50,21 +51,10 @@ export function AstronautHeroFrames({ sequence }: { sequence: string }) {
       if (!canvas || !ready || !tier || images.length === 0) return;
 
       const filmEnd = window.innerWidth >= 720 ? FILM_END_DESKTOP : FILM_END_PHONE;
-      const index = frameIndexForProgress(progress, filmEnd, images.length);
-      const image = nearestLoaded(images, index);
-      if (!image || image === lastDrawn.current) return;
-      lastDrawn.current = image;
+      const position = framePositionForProgress(progress, filmEnd, images.length);
+      lastDrawn.current = drawBlendedFrame(canvas, images, position, lastDrawn.current);
 
-      const context = canvas.getContext('2d');
-      if (!context) return;
-
-      // object-fit: cover, computed here because a canvas has no such property.
-      const scale = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
-      const width = image.naturalWidth * scale;
-      const height = image.naturalHeight * scale;
-      context.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
-
-      decodeAround(images, index);
+      decodeAround(images, position.index);
     },
     [decodeAround]
   );

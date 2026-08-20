@@ -51,6 +51,97 @@ export function frameIndexForProgress(progress: number, filmEnd: number, count: 
 }
 
 /**
+ * `object-fit: cover` for a canvas, which has no such property.
+ *
+ * Was inlined in the hero's draw loop; lifted out because the ignition chapter
+ * draws the same way and because the maths is worth asserting rather than
+ * eyeballing against a letterboxed canvas.
+ */
+export function coverRect(
+  canvasWidth: number,
+  canvasHeight: number,
+  imageWidth: number,
+  imageHeight: number
+): { x: number; y: number; width: number; height: number } {
+  if (imageWidth <= 0 || imageHeight <= 0) {
+    return { x: 0, y: 0, width: canvasWidth, height: canvasHeight };
+  }
+  const scale = Math.max(canvasWidth / imageWidth, canvasHeight / imageHeight);
+  const width = imageWidth * scale;
+  const height = imageHeight * scale;
+  return { x: (canvasWidth - width) / 2, y: (canvasHeight - height) / 2, width, height };
+}
+
+/** A playhead that lies between two frames, for sub-frame cross-dissolve. */
+export interface FramePosition {
+  /** The frame at or before the playhead. */
+  index: number;
+  /** The frame after it, clamped — equal to `index` on the last frame. */
+  next: number;
+  /** Fraction of the way from `index` to `next`, in [0, 1). */
+  blend: number;
+}
+
+/**
+ * The same mapping as `frameIndexForProgress`, but keeping the fractional part.
+ *
+ * Rounding to the nearest frame is correct for *which* frame is closest, and it
+ * is what the renderer used to draw. The cost is temporal: a 97-frame sequence
+ * spread over a multi-thousand-pixel runway advances one frame per ~30 px of
+ * scroll, so scrolling slowly walks a staircase of held stills. That is a
+ * resolution problem, not a frame-time problem — the benchmark measured paint
+ * cost (already stall-free) and could not see it.
+ *
+ * Returning the fraction lets the renderer dissolve between two adjacent frames
+ * instead of snapping. Adjacent frames of a 24 fps camera move differ very
+ * little, so the dissolve reads as continuous motion at slow speeds, and at
+ * speeds where it would read as a double image the eye cannot resolve it anyway.
+ * It costs one extra `drawImage` and no additional bytes or requests.
+ */
+export function framePositionForProgress(
+  progress: number,
+  filmEnd: number,
+  count: number
+): FramePosition {
+  const held = (index: number): FramePosition => ({ index, next: index, blend: 0 });
+  if (count <= 0) return held(0);
+  const last = count - 1;
+  if (!(filmEnd > 0)) return held(last);
+
+  const t = Math.min(1, Math.max(0, progress) / filmEnd);
+  const exact = t * last;
+  const index = Math.min(last, Math.max(0, Math.floor(exact)));
+  if (index >= last) return held(last);
+  return { index, next: index + 1, blend: exact - index };
+}
+
+/**
+ * Resolve a fractional sub-range of a sequence to inclusive frame indices.
+ *
+ * The person-reveal plate is used twice on the page and must not read as a
+ * repeat: chapter 02 plays the subject emerging from shadow, and the contact
+ * scene plays the same move resolving to a lit face. Two windows onto one
+ * continuous camera move, rather than the same clip run twice.
+ *
+ * Fractions rather than frame numbers so the split survives regenerating the
+ * sequence at a different density — a hard-coded frame 131 would silently mean
+ * something else the moment `--every` changed.
+ */
+export function frameWindow(
+  count: number,
+  range?: readonly [number, number]
+): { from: number; to: number } {
+  const last = Math.max(0, count - 1);
+  if (!range) return { from: 0, to: last };
+  const clamp = (v: number) => Math.min(1, Math.max(0, v));
+  const from = Math.round(clamp(range[0]) * last);
+  const to = Math.round(clamp(range[1]) * last);
+  // A reversed or collapsed range would otherwise produce a negative length and
+  // a sequence that draws nothing.
+  return from <= to ? { from, to } : { from: to, to: from };
+}
+
+/**
  * Build a frame URL. `pattern` comes from the manifest (`frame-%04d.webp`) and
  * is 1-based on disk, so index 0 is `frame-0001`.
  */

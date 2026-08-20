@@ -2,8 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   type FrameTier,
+  coverRect,
   frameIndexForProgress,
+  framePositionForProgress,
   frameSrc,
+  frameWindow,
   manifestUrl,
   tierForWidth,
 } from './heroFrames.ts';
@@ -76,4 +79,165 @@ test('a viewport wider than every tier takes the largest rather than none', () =
 
 test('an empty manifest yields no tier instead of throwing', () => {
   assert.equal(tierForWidth([], 1200), null);
+});
+
+// --- Sub-frame blending -----------------------------------------------------
+//
+// `frameIndexForProgress` rounds to the nearest frame, so between two frames
+// the canvas shows a snapped still and the renderer skips the repaint entirely.
+// At 97 frames over a multi-thousand-pixel runway that is ~30 px of scroll per
+// step, which is exactly the stepping visible on slow scroll. `framePosition-
+// ForProgress` keeps the fractional part so the renderer can cross-dissolve.
+
+// `next` still points at the following frame here — `blend: 0` is what keeps it
+// off the canvas. Only the final frame collapses `next` onto `index`, because
+// there is nothing after it to dissolve toward.
+test('a frame position on an exact frame boundary carries no blend', () => {
+  const at = framePositionForProgress(0, FILM_END, 97);
+  assert.equal(at.index, 0);
+  assert.equal(at.blend, 0);
+  assert.equal(at.next, 1);
+});
+
+test('a frame position between two frames carries the fraction toward the next', () => {
+  // Half a frame step into a 97-frame sequence.
+  const half = FILM_END * (0.5 / 96);
+  const at = framePositionForProgress(half, FILM_END, 97);
+  assert.equal(at.index, 0);
+  assert.equal(at.next, 1);
+  assert.ok(Math.abs(at.blend - 0.5) < 1e-9, `expected ~0.5, got ${at.blend}`);
+});
+
+test('the last frame is reached exactly and never blends past the end', () => {
+  const at = framePositionForProgress(FILM_END, FILM_END, 97);
+  assert.equal(at.index, 96);
+  assert.equal(at.next, 96);
+  assert.equal(at.blend, 0);
+  const held = framePositionForProgress(1, FILM_END, 97);
+  assert.equal(held.index, 96);
+  assert.equal(held.blend, 0);
+});
+
+test('frame positions are clamped, so overscroll cannot index out of range', () => {
+  const under = framePositionForProgress(-3, FILM_END, 97);
+  assert.equal(under.index, 0);
+  assert.equal(under.blend, 0);
+  const over = framePositionForProgress(9, FILM_END, 97);
+  assert.equal(over.index, 96);
+  assert.equal(over.next, 96);
+  assert.equal(over.blend, 0);
+});
+
+test('degenerate manifests do not produce NaN blends', () => {
+  const empty = framePositionForProgress(0.5, FILM_END, 0);
+  assert.equal(empty.index, 0);
+  assert.equal(empty.blend, 0);
+  const single = framePositionForProgress(0.5, FILM_END, 1);
+  assert.equal(single.index, 0);
+  assert.equal(single.next, 0);
+  assert.equal(single.blend, 0);
+  const noFilm = framePositionForProgress(0.5, 0, 97);
+  assert.equal(noFilm.index, 96);
+  assert.equal(noFilm.blend, 0);
+});
+
+// The whole point: the playhead has to advance continuously, not in steps.
+test('the blended playhead is monotonic and strictly advances between frames', () => {
+  const playhead = (p: number) => {
+    const at = framePositionForProgress(p, FILM_END, 97);
+    return at.index + at.blend;
+  };
+  let previous = -1;
+  for (let step = 0; step <= 400; step += 1) {
+    const value = playhead((step / 400) * FILM_END);
+    assert.ok(value >= previous, `playhead went backwards at step ${step}`);
+    previous = value;
+  }
+  // Two progress values inside one frame step must differ — that is the fix.
+  const a = playhead(FILM_END * (0.25 / 96));
+  const b = playhead(FILM_END * (0.75 / 96));
+  assert.ok(b > a, 'playhead did not move within a single frame step');
+});
+
+test('the rounded index and the blended index agree on which frame is nearest', () => {
+  for (let step = 0; step <= 200; step += 1) {
+    const p = (step / 200) * FILM_END;
+    const rounded = frameIndexForProgress(p, FILM_END, 97);
+    const at = framePositionForProgress(p, FILM_END, 97);
+    const nearest = at.blend >= 0.5 ? at.next : at.index;
+    assert.equal(nearest, rounded, `disagreement at progress ${p}`);
+  }
+});
+
+// --- cover fitting ----------------------------------------------------------
+
+test('a wider-than-canvas image is cropped left and right, never letterboxed', () => {
+  // 16:9 image into a 1:1 canvas — height fills, width overhangs symmetrically.
+  const fit = coverRect(1000, 1000, 1920, 1080);
+  assert.equal(fit.height, 1000);
+  assert.ok(fit.width > 1000);
+  assert.equal(fit.y, 0);
+  assert.ok(fit.x < 0);
+  assert.ok(Math.abs(fit.x + (fit.width - 1000) / 2) < 1e-9, 'overhang is not centred');
+});
+
+test('a taller-than-canvas image is cropped top and bottom', () => {
+  const fit = coverRect(1600, 400, 1920, 1080);
+  assert.equal(fit.width, 1600);
+  assert.ok(fit.height > 400);
+  assert.equal(fit.x, 0);
+  assert.ok(fit.y < 0);
+});
+
+test('cover always covers: no gap on either axis, at any aspect ratio', () => {
+  const canvases = [[1440, 900], [390, 844], [2560, 1080], [800, 800]];
+  const images = [[3840, 2160], [1920, 1080], [1080, 1920], [960, 960]];
+  for (const [cw, ch] of canvases) {
+    for (const [iw, ih] of images) {
+      const fit = coverRect(cw, ch, iw, ih);
+      assert.ok(fit.width >= cw - 1e-9, `width gap at ${cw}x${ch} / ${iw}x${ih}`);
+      assert.ok(fit.height >= ch - 1e-9, `height gap at ${cw}x${ch} / ${iw}x${ih}`);
+      assert.ok(fit.x <= 1e-9 && fit.y <= 1e-9, `offset leaves a gap at ${cw}x${ch}`);
+    }
+  }
+});
+
+// An image element that has not decoded reports 0x0. Returning the canvas rect
+// keeps the caller from computing Infinity and painting nothing.
+test('an undecoded image does not produce an infinite scale', () => {
+  const fit = coverRect(800, 600, 0, 0);
+  assert.deepEqual(fit, { x: 0, y: 0, width: 800, height: 600 });
+});
+
+// --- sub-range windows ------------------------------------------------------
+
+test('no range means the whole sequence', () => {
+  assert.deepEqual(frameWindow(97), { from: 0, to: 96 });
+});
+
+test('a fractional range resolves to inclusive frame indices', () => {
+  assert.deepEqual(frameWindow(97, [0, 0.68]), { from: 0, to: 65 });
+  assert.deepEqual(frameWindow(97, [0.5, 1]), { from: 48, to: 96 });
+});
+
+// The split is expressed as fractions precisely so that regenerating the
+// sequence at a different density keeps pointing at the same moment.
+test('a range means the same moment at any sequence density', () => {
+  const at97 = frameWindow(97, [0, 0.68]);
+  const at193 = frameWindow(193, [0, 0.68]);
+  assert.ok(Math.abs(at97.to / 96 - at193.to / 192) < 0.01, 'window drifted with density');
+});
+
+test('a reversed or collapsed range still yields a drawable window', () => {
+  assert.deepEqual(frameWindow(97, [0.8, 0.2]), { from: 19, to: 77 });
+  const collapsed = frameWindow(97, [0.4, 0.4]);
+  assert.equal(collapsed.from, collapsed.to);
+});
+
+test('range fractions outside 0..1 are clamped rather than indexing off the end', () => {
+  assert.deepEqual(frameWindow(97, [-2, 5]), { from: 0, to: 96 });
+});
+
+test('a degenerate sequence yields a zero-length window instead of -1', () => {
+  assert.deepEqual(frameWindow(0, [0.2, 0.8]), { from: 0, to: 0 });
 });
