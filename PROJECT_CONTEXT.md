@@ -9,13 +9,22 @@ advertises, so it doubles as a work sample.
 
 ## Current Status
 
-**2026-08-19 (latest) — the site became a launch narrative, and the frame renderer learned to draw
-between frames.** Four scroll-scrubbed chapters now sit between the opening hero and the document
-sections — hardware is **assembled**, it **ignites**, it **lifts off** carrying the career figures,
-and then it **flies** — followed by a deliberately quiet **Systems in flight** section that draws one
-real production pipeline, and a full-bleed **media band** that breaks up the longest stretch of
-reading. Page intensity runs 5·4·5·4·3 across the narrative and 2·2·1·1 through the document: it
-peaks in the middle of the launch and comes down from there rather than staying loud.
+**2026-08-20 (latest) — the site is a six-beat launch narrative, and the frame renderer draws
+between frames.** The opening hero is followed by **five** scroll-scrubbed chapters, before the
+document sections — hardware is **assembled**, it **ignites**, it **lifts off** carrying the career figures,
+it **flies**, and then it **recedes** to a sunrise on the limb — followed by a deliberately quiet
+**Systems in flight** section that draws one real production pipeline, and a full-bleed **media
+band** that breaks up the longest stretch of reading. Page intensity runs 5·4·5·4·3·2 across the
+narrative and 2·2·1·1 through the document: it peaks in the middle of the launch and comes down
+from there rather than staying loud.
+
+Three media lessons from the second and third rounds are recorded in `docs/media-budget-ledger.md`
+because each cost money to learn and each is repeatable: **video models cannot assemble things**
+(no rigid-body solver, no contact constraints — freeze the parts and move the camera instead);
+**colour words are amplitude controls** (asking for a "cyan airglow line" produced a neon band);
+and **invented hull lettering is beaten by scale, not by negative prompts** (glyphs cannot render
+below ~15 px, so keep the subject small). Also: never put a brand name in a prompt — "Apple
+restraint" as a taste cue rendered a literal Apple logo into frame.
 
 - **Chapter 02 is about mechanical engineering, and now shows it.** An exploded technical assembly
   closing itself back together, under "I started in mechanical engineering." The site's idiom is the

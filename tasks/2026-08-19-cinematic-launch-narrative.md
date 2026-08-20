@@ -87,6 +87,7 @@ Chapters, media source, and what is new. **Five of eight chapters need no new me
 | 03 | Ignition | Engine bell → full thrust | **new** `ignition` | **yes** |
 | 04 | Liftoff | Ascent + editorial figures | **new** `liftoff` | **yes** |
 | 05 | In flight | Orbiter coasting, Earth limb, one flare | **new** `orbit` | **yes** |
+| 06 | Endurance | Orbiter receding to a sunrise on the limb | **new** `recede` | **yes** |
 | — | Systems in flight | Real architecture, DOM/CSS | none | no |
 | — | Selected work | Grouped by kind | none | no |
 | — | Media band | Orbit plate as a living still | reuse of `orbit` | no |
@@ -132,6 +133,20 @@ CONTAINER none · MEDIA living-still · INTENSITY 1   ← deceleration to quiet
 
 Intensity curve: **5 · 4 · 5 · 4 · 2 · 2 · 1 · 1**. Rises, peaks twice, then falls and stays down.
 The page is not loud throughout, which is the point.
+
+### Revision (third round, 2026-08-20)
+
+Two round-2 keepers were rejected on review and re-bought, and a sixth beat was added.
+
+- **The assembly clip merged rather than connected.** Parts cross-faded into one another, part count
+  drifted, and the convergence never completed. Not a seed problem: video models have no rigid-body
+  solver and no contact constraints. Fixed by freezing the parts and moving the camera instead —
+  which is also the better shot, and the only one that survives being scrubbed backwards.
+- **The orbiter carried invented lettering.** Beaten by scale rather than by negative prompts:
+  glyphs cannot render below ~15 px, so the vehicle was held to about a sixth of the frame width.
+- **A sixth chapter, `recede`.** The orbiter flies away from a locked camera toward a sunrise on the
+  limb. No light trail — nothing at that altitude condenses, and a trail encodes time's arrow, which
+  is the one thing that would not survive bidirectional scrubbing.
 
 ### Revision (same day, second round)
 
@@ -243,3 +258,40 @@ Forced `prefers-reduced-motion: reduce`, whole page scrolled:
   here because that component is the benchmarked candidate.
 - Per-tier frame decimation (fewer frames in `w720` than `w1440`) would cut mobile bytes further.
   The manifest format already supports a different `count` per tier; the extractor does not.
+
+## Third-round measurements (2026-08-20)
+
+Production build, `vite preview`, desktop 1440×900 DPR 1, sequences fully loaded before measuring.
+
+### Scroll smoothness — *frames over 16.7 ms / over 50 ms · longest frame*
+
+| Chapter | slow (8 s) | fast (1.2 s) | reverse (1.2 s) |
+| --- | --- | --- | --- |
+| 02 engineer (assembly retake) | 0 / 0 · 7.1 ms | 0 / 0 · 7.1 ms | 0 / 0 · 7.1 ms |
+| 06 recede (new) | 0 / 0 · 7.1 ms | 0 / 0 · 7.4 ms | 0 / 0 · 7.1 ms |
+
+Slow figures are the median of three runs. **Stall-free**, and the longest frame is now at the
+display's own idle floor rather than above it.
+
+### Reduced motion
+
+Whole page walked with `prefers-reduced-motion: reduce`: **0** frame requests, **0** manifests,
+**0** videos, **0** canvases mounted. All five chapters still fully composed with their copy.
+
+### Mobile (390×844)
+
+605 frames, **all at the w720 tier** — 121 per sequence across five sequences, each fetched only on
+approach.
+
+### Sequence weight
+
+| Sequence | frames | w1440 | w720 |
+| --- | ---: | ---: | ---: |
+| astronaut-hero-97 | 97 | 4.25 MB | 1.85 MB |
+| assembly | 121 | ~4.7 MB | ~1.7 MB |
+| ignition | 121 | 4.12 MB | 1.69 MB |
+| liftoff | 121 | 3.58 MB | 1.62 MB |
+| orbit | 121 | ~2.9 MB | ~1.3 MB |
+| recede | 121 | ~2.0 MB | ~0.9 MB |
+
+The two newest plates are the lightest on the page: they are mostly black, and black compresses.
