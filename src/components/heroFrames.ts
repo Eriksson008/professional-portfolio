@@ -42,6 +42,13 @@ export const manifestUrl = (base: string, name: string) =>
  * the remainder — the same choreography the MP4 hero uses, so the two are
  * comparable frame for frame. Clamped at both ends: progress 0 must show the
  * true first frame and progress >= filmEnd the true last one.
+ *
+ * **No longer called by the renderer** — `framePositionForProgress` replaced it
+ * when the draw path learned to blend between frames. It is kept deliberately,
+ * as the reference the blended mapping is checked against: a test asserts the
+ * two agree on which frame is *nearest* at every progress, which is what pins
+ * the dissolve to the same timeline the snapped version had. Delete it only
+ * together with that test.
  */
 export function frameIndexForProgress(progress: number, filmEnd: number, count: number): number {
   if (count <= 0) return 0;
@@ -108,9 +115,10 @@ export interface FramePosition {
  * The same mapping as `frameIndexForProgress`, but keeping the fractional part.
  *
  * Rounding to the nearest frame is correct for *which* frame is closest, and it
- * is what the renderer used to draw. The cost is temporal: a 97-frame sequence
- * spread over a multi-thousand-pixel runway advances one frame per ~30 px of
- * scroll, so scrolling slowly walks a staircase of held stills. That is a
+ * is what the renderer used to draw. The cost is temporal: a sequence spread
+ * over a multi-thousand-pixel runway advances one frame per ~10-15 px of scroll
+ * at the densities this page ships, so scrolling slowly walks a staircase of
+ * held stills. That is a
  * resolution problem, not a frame-time problem — the benchmark measured paint
  * cost (already stall-free) and could not see it.
  *
