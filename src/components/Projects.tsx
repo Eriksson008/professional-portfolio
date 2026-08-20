@@ -6,15 +6,26 @@ import { gridStagger } from './motion';
 import { type Project, projects } from '../data/projects';
 
 /**
- * The three kinds, in the order they earn attention. Enterprise work is the
- * deepest and least self-evident (it is sanitized, so it has to explain
- * itself); lab work is context, not a claim.
+ * One line of framing per kind.
+ *
+ * Typed as a `Record` over the union rather than as an array of objects, so
+ * adding a kind to `Project['kind']` fails the build here instead of silently
+ * rendering nothing. The groups themselves are derived from the data below —
+ * a hand-maintained list would drop any project whose kind was not on it, and
+ * lint, tests and build would all still pass.
  */
-const GROUPS: { kind: Project['kind']; note: string }[] = [
-  { kind: 'Enterprise', note: 'Production systems owned on a platform team' },
-  { kind: 'Personal', note: 'Built and operated end to end, by me' },
-  { kind: 'Lab', note: 'Infrastructure practice, not a product' },
-];
+const NOTES: Record<Project['kind'], string> = {
+  Enterprise: 'Production systems owned on a platform team',
+  Personal: 'Built and operated end to end, by me',
+  Lab: 'Infrastructure practice, not a product',
+};
+
+/** The order the kinds earn attention. Anything unlisted sorts to the end. */
+const ORDER: readonly Project['kind'][] = ['Enterprise', 'Personal', 'Lab'];
+const rank = (kind: Project['kind']) => {
+  const i = ORDER.indexOf(kind);
+  return i === -1 ? ORDER.length : i;
+};
 
 /**
  * Selected work, grouped rather than tiled.
@@ -40,9 +51,11 @@ export function Projects() {
         intro="Enterprise work is sanitized — no internal system names, data, or business logic. Personal and lab projects are my own and described in full."
       />
 
-      {GROUPS.map(({ kind, note }) => {
+      {[...new Set(projects.map((p) => p.kind))]
+        .sort((a, b) => rank(a) - rank(b))
+        .map((kind) => {
         const inGroup = projects.filter((p) => p.kind === kind);
-        if (inGroup.length === 0) return null;
+        const note = NOTES[kind];
         return (
           <section className="project-group" key={kind} aria-label={`${kind} work`}>
             <h3 className="project-group-head">
@@ -50,7 +63,13 @@ export function Projects() {
               <span className="project-group-rule" aria-hidden="true" />
               <span className="project-group-note">{note}</span>
             </h3>
-            <m.div className={`project-grid grid-${kind.toLowerCase()}`} variants={gridStagger}>
+            <m.div
+              // Only Enterprise takes a modifier; the other kinds use the base
+              // two-column grid, so emitting grid-personal / grid-lab would be
+              // class names with no rules behind them.
+              className={`project-grid ${kind === 'Enterprise' ? 'grid-enterprise' : ''}`}
+              variants={gridStagger}
+            >
               {inGroup.map((p) => (
                 <SystemCard key={p.id} project={p} />
               ))}

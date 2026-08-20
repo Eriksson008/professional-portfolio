@@ -1,4 +1,9 @@
-import { type FramePosition, coverRect, nearestLoaded } from './heroFrames';
+// Explicit .ts extension (allowed by `allowImportingTsExtensions` in
+// tsconfig.app.json, and resolved by Vite) so this module can be imported
+// directly by the node test runner, which does not do extensionless
+// resolution. It is the pixel path for every scrubbed chapter; it should be
+// testable without a bundler in front of it.
+import { type FramePosition, coverRect, nearestLoaded } from './heroFrames.ts';
 
 /**
  * The canvas half of the frame-sequence renderer, shared by every scrubbed
@@ -52,7 +57,12 @@ export function drawBlendedFrame(
       ? exactNext
       : null;
 
-  const key = `${position.index}:${overlay ? blend : 0}:${focus.x}:${focus.y}:${base.src}`;
+  // Keyed on what is actually drawn, not on the requested index. While the tail
+  // streams, `nearestLoaded` returns the same neighbour for a run of indices —
+  // keying on the index made each of those a different key and repainted an
+  // identical bitmap. The exact frame arriving still changes `base.src`, so the
+  // substitution is still corrected the moment it can be.
+  const key = `${base.src}:${overlay ? `${overlay.src}@${blend}` : ''}:${focus.x}:${focus.y}`;
   if (key === lastKey) return lastKey;
 
   const context = canvas.getContext('2d');

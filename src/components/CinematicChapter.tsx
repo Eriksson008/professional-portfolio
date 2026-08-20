@@ -92,7 +92,9 @@ export function CinematicChapter({
   const [runwayEl, setRunwayEl] = useState<HTMLElement | null>(null);
   const near = useNearViewport(runwayEl);
 
-  const frames = useHeroFrames(sequence, !reduced && near);
+  // The range is handed to the loader as well as the renderer: a chapter that
+  // draws only part of a sequence should not download the rest.
+  const frames = useHeroFrames(sequence, !reduced && near, range);
   const scrub = !reduced && !frames.failed;
 
   const framesRef = useRef(frames);
@@ -114,7 +116,7 @@ export function CinematicChapter({
     [decodeAround, filmEnd, range]
   );
 
-  const { runwayRef, heroRef, progress, settled } = useHeroRunway(scrub, draw, `chapter:${id}`);
+  const { runwayRef, heroRef, progress } = useHeroRunway(scrub, draw, `chapter:${id}`);
 
   // The runway is also what the observer watches. Publishing it into state
   // after mount costs one extra render and is what makes the observer attach at
@@ -165,7 +167,10 @@ export function CinematicChapter({
       aria-label={label}
       ref={runwayRef}
     >
-      <div className={`chapter tone-${tone} ${settled ? 'is-settled' : ''}`} ref={heroRef}>
+      {/* No `is-settled` here: every `.is-settled` rule in the stylesheets is
+          `.hero`-scoped, so on a chapter it was a class nobody read that kept a
+          state hook live for nothing. */}
+      <div className={`chapter tone-${tone}`} ref={heroRef}>
         <div
           className="chapter-media"
           aria-hidden="true"

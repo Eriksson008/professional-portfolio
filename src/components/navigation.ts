@@ -67,7 +67,11 @@ export const dockDestinations: readonly DockDestination[] = [
     label: 'Projects',
     icon: ProjectsIcon,
     href: '#projects',
-    matches: ['projects'],
+    // 'systems' rides with Projects rather than getting an eighth dock icon:
+    // the dock's 7-destination hierarchy is a deliberate thumb-width decision,
+    // and an id the spy does not track reads as "nothing intersecting", which
+    // sends the highlight back to Home mid-section.
+    matches: ['systems', 'projects'],
   },
   { key: 'skills', label: 'Skills', icon: SkillsIcon, href: '#skills', matches: ['skills'] },
   {

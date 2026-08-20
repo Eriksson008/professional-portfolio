@@ -58,7 +58,7 @@ const REVEAL_END = 0.18;
  * scrubbed by scroll. On desktop the scene **pins** (sticky under a
  * extended runway): the composition holds still while scroll plays it out
  * in phases — eyebrow, then headline and body, then the astronaut
- * lighting out of black on the right, then the CTAs, then a held beat
+ * resolving out of half-light on the right, then the CTAs, then a held beat
  * before the section unpins toward the footer. Scrolling back rewinds
  * it. One sprung progress value drives everything: the scroll handler
  * only moves spring targets (GLIDE_SPRING — overdamped, so the scrub
@@ -75,8 +75,9 @@ const REVEAL_END = 0.18;
  * measure() reads the computed sticky position and the band's computed
  * order, so JS and CSS can't disagree about which mode is active.
  *
- * The subject drifts across the frame during the reveal, so the film is
- * shown whole (16:9, never cover-cropped) as its own object: CTA column
+ * This scene plays the *back* of the reveal (from FILM_FROM); chapter 02 plays
+ * the front of it. The subject drifts across the frame during the move, so the
+ * film is shown whole (16:9, never cover-cropped) as its own object: CTA column
  * on the left, film bleeding to the right viewport edge on desktop,
  * hung slightly low so the figure reads as emerging from the dark. On
  * phones it is a full-width 16:9 band *above* the closing text, with no
@@ -181,8 +182,14 @@ export function AstronautFinale() {
       // from the raw target made the last several seconds jump at once when
       // a short scroll reached one. Round only the final source-frame interval
       // so the settled state still lands on the exact scrub-visible poster.
+      //
+      // The band is measured against the span this scene actually plays, not
+      // the whole clip: progress 0..1 now covers (1 - FILM_FROM) of the
+      // duration, so dividing by the full duration would size the band to a
+      // fraction of a frame and stop guaranteeing the last frame at all.
       const smoothed = clamp01(filmSmooth.get());
-      const progress = smoothed >= 1 - FRAME / (dur - 0.05) ? 1 : smoothed;
+      const span = (1 - FILM_FROM) * (dur - 0.05);
+      const progress = span > 0 && smoothed >= 1 - FRAME / span ? 1 : smoothed;
       // Play only the back of the clip. The same reveal now opens chapter 02,
       // where it runs from black to the point the face begins to read; picking
       // it up again here resolves that move to the lit frame instead of

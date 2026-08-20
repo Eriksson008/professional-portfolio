@@ -16,6 +16,14 @@ import { AstronautFinale } from './components/AstronautFinale';
 import { Footer } from './components/Footer';
 import { AskFredrik } from './components/AskFredrik';
 
+/**
+ * Chapter 02 plays only the front of the reveal; the contact scene resolves it.
+ * Hoisted out of the JSX because a fresh array identity on every render changes
+ * the chapter's `draw` callback, which tears down and re-runs its canvas
+ * effects and forces a full repaint.
+ */
+const ENGINEER_RANGE = [0, 0.68] as const;
+
 export default function App() {
   useAnchorGlide();
   // useKeyboardInset() used to run here, publishing --kb-inset for the old
@@ -41,14 +49,17 @@ export default function App() {
             hero becomes a person, the person's work ignites, and the figures
             arrive on the ascent. All three are the same component over
             different frame sequences — see CinematicChapter. */}
-        <CinematicChapter {...engineerChapter} range={[0, 0.68]} />
+        <CinematicChapter {...engineerChapter} range={ENGINEER_RANGE} />
         <CinematicChapter {...ignitionChapter} tone="ignition" />
         <CinematicChapter {...liftoffChapter} tone="ignition">
           <dl className="chapter-figures">
             {liftoffFigures().map((figure) => (
+              // The label is the term and the figure is its value, not the
+              // other way round; CSS orders the value above so the editorial
+              // reading is unchanged.
               <div className="chapter-figure" key={figure.label}>
-                <dt>{figure.value}</dt>
-                <dd>{figure.label}</dd>
+                <dt>{figure.label}</dt>
+                <dd>{figure.value}</dd>
               </div>
             ))}
           </dl>

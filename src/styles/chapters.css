@@ -125,7 +125,16 @@
   padding: 0;
   max-width: 26rem;
 }
-.chapter-figure dt {
+/* `dt` is the label and `dd` the figure, which is the correct pairing for a
+   description list. The visual order is the editorial one — number first —
+   so the column is reversed rather than the markup. */
+.chapter-figure {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+}
+.chapter-figure dd {
+  margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
   font-size: clamp(1.8rem, 3.6vw, 2.7rem);
@@ -134,7 +143,7 @@
   color: var(--text);
   font-variant-numeric: tabular-nums;
 }
-.chapter-figure dd {
+.chapter-figure dt {
   margin: 0.45rem 0 0;
   font-family: var(--font-mono);
   font-size: 0.7rem;

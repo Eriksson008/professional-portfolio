@@ -1,7 +1,14 @@
 import { GlowPanel } from './GlowPanel';
 import type { Project } from '../data/projects';
 
-/** A project as a system node: glass panel + corner node that lights on hover. */
+/**
+ * A project as a system node: glass panel + corner node that lights on hover.
+ *
+ * The title is an `h4` because `Projects` groups cards under an `h3` per kind.
+ * At the same level the grouping the section exists to create is absent from
+ * the heading outline — a screen reader hears "Enterprise", then three project
+ * titles, all as siblings.
+ */
 export function SystemCard({ project: p }: { project: Project }) {
   return (
     <GlowPanel as="article" className="sys-card">
@@ -10,7 +17,7 @@ export function SystemCard({ project: p }: { project: Project }) {
         <span className={`pc-kind kind-${p.kind.toLowerCase()}`}>{p.kind}</span>
         {p.confidential && <span className="pc-conf">Sanitized</span>}
       </header>
-      <h3 className="pc-title">{p.title}</h3>
+      <h4 className="pc-title">{p.title}</h4>
       <p className="pc-summary">{p.summary}</p>
       <p className="pc-role">{p.role}</p>
       <ul className="pc-bullets">

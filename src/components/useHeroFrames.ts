@@ -3,6 +3,7 @@ import {
   type FrameManifest,
   type FrameTier,
   frameSrc,
+  frameWindow,
   manifestUrl,
   tierForWidth,
 } from './heroFrames';
@@ -66,8 +67,34 @@ const CONCURRENCY = 8;
  * `decode()` is then called over a sliding window around the playhead so the
  * frames about to be drawn are already decoded and `drawImage` does not stall.
  */
-export function useHeroFrames(name: string | null, enabled: boolean): HeroFrames {
+/**
+ * `range` limits which frames are fetched, for a chapter that plays only part
+ * of a sequence.
+ *
+ * Taken as the same 0..1 fraction the renderer uses rather than as frame
+ * numbers, because the frame count is not known until the manifest has been
+ * fetched — the caller cannot resolve it, and resolving it in both places would
+ * be two sources of truth for the same window. `frameWindow` does the
+ * resolution here, against the tier this hook itself picked.
+ *
+ * The `images` array stays full length and index-aligned with the manifest, so
+ * every consumer still addresses frames by absolute index; entries outside the
+ * window are simply never given a `src`, and `nearestLoaded` already treats an
+ * unloaded entry as not usable.
+ *
+ * Chapter 02 plays frames 0-65 of a 97-frame sequence, so without this it
+ * downloaded 31 frames — about 0.8 MB at the desktop tier — it can never draw.
+ */
+export function useHeroFrames(
+  name: string | null,
+  enabled: boolean,
+  range?: readonly [number, number]
+): HeroFrames {
   const [state, setState] = useState<HeroFrames>(EMPTY);
+  // Depend on the numbers, not the tuple identity, so an inline literal at the
+  // call site cannot restart the load on every render.
+  const rangeFrom = range?.[0];
+  const rangeTo = range?.[1];
 
   useEffect(() => {
     if (!enabled || !name) {
@@ -103,9 +130,15 @@ export function useHeroFrames(name: string | null, enabled: boolean): HeroFrames
         images.push(image);
       }
 
+      const { from: first, to: last } = frameWindow(
+        count,
+        rangeFrom === undefined || rangeTo === undefined ? undefined : [rangeFrom, rangeTo]
+      );
+      const wanted = last - first + 1;
+
       let settled = 0;
       let failures = 0;
-      const revealAt = Math.min(REVEAL_WINDOW, count);
+      const revealAt = Math.min(REVEAL_WINDOW, wanted);
 
       const publish = () => {
         if (!active) return;
@@ -114,9 +147,9 @@ export function useHeroFrames(name: string | null, enabled: boolean): HeroFrames
           tier,
           manifest,
           ready: settled >= revealAt,
-          complete: settled === count,
-          progress: settled / count,
-          failed: settled === count && failures === count,
+          complete: settled === wanted,
+          progress: settled / wanted,
+          failed: settled === wanted && failures === wanted,
         });
       };
 
@@ -129,7 +162,7 @@ export function useHeroFrames(name: string | null, enabled: boolean): HeroFrames
             // Publish on the reveal boundary, on completion, and sparsely in
             // between — one setState per frame would re-render the tree 193
             // times during load.
-            if (settled === revealAt || settled === count || settled % 24 === 0) publish();
+            if (settled === revealAt || settled === wanted || settled % 24 === 0) publish();
             resolve();
           };
           image.addEventListener('load', () => done(true), { once: true });
@@ -139,12 +172,12 @@ export function useHeroFrames(name: string | null, enabled: boolean): HeroFrames
 
       // The opening window first, in parallel, so the hero reveals as early as
       // it can. Everything after it streams in index order behind a cap.
-      await Promise.all(Array.from({ length: revealAt }, (_, i) => fetchOne(i)));
+      await Promise.all(Array.from({ length: revealAt }, (_, i) => fetchOne(first + i)));
       if (!active) return;
 
-      let next = revealAt;
+      let next = first + revealAt;
       const worker = async () => {
-        while (active && next < count) {
+        while (active && next <= last) {
           const index = next;
           next += 1;
           await fetchOne(index);
@@ -160,7 +193,7 @@ export function useHeroFrames(name: string | null, enabled: boolean): HeroFrames
       // Drop the requests and let the browser reclaim the decodes.
       for (const image of images) image.src = '';
     };
-  }, [name, enabled]);
+  }, [name, enabled, rangeFrom, rangeTo]);
 
   return state;
 }
