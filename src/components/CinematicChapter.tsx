@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useEffect, useRef } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { framePositionForProgress, frameWindow } from './heroFrames';
 import { drawBlendedFrame } from './frameCanvas';
@@ -8,6 +8,19 @@ import { useNearViewport } from './useNearViewport';
 
 /** Uncapped DPR would render 9x the pixels on a 3x phone for no visible gain. */
 const MAX_DPR = 2;
+
+/**
+ * Where the subject sits in every plate, and where a portrait crop has to look.
+ *
+ * All four sequences compose their subject right of centre against an empty
+ * left half. On a wide viewport the frame is barely cropped horizontally and
+ * dead centre is right; on a phone, covering a 16:9 plate into a tall viewport
+ * crops most of the width away, and centring throws the subject off the right
+ * edge entirely. These match the `background-position` the poster underneath
+ * uses in chapters.css — if one moves, move the other.
+ */
+const PHONE_FOCUS = { x: 0.68, y: 0.58 };
+const WIDE_FOCUS = { x: 0.5, y: 0.5 };
 
 export interface CinematicChapterProps {
   id: string;
@@ -74,8 +87,10 @@ export function CinematicChapter({
   const lastDrawn = useRef<string | null>(null);
   const decodeAround = useDecodeWindow();
 
-  const sectionRef = useRef<HTMLElement>(null);
-  const near = useNearViewport(sectionRef);
+  // Held in state rather than read off a ref: the runway element does not
+  // exist on the first commit, and useNearViewport has to re-run once it does.
+  const [runwayEl, setRunwayEl] = useState<HTMLElement | null>(null);
+  const near = useNearViewport(runwayEl);
 
   const frames = useHeroFrames(sequence, !reduced && near);
   const scrub = !reduced && !frames.failed;
@@ -89,10 +104,11 @@ export function CinematicChapter({
       const { images, tier, ready } = framesRef.current;
       if (!canvas || !ready || !tier || images.length === 0) return;
 
+      const focus = window.innerWidth < 720 ? PHONE_FOCUS : WIDE_FOCUS;
       const { from, to } = frameWindow(images.length, range);
       const local = framePositionForProgress(progress, filmEnd, to - from + 1);
       const position = { index: local.index + from, next: local.next + from, blend: local.blend };
-      lastDrawn.current = drawBlendedFrame(canvas, images, position, lastDrawn.current);
+      lastDrawn.current = drawBlendedFrame(canvas, images, position, lastDrawn.current, focus);
       decodeAround(images, position.index);
     },
     [decodeAround, filmEnd, range]
@@ -100,10 +116,11 @@ export function CinematicChapter({
 
   const { runwayRef, heroRef, progress, settled } = useHeroRunway(scrub, draw, `chapter:${id}`);
 
-  // One node cannot carry two refs; the runway is also what the observer wants
-  // to watch, so mirror it rather than wrapping the section in another element.
+  // The runway is also what the observer watches. Publishing it into state
+  // after mount costs one extra render and is what makes the observer attach at
+  // all — see useNearViewport for why reading the ref directly does not.
   useEffect(() => {
-    (sectionRef as { current: HTMLElement | null }).current = runwayRef.current;
+    setRunwayEl(runwayRef.current);
   }, [runwayRef]);
 
   useEffect(() => {

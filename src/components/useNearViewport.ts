@@ -1,4 +1,4 @@
-import { type RefObject, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
  * True once an element has come within `margin` of the viewport, and true
@@ -17,14 +17,20 @@ import { type RefObject, useEffect, useState } from 'react';
  *
  * Latching is deliberate: a chapter scrolled past must not unload, or scrolling
  * back up would re-fetch a sequence the browser has already cached decodes for.
+ *
+ * Takes the **element**, not a ref. That is not a style preference: a ref
+ * handed to a hook is still `null` on the first commit, and an effect keyed on
+ * the ref object never re-runs to notice it was filled in afterwards. Under
+ * StrictMode the effect is invoked twice and the second pass finds the element,
+ * so the bug is invisible in development and the observer is simply never
+ * created in production. Taking the element means the caller has to hold it in
+ * state, which re-renders when it arrives — and that is the point.
  */
-export function useNearViewport(ref: RefObject<Element>, margin = '150% 0px'): boolean {
+export function useNearViewport(element: Element | null, margin = '150% 0px'): boolean {
   const [near, setNear] = useState(false);
 
   useEffect(() => {
-    if (near) return;
-    const element = ref.current;
-    if (!element) return;
+    if (near || !element) return;
 
     // No IntersectionObserver (or a test environment) — load rather than never
     // showing the chapter at all.
@@ -44,7 +50,7 @@ export function useNearViewport(ref: RefObject<Element>, margin = '150% 0px'): b
     );
     observer.observe(element);
     return () => observer.disconnect();
-  }, [ref, margin, near]);
+  }, [element, margin, near]);
 
   return near;
 }
