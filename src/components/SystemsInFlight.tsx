@@ -30,7 +30,7 @@ export function SystemsInFlight() {
       <SectionHeader
         index="03"
         eyebrow="Systems in flight"
-        title="How one of them actually works"
+        title="How one of them actually works."
         intro="A secure internal assistant that answers questions about client detail without reading from the CRM. Records are indexed outside it, retrieved, and reasoned over — so an answer is grounded in indexed data rather than in what a model remembers."
       />
 

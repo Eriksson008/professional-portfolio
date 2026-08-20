@@ -175,6 +175,16 @@ img {
    film, and re-blurring a changing video every scrolled frame is
    the most expensive thing a sticky header can do. A slightly
    deeper tint reads the same over dark content.
+
+   That tint has to be deep enough for the *document*, not just
+   for the film. Measured residue of body text (luma 182) passing
+   under the scrolled bar: 24.5/255 at alpha 0.88 — dim, but
+   unmistakably text, and it struck through the nav labels in
+   every document section. 8.4 at 0.97, 4.8 at 0.99 against a page
+   background of 3, which is the point where it stops existing.
+   Over the film it is invisible at any of these, because the film
+   behind the bar is near-black already — so the deeper tint costs
+   nothing and buys back eight screens of the document.
    ============================================================ */
 .nav {
   position: sticky;
@@ -189,7 +199,7 @@ img {
 }
 .nav.is-scrolled {
   border-bottom-color: var(--line-soft);
-  background: rgba(3, 3, 5, 0.88);
+  background: rgba(3, 3, 5, 0.99);
 }
 .nav-inner {
   display: flex;
@@ -472,6 +482,14 @@ img {
    by layout rather than by colour. */
 .project-grid.grid-enterprise {
   grid-template-columns: 1fr;
+}
+
+/* An odd-numbered group leaves its last card beside an empty cell, and on a
+   grid this deliberate an empty cell reads as an unfinished layout rather than
+   as space. The straggler takes the full row instead — which also means the
+   single Lab entry is a full-width row rather than a lonely half. */
+.project-grid > *:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .project-group + .project-group {
