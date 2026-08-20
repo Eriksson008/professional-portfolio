@@ -27,13 +27,14 @@ export const engineerChapter: Chapter = {
   title: 'I started in mechanical engineering.',
   // profile.about[0], compressed.
   body: 'Project management, technical drawings, facility design — where I learned to break ambiguous problems into precise, buildable specifications. The software came later. The habit came with it.',
-  // An exploded assembly closing itself back together. The site's whole idiom
-  // is the title block of an engineering drawing, and an exploded view is that
-  // drawing's other half — so the one chapter about mechanical engineering is
-  // the one place it can be shown literally rather than alluded to.
-  sequence: 'assembly',
-  poster: media('assembly-poster.jpg'),
-  start: media('assembly-start.jpg'),
+  // A machined turbopump impeller whose trailing edge dissolves into its own
+  // engineering drawing — the line on paper and the thing that exists, in one
+  // object. It replaced an exploded assembly, which illustrated the *noun*
+  // (machine parts) while the copy is about the *verb* (specifying), and which
+  // put two consecutive chapters of grey engine hardware back to back.
+  sequence: 'impeller',
+  poster: media('impeller-poster.jpg'),
+  start: media('impeller-start.jpg'),
   label: 'About the engineer',
 };
 

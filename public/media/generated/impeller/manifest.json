@@ -1,10 +1,10 @@
 {
-  "name": "assembly",
+  "name": "impeller",
   "generatedBy": "cinematic-media-converter/scripts/extract-frames.mjs",
-  "generatedAt": "2026-08-20T14:25:36.113Z",
-  "command": "node extract-frames.mjs media-src/assembly-source.mp4 --outdir public/media/generated --name assembly --widths 1440,1080,720 --format webp --quality 82 --every 1",
+  "generatedAt": "2026-08-20T15:08:23.045Z",
+  "command": "node extract-frames.mjs media-src/impeller-source.mp4 --outdir public/media/generated --name impeller --widths 1440,1080,720 --format webp --quality 82 --every 1",
   "source": {
-    "file": "C:\\Users\\eriks\\Repositories\\professional-portfolio\\media-src\\assembly-source.mp4",
+    "file": "C:\\Users\\eriks\\Repositories\\professional-portfolio\\media-src\\impeller-source.mp4",
     "width": 1920,
     "height": 1080,
     "fps": 24,
@@ -23,8 +23,8 @@
       "dir": "w1440",
       "pattern": "frame-%04d.webp",
       "count": 121,
-      "bytes": 5796854,
-      "averageBytes": 47908
+      "bytes": 4262040,
+      "averageBytes": 35223
     },
     {
       "width": 1080,
@@ -32,8 +32,8 @@
       "dir": "w1080",
       "pattern": "frame-%04d.webp",
       "count": 121,
-      "bytes": 3873822,
-      "averageBytes": 32015
+      "bytes": 3092054,
+      "averageBytes": 25554
     },
     {
       "width": 720,
@@ -41,9 +41,9 @@
       "dir": "w720",
       "pattern": "frame-%04d.webp",
       "count": 121,
-      "bytes": 2054236,
-      "averageBytes": 16977
+      "bytes": 1854920,
+      "averageBytes": 15330
     }
   ],
-  "totalBytes": 11724912
+  "totalBytes": 9209014
 }

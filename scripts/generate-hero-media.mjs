@@ -46,7 +46,7 @@ const VIDEO_DIR = join(GENERATED, 'astronaut-hero-video');
  */
 const SEQUENCES = [
   { name: 'astronaut-hero-97', source: 'media-src/astronaut-hero-source.mp4', every: 2 },
-  { name: 'assembly', source: 'media-src/assembly-source.mp4', every: 1 },
+  { name: 'impeller', source: 'media-src/impeller-source.mp4', every: 1 },
   { name: 'ignition', source: 'media-src/ignition-source.mp4', every: 1 },
   { name: 'liftoff', source: 'media-src/liftoff-source.mp4', every: 1 },
   { name: 'orbit', source: 'media-src/orbit-source.mp4', every: 1 },
