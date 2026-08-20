@@ -38,8 +38,12 @@ export interface CinematicChapterProps {
   label: string;
   /** Extra content below the copy — editorial metrics, for instance. */
   children?: ReactNode;
-  /** Slightly warms the scrim for the ignition beats. Off by default. */
-  tone?: 'cool' | 'ignition';
+  /**
+   * Which scrim treatment the plate needs. `ignition` deepens with scroll as
+   * the plume brightens; `orbit` holds the type column dark further right,
+   * because that plate's camera pushes in. Both are in chapters.css.
+   */
+  tone?: 'cool' | 'ignition' | 'orbit';
   /**
    * Fractional sub-range of the sequence to play, e.g. `[0, 0.68]`.
    * Used to split the person-reveal between this chapter and the contact

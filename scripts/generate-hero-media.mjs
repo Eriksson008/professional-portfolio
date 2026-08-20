@@ -32,17 +32,24 @@ const VIDEO_DIR = join(GENERATED, 'astronaut-hero-video');
 /**
  * Every scroll-scrubbed sequence on the page, and the master each derives from.
  *
- * `every` is the source-frame decimation. The hero and the person-reveal take
- * every other frame of a 193-frame master (193 = 2*96 + 1, so frame 0 and frame
- * 192 both survive); the two launch beats take every frame of a 121-frame
- * master, because they are the page's highest-intensity moment and are the one
- * place worth spending frame density on.
+ * `every` is the source-frame decimation. The hero takes every other frame of a
+ * 193-frame master (193 = 2*96 + 1, so frame 0 and frame 192 both survive); the
+ * four launch-narrative beats take every frame of their 121-frame masters,
+ * because they are the page's highest-intensity stretch and the one place worth
+ * spending frame density on.
+ *
+ * The contact scene is not here: it scrubs an MP4 rather than a frame sequence,
+ * and it plays the person-reveal whole. A frame sequence for it existed briefly
+ * while chapter 02 shared that plate, and was removed when chapter 02 got its
+ * own assembly footage — an ignored, regenerated sequence nothing reads is pure
+ * CI time and deploy weight.
  */
 const SEQUENCES = [
   { name: 'astronaut-hero-97', source: 'media-src/astronaut-hero-source.mp4', every: 2 },
-  { name: 'astronaut-reveal-97', source: 'media-src/astronaut-finale-source.mp4', every: 2 },
+  { name: 'assembly', source: 'media-src/assembly-source.mp4', every: 1 },
   { name: 'ignition', source: 'media-src/ignition-source.mp4', every: 1 },
   { name: 'liftoff', source: 'media-src/liftoff-source.mp4', every: 1 },
+  { name: 'orbit', source: 'media-src/orbit-source.mp4', every: 1 },
 ];
 
 /** The master the optimized desktop MP4 encode is built from (hero only). */

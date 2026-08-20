@@ -27,9 +27,13 @@ export const engineerChapter: Chapter = {
   title: 'I started in mechanical engineering.',
   // profile.about[0], compressed.
   body: 'Project management, technical drawings, facility design — where I learned to break ambiguous problems into precise, buildable specifications. The software came later. The habit came with it.',
-  sequence: 'astronaut-reveal-97',
-  poster: media('astronaut-reveal-poster.jpg'),
-  start: media('astronaut-reveal-start.jpg'),
+  // An exploded assembly closing itself back together. The site's whole idiom
+  // is the title block of an engineering drawing, and an exploded view is that
+  // drawing's other half — so the one chapter about mechanical engineering is
+  // the one place it can be shown literally rather than alluded to.
+  sequence: 'assembly',
+  poster: media('assembly-poster.jpg'),
+  start: media('assembly-start.jpg'),
   label: 'About the engineer',
 };
 
@@ -44,6 +48,20 @@ export const ignitionChapter: Chapter = {
   poster: media('ignition-poster.jpg'),
   start: media('ignition-start.jpg'),
   label: 'Engineering approach',
+};
+
+export const orbitChapter: Chapter = {
+  id: 'orbit',
+  eyebrow: 'In flight',
+  title: 'Shipping is where the work starts.',
+  // profile.about[2] (production stability under enterprise reliability
+  // standards), the Salesforce entry's release ownership and production
+  // support, and Homebase's forward-only migrations against live data.
+  body: 'Release ownership, production support, forward-only migrations applied to live data, and checks that run on every change. The interesting part of a system is the part that has to keep running.',
+  sequence: 'orbit',
+  poster: media('orbit-poster.jpg'),
+  start: media('orbit-start.jpg'),
+  label: 'Operating in production',
 };
 
 export const liftoffChapter: Chapter = {

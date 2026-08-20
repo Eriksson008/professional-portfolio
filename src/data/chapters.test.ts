@@ -55,21 +55,27 @@ test('the engineer chapter still summarises the paragraph it came from', () => {
 });
 
 test('every chapter names a sequence, an anchor id and an accessible label', () => {
+  const CHAPTERS = 4;
   const ids = [...source.matchAll(/^\s{2}id: '([^']+)'/gm)].map((m) => m[1]);
-  assert.equal(ids.length, 3, `expected 3 chapters, found ${ids.length}`);
+  assert.equal(ids.length, CHAPTERS, `expected ${CHAPTERS} chapters, found ${ids.length}`);
   assert.equal(new Set(ids).size, ids.length, 'two chapters share an anchor id');
   for (const field of ['sequence', 'label', 'title', 'eyebrow']) {
     // The trailing quote matters: without it this also matches the `Chapter`
-    // interface's own `field: string;` declarations and every count is 4.
+    // interface's own `field: string;` declarations and every count is one high.
     const n = [...source.matchAll(new RegExp(`^\\s{2}${field}: '`, 'gm'))].length;
-    assert.equal(n, 3, `${field} is set on ${n} chapters, expected 3`);
+    assert.equal(n, CHAPTERS, `${field} is set on ${n} chapters, expected ${CHAPTERS}`);
   }
   // poster and start are built by the media() helper rather than written as
   // literals, so they are counted by their call rather than by a quote.
   for (const field of ['poster', 'start']) {
     const n = [...source.matchAll(new RegExp(`^\\s{2}${field}: media\\(`, 'gm'))].length;
-    assert.equal(n, 3, `${field} is set on ${n} chapters, expected 3`);
+    assert.equal(n, CHAPTERS, `${field} is set on ${n} chapters, expected ${CHAPTERS}`);
   }
+  // Every chapter must read a distinct sequence. Two chapters pointing at one
+  // manifest is the duplicate-plate mistake this narrative already made once,
+  // when the person-reveal ran in both chapter 02 and the contact scene.
+  const seqs = [...source.matchAll(/^\s{2}sequence: '([^']+)'/gm)].map((m) => m[1]);
+  assert.equal(new Set(seqs).size, seqs.length, `two chapters share a sequence: ${seqs.join(', ')}`);
 });
 
 // Chapter copy is public-facing text in a public repo, and the repo's rule is
@@ -84,7 +90,7 @@ test('every chapter names a sequence, an anchor id and an accessible label', () 
 // harder to slip past.
 test('chapter prose states no figures — every number goes through highlights.ts', () => {
   const copy = [...source.matchAll(/^\s{2}(?:title|body): '([^']*)'/gm)].map((m) => m[1]);
-  assert.ok(copy.length >= 6, `expected title+body for 3 chapters, found ${copy.length}`);
+  assert.ok(copy.length >= 8, `expected title+body for 4 chapters, found ${copy.length}`);
   assert.ok(highlights.length > 0, 'highlights.ts is empty; the figures have nowhere to come from');
   for (const line of copy) {
     const digits = line.match(/\d/g);
