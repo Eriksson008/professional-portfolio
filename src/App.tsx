@@ -8,6 +8,7 @@ import { CinematicChapter } from './components/CinematicChapter';
 import { engineerChapter, ignitionChapter, liftoffChapter, liftoffFigures } from './data/chapters';
 import { About } from './components/About';
 import { Highlights } from './components/Highlights';
+import { SystemsInFlight } from './components/SystemsInFlight';
 import { Projects } from './components/Projects';
 import { Skills } from './components/Skills';
 import { Experience } from './components/Experience';
@@ -55,6 +56,7 @@ export default function App() {
 
         <About />
         <Highlights />
+        <SystemsInFlight />
         <Projects />
         <Skills />
         <Experience />

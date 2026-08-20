@@ -53,7 +53,7 @@ const FILM_FROM = 0.55;
 const REVEAL_END = 0.18;
 
 /**
- * Closing scene: the contact section (sheet 06) staged as a cinematic
+ * Closing scene: the contact section (sheet 07) staged as a cinematic
  * ending that mirrors the hero's mechanic — the light-reveal film is
  * scrubbed by scroll. On desktop the scene **pins** (sticky under a
  * extended runway): the composition holds still while scroll plays it out
@@ -340,7 +340,7 @@ export function AstronautFinale() {
               Everywhere else the panel already is the section's first child. */}
           <div className="finale-panel" ref={panelRef} data-anchor-landing={desktop ? undefined : ''}>
             <p className="sheet-mark">
-              <span className="sheet-no">06</span>
+              <span className="sheet-no">07</span>
               <span className="sheet-rule" aria-hidden="true" />
               <span className="sheet-eyebrow">Open to meaningful engineering work</span>
             </p>

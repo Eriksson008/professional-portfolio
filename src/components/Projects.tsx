@@ -9,7 +9,7 @@ export function Projects() {
   return (
     <Section id="projects">
       <SectionHeader
-        index="03"
+        index="04"
         eyebrow="Project Modules"
         title="Enterprise systems I own, and things I build for myself."
         intro="Enterprise work is sanitized — no internal system names, data, or business logic. Personal and lab projects are my own and described in full."

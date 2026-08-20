@@ -6,7 +6,7 @@ export function Skills() {
   return (
     <Section id="skills" alt>
       <SectionHeader
-        index="04"
+        index="05"
         eyebrow="Systems &amp; Skills"
         title="Tools and practices I work in regularly."
       />

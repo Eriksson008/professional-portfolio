@@ -6,7 +6,7 @@ export function Experience() {
   return (
     <Section id="experience">
       <SectionHeader
-        index="05"
+        index="06"
         eyebrow="Career Trajectory"
         title="A steady progression from engineering foundation to senior ownership."
       />

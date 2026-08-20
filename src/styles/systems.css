@@ -1,0 +1,130 @@
+/* ============================================================
+   Systems in flight — one real production pipeline, drawn.
+
+   A vertical rail with numbered nodes, not a grid of cards.
+   Six stages laid out as a wrapping grid would need connectors
+   that survive re-wrapping at every breakpoint, and the first
+   thing to break would be the arrow that carries the meaning.
+   A rail reads as a sequence at any width and needs no arrows
+   at all: order is the direction.
+
+   Deliberately quiet. This is where the launch chapters stop
+   and the page becomes an engineering document again, so the
+   only motion is the section's existing in-view stagger.
+   ============================================================ */
+
+.flow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 46rem;
+  position: relative;
+}
+
+/* The rail. Sits under the nodes and stops short at both ends so the sequence
+   reads as beginning and ending rather than running off the section. */
+.flow::before {
+  content: '';
+  position: absolute;
+  left: 0.6rem;
+  top: 0.9rem;
+  bottom: 0.9rem;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--line) 8%, var(--line) 92%, transparent);
+}
+
+.flow-stage {
+  position: relative;
+  padding: 0 0 1.9rem 2.6rem;
+}
+.flow-stage:last-child {
+  padding-bottom: 0;
+}
+
+/* The node. A square rather than a dot — the site's idiom is engineering
+   drawing, and every other mark on the page is orthogonal. */
+.flow-step {
+  position: absolute;
+  left: 0;
+  top: 0.1rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  border: 1px solid var(--line-strong);
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+}
+
+.flow-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.flow-tech {
+  margin: 0.22rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  color: var(--silver-2);
+}
+.flow-role {
+  margin: 0.5rem 0 0;
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ---- Platform strip ----
+   The runtime is the same across every stage, so it is listed beside the flow
+   rather than drawn into it: another node in the chain would imply it sits
+   between two steps, which it does not. */
+.flow-platform {
+  margin-top: clamp(2.2rem, 5vw, 3.4rem);
+  padding-top: clamp(1.4rem, 3vw, 2rem);
+  border-top: 1px solid var(--line-soft);
+}
+.flow-platform-title {
+  margin: 0 0 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--faint);
+}
+.flow-platform-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1.2rem clamp(1.2rem, 3vw, 2.4rem);
+  margin: 0;
+}
+.flow-platform-item dt {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.045em;
+  color: var(--text);
+}
+.flow-platform-item dd {
+  margin: 0.35rem 0 0;
+  color: var(--faint);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 719px) {
+  .flow-stage {
+    padding-left: 2.2rem;
+  }
+  .flow-role {
+    font-size: 0.92rem;
+  }
+}
