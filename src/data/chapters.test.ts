@@ -55,7 +55,7 @@ test('the engineer chapter still summarises the paragraph it came from', () => {
 });
 
 test('every chapter names a sequence, an anchor id and an accessible label', () => {
-  const CHAPTERS = 5;
+  const CHAPTERS = 4;
   const ids = [...source.matchAll(/^\s{2}id: '([^']+)'/gm)].map((m) => m[1]);
   assert.equal(ids.length, CHAPTERS, `expected ${CHAPTERS} chapters, found ${ids.length}`);
   assert.equal(new Set(ids).size, ids.length, 'two chapters share an anchor id');
@@ -89,8 +89,11 @@ test('every chapter names a sequence, an anchor id and an accessible label', () 
 // legitimate reason to carry a number, and the strict form is both simpler and
 // harder to slip past.
 test('chapter prose states no figures — every number goes through highlights.ts', () => {
-  const copy = [...source.matchAll(/^\s{2}(?:title|body): '([^']*)'/gm)].map((m) => m[1]);
-  assert.ok(copy.length >= 10, `expected title+body for 5 chapters, found ${copy.length}`);
+  // Beat copy is nested one level deeper than chapter copy, so both indents are
+  // matched. Missing the nested form would leave a whole beat unchecked, which
+  // is exactly what happened when the ascent chapter gained one.
+  const copy = [...source.matchAll(/^\s{2,6}(?:title|body): '([^']*)'/gm)].map((m) => m[1]);
+  assert.ok(copy.length >= 8, `expected title+body for 4 chapters, found ${copy.length}`);
   assert.ok(highlights.length > 0, 'highlights.ts is empty; the figures have nowhere to come from');
   for (const line of copy) {
     const digits = line.match(/\d/g);
@@ -100,4 +103,42 @@ test('chapter prose states no figures — every number goes through highlights.t
       `chapter prose contains a figure ("${line.slice(0, 60)}…"). Put it in highlights.ts and render it as a figure instead.`
     );
   }
+});
+
+// --- beat windows -----------------------------------------------------------
+//
+// A chapter whose film is one continuous move carries its copy as beats that
+// fade through on windows of the same scroll. The windows are what keep the
+// hand-over legible, so they are asserted rather than eyeballed against a
+// scrubbing canvas.
+
+// `from:` only ever appears inside a beat, so the whole source can be scanned
+// without having to match the enclosing array — which is both simpler and
+// immune to how the array happens to be formatted.
+const beatWindows = () => [...source.matchAll(/^\s{6}from:\s*([\d.]+)/gm)].map((m) => Number(m[1]));
+
+test('every beat window is inside the runway', () => {
+  for (const from of beatWindows()) {
+    assert.ok(from > 0 && from < 1, `beat starts at ${from}, outside 0..1`);
+  }
+});
+
+test('beats start in order, and late enough for the one before to have been read', () => {
+  const froms = beatWindows();
+  let previous = 0;
+  for (const from of froms) {
+    assert.ok(from > previous, `beat at ${from} does not follow the one at ${previous}`);
+    // A beat needs roughly a third of the runway to arrive, hold and hand over.
+    assert.ok(from - previous >= 0.25, `only ${(from - previous).toFixed(2)} of runway before ${from}`);
+    previous = from;
+  }
+});
+
+// The last beat must still have room to arrive before the film stops moving —
+// `filmEnd` defaults to 0.8, and copy landing after that would appear over a
+// frozen frame.
+test('the last beat arrives before the film ends', () => {
+  const froms = beatWindows();
+  if (froms.length === 0) return;
+  assert.ok(Math.max(...froms) < 0.7, 'the final beat arrives too late in the runway');
 });

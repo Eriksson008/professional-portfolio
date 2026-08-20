@@ -1,4 +1,5 @@
-import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import type { ChapterBeat } from '../data/chapters';
 import { useReducedMotion } from 'framer-motion';
 import { framePositionForProgress, frameWindow } from './heroFrames';
 import { drawBlendedFrame } from './frameCanvas';
@@ -38,6 +39,19 @@ export interface CinematicChapterProps {
   label: string;
   /** Extra content below the copy — editorial metrics, for instance. */
   children?: ReactNode;
+  /**
+   * Additional copy stanzas that fade through on their own windows of the same
+   * scroll, for a chapter whose film is one continuous move but whose copy is
+   * more than one thought.
+   */
+  beats?: readonly ChapterBeat[];
+  /** Where this chapter's own copy fades out, when later beats follow it. */
+  until?: number;
+  /**
+   * `long` doubles the runway, for a chapter carrying two films' worth of
+   * frames. Without it the same scroll distance plays twice the frames.
+   */
+  runway?: 'standard' | 'long';
   /**
    * Which scrim treatment the plate needs. `ignition` deepens with scroll as
    * the plume brightens; `deep` holds the type column dark much further right,
@@ -93,7 +107,22 @@ export function CinematicChapter({
   tone = 'cool',
   range,
   phoneFit = 'cover',
+  beats,
+  until,
+  runway = 'standard',
 }: CinematicChapterProps) {
+  // The chapter's own copy is simply the first beat. Building one list means a
+  // single render path, and a one-beat chapter behaves exactly as it always has.
+  const stanzas: ChapterBeat[] = [
+    {
+      eyebrow,
+      title: typeof title === 'string' ? title : '',
+      body: typeof body === 'string' ? body : '',
+      from: 0,
+      until,
+    },
+    ...(beats ?? []),
+  ];
   const reduced = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lastDrawn = useRef<string | null>(null);
@@ -177,7 +206,9 @@ export function CinematicChapter({
 
   return (
     <section
-      className={`chapter-runway ${scrub ? 'is-scrub' : ''} ${phoneFit === 'contain' ? 'fit-band' : ''}`}
+      className={`chapter-runway ${scrub ? 'is-scrub' : ''} ${
+        phoneFit === 'contain' ? 'fit-band' : ''
+      } ${runway === 'long' ? 'runway-long' : ''}`}
       id={id}
       aria-label={label}
       ref={runwayRef}
@@ -202,18 +233,46 @@ export function CinematicChapter({
         </div>
 
         <div className="wrap chapter-content">
+          {/* Beats stack in a single grid cell so they cross-fade in place
+              rather than pushing one another around, and every one of them
+              stays in the DOM and in the accessibility tree — a screen-reader
+              user gets the whole chapter's copy in order without having to
+              scrub a film to reveal it. */}
           <div className="chapter-panel">
-            {/* No sheet number, deliberately. The numbered sheet marks below
-                belong to the document sections — these are film beats, and
-                interleaving the two numbering systems would imply the chapters
-                and the sections are the same kind of thing. */}
-            <p className="sheet-mark">
-              <span className="sheet-rule" aria-hidden="true" />
-              <span className="sheet-eyebrow">{eyebrow}</span>
-            </p>
-            <h2 className="chapter-title">{title}</h2>
-            {body && <p className="chapter-body">{body}</p>}
-            {children}
+            {stanzas.map((beat, i) => (
+              <div
+                className="chapter-beat"
+                key={beat.eyebrow}
+                style={{ '--from': beat.from, '--until': beat.until ?? 2 } as CSSProperties}
+              >
+                {/* No sheet number, deliberately. The numbered sheet marks
+                    below belong to the document sections — these are film
+                    beats, and interleaving the two numbering systems would
+                    imply they are the same kind of thing. */}
+                <p className="sheet-mark">
+                  <span className="sheet-rule" aria-hidden="true" />
+                  <span className="sheet-eyebrow">{beat.eyebrow}</span>
+                </p>
+                <h2 className="chapter-title">{i === 0 ? title : beat.title}</h2>
+                {(i === 0 ? body : beat.body) && (
+                  <p className="chapter-body">{i === 0 ? body : beat.body}</p>
+                )}
+                {beat.figures && beat.figures.length > 0 && (
+                  <dl className="chapter-figures">
+                    {beat.figures.map((figure) => (
+                      // The label is the term and the figure its value, not the
+                      // other way round; CSS orders the value above so the
+                      // editorial reading is unchanged.
+                      <div className="chapter-figure" key={figure.label}>
+                        <dt>{figure.label}</dt>
+                        <dd>{figure.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                {i === 0 && children}
+              </div>
+            ))}
           </div>
         </div>
       </div>

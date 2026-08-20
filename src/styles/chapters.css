@@ -23,10 +23,19 @@
 .chapter-runway.is-scrub {
   height: 300vh;
 }
+/* The ascent is two films' worth of frames on one runway — 241 rather than
+   121 — so it takes two chapters' worth of scroll. Without this the same copy
+   and twice the frames would fly past at double speed. */
+.chapter-runway.is-scrub.runway-long {
+  height: 600vh;
+}
 
 @media (min-width: 720px) {
   .chapter-runway.is-scrub {
     height: 280vh;
+  }
+  .chapter-runway.is-scrub.runway-long {
+    height: 560vh;
   }
   /* Same compositor isolation the hero uses: the canvas repaints every frame
      and must not drag the copy's layer into the recalc with it. */
@@ -160,46 +169,67 @@
    for the reason motion.ts documents — re-rasterising a blur
    on every scroll frame is main-thread work this page cannot
    spare while a canvas is also repainting.
+
+   A chapter may carry more than one BEAT of copy. The ascent
+   chapter is one continuous 241-frame film — ignition through
+   liftoff, no cut — and it would be wrong to break the runway
+   just to change the words. So the film runs uninterrupted and
+   the copy hands over: each beat fades in at its own --from and
+   out at its own --until, both set inline per beat.
    ============================================================ */
 
 .chapter-runway.is-scrub .chapter {
   --p: 0;
 }
 
-.chapter-runway.is-scrub .chapter-panel > * {
-  /* --t is each element's own eased window within the runway. */
+/* Beats occupy one grid cell so they cross-fade in place instead of pushing
+   each other down the panel. Without the stack, the second beat's arrival
+   would move the first one while it is still visible. */
+.chapter-runway.is-scrub .chapter-panel {
+  display: grid;
+}
+.chapter-runway.is-scrub .chapter-beat {
+  grid-area: 1 / 1;
+  /* --enter climbs 0→1 across the beat's opening window; --leave climbs 0→1
+     across its closing one. A beat with no --until is given 2, which --p can
+     never reach, so it simply holds to the end of the runway. */
+  --enter: clamp(0, calc((var(--p) - var(--from)) / 0.1), 1);
+  --leave: clamp(0, calc((var(--p) - var(--until)) / 0.08), 1);
+  opacity: calc(var(--enter) * (1 - var(--leave)));
+  /* A departing beat lifts slightly as it goes, so the hand-over reads as
+     one thought giving way to the next rather than a dissolve. */
+  transform: translate3d(0, calc(var(--leave) * -14px), 0);
+}
+
+/* A faded-out beat must not swallow taps meant for what is under it. It stays
+   in the DOM and in the accessibility tree — a screen reader gets the whole
+   chapter — but it stops being a pointer target once it is gone. */
+.chapter-runway.is-scrub .chapter-beat {
+  pointer-events: none;
+}
+.chapter-runway.is-scrub .chapter-beat > * {
+  pointer-events: auto;
+}
+
+.chapter-runway.is-scrub .chapter-beat > * {
+  /* --t is each element's own eased window *within its beat*, which is why
+     every ramp below is offset by --from rather than measured from the top of
+     the runway. Beat two gets the same internal cascade as beat one. */
   opacity: var(--t, 1);
   transform: translate3d(0, calc((1 - var(--t, 1)) * 14px), 0);
 }
 
 .chapter-runway.is-scrub .sheet-mark {
-  --t: clamp(0, calc((var(--p) - 0.04) / 0.12), 1);
+  --t: clamp(0, calc((var(--p) - var(--from) - 0.02) / 0.1), 1);
 }
 .chapter-runway.is-scrub .chapter-title {
-  --t: clamp(0, calc((var(--p) - 0.09) / 0.14), 1);
+  --t: clamp(0, calc((var(--p) - var(--from) - 0.05) / 0.12), 1);
 }
 .chapter-runway.is-scrub .chapter-body {
-  --t: clamp(0, calc((var(--p) - 0.15) / 0.14), 1);
+  --t: clamp(0, calc((var(--p) - var(--from) - 0.09) / 0.12), 1);
 }
 .chapter-runway.is-scrub .chapter-figures {
-  --t: clamp(0, calc((var(--p) - 0.22) / 0.16), 1);
-}
-
-/* The ignition beats brighten a great deal between the first frame and the
-   last. Deepening the type-side scrim as --p climbs keeps the copy at the same
-   contrast throughout instead of letting the plume wash it out at full thrust —
-   the one place the film's light is allowed to change the interface. */
-.chapter-runway.is-scrub .chapter.tone-ignition .chapter-scrim {
-  --lift: clamp(0, calc((var(--p) - 0.3) / 0.4), 1);
-  background:
-    linear-gradient(
-      90deg,
-      rgba(0, 0, 0, calc(0.86 + var(--lift) * 0.1)) 0%,
-      rgba(0, 0, 0, calc(0.6 + var(--lift) * 0.18)) 34%,
-      transparent 62%
-    ),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, transparent 26%),
-    linear-gradient(180deg, transparent 58%, rgba(0, 0, 0, calc(0.6 + var(--lift) * 0.12)) 100%);
+  --t: clamp(0, calc((var(--p) - var(--from) - 0.14) / 0.14), 1);
 }
 
 /* `deep` — for plates whose subject grows or spreads into the type column over
@@ -238,6 +268,9 @@
      never quite reaches its final frame before unpinning. */
   .chapter-runway.is-scrub {
     height: 200svh;
+  }
+  .chapter-runway.is-scrub.runway-long {
+    height: 400svh;
   }
   .chapter-panel {
     max-width: none;
@@ -282,6 +315,17 @@
     align-items: flex-end;
     padding-bottom: clamp(2rem, 9vh, 4.5rem);
   }
+}
+
+/* ---- Beats without a runway ----
+   Reduced motion and load failure both drop `is-scrub`, and with it the grid
+   stack and the opacity envelope. The beats then flow one after another as
+   ordinary paragraphs, which is the whole chapter's copy in reading order —
+   a complete composition, not the scrubbed one with the movement removed. */
+.chapter-runway:not(.is-scrub) .chapter-beat + .chapter-beat {
+  margin-top: clamp(1.6rem, 4vh, 2.6rem);
+  padding-top: clamp(1.4rem, 3vh, 2rem);
+  border-top: 1px solid var(--line-soft);
 }
 
 /* ---- Reduced motion ----

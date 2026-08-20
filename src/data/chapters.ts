@@ -17,9 +17,62 @@ export interface Chapter {
   poster: string;
   start: string;
   label: string;
+  /**
+   * Where the chapter's own copy begins fading out, when later beats follow it.
+   * Set it clear of the next beat's `from`: two stanzas cross-fading in the same
+   * place puts two eyebrows and two headlines on top of each other, which reads
+   * as a rendering fault rather than a transition. A brief gap with no copy at
+   * all is better — on a chapter whose film never stops, that gap is a beat of
+   * pure film, which is the point of merging them in the first place.
+   */
+  until?: number;
+  /**
+   * Optional additional copy stanzas for a chapter whose film is long enough to
+   * carry more than one thought. The chapter's own `eyebrow`/`title`/`body` are
+   * the first beat; these follow it, each fading in and out on its own window
+   * of the same scroll while the film underneath never stops.
+   */
+  beats?: readonly ChapterBeat[];
+}
+
+/**
+ * One stanza of copy inside a chapter, with the progress window it lives in.
+ *
+ * `from` is where it begins fading in; `until` is where it begins fading out.
+ * The last beat omits `until` and holds to the end of the runway. Windows may
+ * overlap slightly — a small crossfade reads better than a gap, because a gap
+ * leaves the film carrying the frame alone and the chapter briefly looks empty.
+ */
+export interface ChapterBeat {
+  eyebrow: string;
+  title: string;
+  body?: string;
+  from: number;
+  until?: number;
+  /** Rendered as large editorial numerals beneath the body. */
+  figures?: readonly Highlight[];
 }
 
 const media = (file: string) => `${import.meta.env.BASE_URL}media/${file}`;
+
+/**
+ * Which highlights get the editorial treatment in the liftoff beat.
+ *
+ * Referenced by label rather than copied, so there is exactly one place a
+ * figure can be edited. A unit test asserts every label here still resolves —
+ * renaming a highlight would otherwise silently drop it from the chapter.
+ */
+export const liftoffFigureLabels = [
+  'Commits authored',
+  'Contributor on core systems',
+  'Engineers led',
+  'Exceptional Impact rating',
+] as const;
+
+export const liftoffFigures = (): Highlight[] =>
+  liftoffFigureLabels
+    .map((label) => highlights.find((h) => h.label === label))
+    .filter((h): h is Highlight => Boolean(h));
 
 export const engineerChapter: Chapter = {
   id: 'engineer',
@@ -38,17 +91,44 @@ export const engineerChapter: Chapter = {
   label: 'About the engineer',
 };
 
-export const ignitionChapter: Chapter = {
-  id: 'ignition',
+/**
+ * Ignition and liftoff, as one uninterrupted film.
+ *
+ * They were two chapters, which meant the sticky runway unpinned and repinned
+ * at exactly the moment the launch should have been most continuous, and the
+ * canvas swapped from one frame sequence to another across the join. The
+ * master is now a single 241-frame concatenation — the duplicated seed frame
+ * between them dropped — so the engine lights, builds and leaves in one move
+ * and the reader's thumb never hands off.
+ *
+ * The copy is what changes instead: two beats fading through on their own
+ * windows of the same scroll. That is the right division of labour — the film
+ * is continuous because the event is, and the words are discrete because
+ * they are two different claims.
+ */
+export const ascentChapter: Chapter = {
+  id: 'ascent',
   eyebrow: 'Ignition',
   title: 'Architecture becomes execution.',
   // profile.about[2] ("keeping production stable under enterprise reliability
   // standards") and the Salesforce platform entry's release ownership.
   body: 'Design decisions stay cheap until something has to run. Mine have carried production releases, enterprise reliability standards, and the engineers on call behind them.',
-  sequence: 'ignition',
-  poster: media('ignition-poster.jpg'),
-  start: media('ignition-start.jpg'),
-  label: 'Engineering approach',
+  sequence: 'ascent',
+  poster: media('ascent-poster.jpg'),
+  start: media('ascent-start.jpg'),
+  label: 'Engineering approach and career figures',
+  // Ignition's copy is gone by 0.48 and liftoff's arrives at 0.50 — a hand-over
+  // with a hairline of clear film between, not a dissolve.
+  until: 0.4,
+  beats: [
+    {
+      eyebrow: 'Liftoff',
+      title: 'What it has added up to.',
+      body: 'Figures that can be checked, not estimated — commit history, team scope, and a performance record.',
+      from: 0.5,
+      figures: liftoffFigures(),
+    },
+  ],
 };
 
 export const orbitChapter: Chapter = {
@@ -84,36 +164,3 @@ export const recedeChapter: Chapter = {
   start: media('recede-start.jpg'),
   label: 'Handover and maintainability',
 };
-
-export const liftoffChapter: Chapter = {
-  id: 'liftoff',
-  eyebrow: 'Liftoff',
-  title: 'What it has added up to.',
-  // Names only the evidence the four displayed figures actually rest on:
-  // commit history (750+, #1), team scope (7 engineers), and the performance
-  // record (3 yrs). Ticket history backs a highlight this chapter does not show.
-  body: 'Figures that can be checked, not estimated — commit history, team scope, and a performance record.',
-  sequence: 'liftoff',
-  poster: media('liftoff-poster.jpg'),
-  start: media('liftoff-start.jpg'),
-  label: 'Career figures',
-};
-
-/**
- * Which highlights get the editorial treatment in chapter 04.
- *
- * Referenced by label rather than copied, so there is exactly one place a
- * figure can be edited. A unit test asserts every label here still resolves —
- * renaming a highlight would otherwise silently drop it from the chapter.
- */
-export const liftoffFigureLabels = [
-  'Commits authored',
-  'Contributor on core systems',
-  'Engineers led',
-  'Exceptional Impact rating',
-] as const;
-
-export const liftoffFigures = (): Highlight[] =>
-  liftoffFigureLabels
-    .map((label) => highlights.find((h) => h.label === label))
-    .filter((h): h is Highlight => Boolean(h));

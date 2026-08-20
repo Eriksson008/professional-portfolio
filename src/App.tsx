@@ -7,9 +7,7 @@ import { HeroSwitch } from './components/HeroSwitch';
 import { CinematicChapter } from './components/CinematicChapter';
 import {
   engineerChapter,
-  ignitionChapter,
-  liftoffChapter,
-  liftoffFigures,
+  ascentChapter,
   orbitChapter,
   recedeChapter,
 } from './data/chapters';
@@ -43,28 +41,18 @@ export default function App() {
             experimental implementation (experiment/cinematic-media-converter). */}
         <HeroSwitch />
 
-        {/* The launch narrative: five scroll-scrubbed film beats between the
+        {/* The launch narrative: four scroll-scrubbed films between the
             opening hero and the document sections — hardware is assembled, it
-            ignites, it leaves the ground carrying the figures, it flies, and
-            it goes on without us. All five are one component over sequences
-            (see CinematicChapter), and their intensity runs 4-5-4-3-2 so the
+            ignites and leaves the ground carrying the figures, it flies, and
+            it goes on without us. All four are one component over sequences
+            (see CinematicChapter), and their intensity runs 4-5-3-2 so the
             page peaks in the middle of the launch and comes down from there
             rather than staying loud. */}
         <CinematicChapter {...engineerChapter} tone="deep" />
-        <CinematicChapter {...ignitionChapter} tone="ignition" />
-        <CinematicChapter {...liftoffChapter} tone="ignition">
-          <dl className="chapter-figures">
-            {liftoffFigures().map((figure) => (
-              // The label is the term and the figure is its value, not the
-              // other way round; CSS orders the value above so the editorial
-              // reading is unchanged.
-              <div className="chapter-figure" key={figure.label}>
-                <dt>{figure.label}</dt>
-                <dd>{figure.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </CinematicChapter>
+        {/* Ignition and liftoff are one film on one runway. Splitting them
+            unpinned and repinned the sticky frame at exactly the moment the
+            launch should be most continuous; the copy hands over instead. */}
+        <CinematicChapter {...ascentChapter} tone="ignition" runway="long" />
         {/* The deceleration. Ignition and liftoff peak; these two glide, and
             the page keeps coming down from here into the document. */}
         <CinematicChapter {...orbitChapter} tone="deep" />
