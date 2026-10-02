@@ -246,7 +246,7 @@ that carries the tags and bounces an admin to the dashboard; because Access here
 ### GitHub Pages (primary)
 
 The site deploys to GitHub Pages automatically via GitHub Actions
-(`.github/workflows/deploy.yml`) on every push to `main`.
+(`.github/workflows/deploy.yml`) on a push to `main`. A push that changes only `AGENTS.md`, `CLAUDE.md`, `tasks/` or `.claude/` is skipped.
 
 **Live URL:** https://eriksson008.github.io/professional-portfolio/
 

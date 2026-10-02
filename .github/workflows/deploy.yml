@@ -1,12 +1,19 @@
 name: Deploy to GitHub Pages
 
-# Builds the Vite site and publishes dist/ to GitHub Pages on every push to main.
+# Builds the Vite site and publishes dist/ to GitHub Pages on a push to main.
 # Requires (one-time, in repo Settings → Pages): Source = "GitHub Actions".
 # The repo must be public, or on a plan that allows Pages for private repos.
 
 on:
   push:
     branches: [main]
+    # A push that changes only agent-instruction files does not redeploy:
+    # none of them are part of the build.
+    paths-ignore:
+      - AGENTS.md
+      - CLAUDE.md
+      - tasks/**
+      - .claude/**
   workflow_dispatch:
 
 # Least-privilege token: read the repo, write Pages, mint the deploy id-token.
