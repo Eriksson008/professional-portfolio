@@ -5,69 +5,47 @@ Canonical, cross-tool operating guide for **Professional Portfolio**. Both Claud
 <!-- ai-workflow:default-start level=Standard novault=false vaultnote="Professional-Portfolio/README" (managed by ai-workflows/update-repo-workflow; edit the template, not here) -->
 ## Default agent workflow
 
-This is the standing process for both Claude Code and Codex in this repo — it applies to every task
-**without needing to be restated in the prompt**. Scale effort to the task (see the tiers below).
+Workspace-wide defaults for Claude Code and Codex. The repo-specific sections of this file take
+precedence over them.
 
-1. Understand the requested **outcome** first, then inspect the **relevant** implementation.
-2. Read the repo docs and any active `tasks/` context relevant to the request.
-3. Do **not** scan the whole repository when targeted inspection is enough.
-4. Delegate substantial or cross-cutting investigation to a **read-only explorer** agent; skip subagents for trivial changes.
-5. For broad or high-risk changes, write a **brief plan** before editing.
-6. **One implementation owner** per feature/branch; never let two agents edit overlapping files; use an isolated **worktree** only for genuinely independent work.
-7. Make the **smallest defensible change** that satisfies the request; preserve unrelated user work.
-8. Run focused checks while implementing; run the repo's **supported verification** (`scripts/verify.ps1` / `.sh`) before claiming done.
-9. Have an **independent reviewer** (the `reviewer` agent, or Codex `codex review`) check meaningful changes; use **browser validation** for meaningful UI behavior changes.
-10. Compare the result to the requested outcome and acceptance criteria. Report failed/skipped/unavailable checks honestly — **never claim a check passed unless it actually ran**.
-11. Do **not** commit, push, deploy, migrate, or mutate external systems unless explicitly authorized. Protect secrets and private data.
+- **Change.** Make the smallest robust change that fits the existing architecture. Several sessions
+  work in this workspace at once, so leave alone any change you did not make.
+- **Free to do.** Read, search, edit, add tests, run local checks and builds, fix what your change
+  broke, delete scratch files you created.
+- **Ask first.** Commit, push, deploy, run a remote or destructive migration, delete data or volumes,
+  add a git remote, change a repo's visibility, send anything to an external service. One exception:
+  generator or template-refresh output with no hand-written content may be committed locally, as its
+  own commit of only those files. It is not pushed.
+- **Verify.** Show the changed behavior working, narrowest check first. Run `scripts/verify.ps1`
+  (`scripts/verify.sh` under bash) when the change reaches beyond one module, and before reporting a
+  substantial change done. Report what ran, what failed and what was skipped. A failure that predates
+  your change is reported, not fixed in passing, and a test is not edited to make it pass.
+- **Plan.** Work that will span sessions or change hands gets `tasks/<date>-<slug>.md`: objective,
+  constraints, discoveries, approach, progress, open questions, validation status. Keep it current as
+  you go and move it to `tasks/done/` when the work lands. Smaller work needs no plan file.
+- **Docs.** Edit a doc when your change makes it wrong, or when you had to work out a constraint the
+  next session would otherwise work out again. Implementation facts go in this repo's docs; a
+  repeatable procedure becomes a skill.
+- **Shell.** Windows PowerShell 5.1 (`powershell`) and Git Bash are installed. PowerShell 7 (`pwsh`)
+  is not.
+- **Tier: Standard.** A change that is broad, hard to reverse, or touches data handling gets an
+  independent review before it is reported done: the `reviewer` subagent in Claude Code,
+  `codex review` in Codex. A change to UI behavior is checked in a browser.
 
-### Effort tiers
+### The Second Brain vault
 
-- **Trivial** (typo, tiny text/style fix, one obvious test): inspect the file, make the change, run a targeted check. No subagents.
-- **Normal** (contained feature, bug fix, focused refactor): focused exploration → one implementation owner → repo verification → independent review.
-- **Complex / high-risk** (architecture, auth, migrations, infra, cross-app or sensitive-data changes): parallel read-only investigation where useful → written plan → one owner per isolated workstream → targeted + full verification → specialist review → browser/integration evidence where applicable → explicit rollback/risk consideration.
+`../second-brain/02-Projects/Professional-Portfolio/README.md` holds this project's direction: decisions with their
+reasons, what is deliberately not being done, and what comes next. `PROJECT_CONTEXT.md` in this repo
+holds implementation.
 
-### Committing mechanical refreshes
-
-A **mechanical refresh** - the output of a generator or of a marker-scoped template applier, with no
-hand-authored content in it - may be committed locally **without asking**, as its own commit, touching
-only the files the tool wrote. Never push it, and never fold unrelated work into it. Everything else
-still needs explicit authorization.
-
-Uncommitted work is not safe work here: several sessions run against this workspace at once, and one
-of them committing everything will absorb whatever another left sitting in the tree.
-
-### If you explained it twice, write it down
-
-The second time a session has to re-derive the same constraint, gotcha, or domain fact, capture it
-before moving on - the repo docs if it is implementation, the vault note's **Important Decisions** if
-it is direction, a skill if it is a procedure. The re-explanation is the signal, and capture always
-costs less than the third explanation.
-
-### The Second Brain vault — read before, write after
-
-The vault at `../second-brain` holds this project's **direction**: why decisions were made, what is
-deliberately not being done, and what comes next. This repo's `PROJECT_CONTEXT.md` holds
-**implementation**: how it is built, run, and verified. They answer different questions, so neither
-substitutes for the other.
-
-**Read it before planning.** For any non-trivial change, read
-`../second-brain/02-Projects/Professional-Portfolio/README.md` first — its **Important Decisions** table above
-all. That table is where settled calls and their rationale live, and re-deciding something already
-decided is the failure this rule exists to prevent. Where the note and the code disagree, the code is
-what runs: say so plainly, and correct the note in the same session.
-
-**Write it after.** When a task changes this project's real state, update that note per the vault's
-own rules in `second-brain/AGENTS.md`. In particular: **`## Recent Changes` is capped at ~25 lines** —
-trim the oldest entries as you add one, and promote anything durable (an architectural choice, a
-security posture, a constraint someone would otherwise rediscover) into **Important Decisions** first.
-Git already holds the history; the note holds what lasts.
-
-**Meaningful changes only** — not typo fixes, formatting, styling tweaks, routine dependency bumps, or
-trivial refactors. What counts as meaningful for *this* repo is listed under `## Second Brain Sync
-Rule` below; the mechanics are here so all repos share one copy of them.
-
-Before finishing a meaningful session: update `PROJECT_CONTEXT.md`, update the vault note, run the
-repo's checks, then show `git status` for this repo **and** for `../second-brain`.
+- **Before** changing architecture, scope or product direction, or when a requirement is ambiguous,
+  read that note's **Important Decisions** table so a settled decision is not re-decided. Where the
+  note and the code disagree, the code is what runs; correct the note.
+- **After** a change to the project's real state (a feature shipped, a deploy, a new architecture or
+  constraint, a decision made), update the note under the rules in `../second-brain/AGENTS.md`, update
+  `PROJECT_CONTEXT.md`, and show `git status` for this repo and for `../second-brain`. Fixes,
+  refactors, styling and dependency bumps do not count. Where this file has a Second Brain sync rule
+  of its own, that rule says what counts for this repo.
 <!-- ai-workflow:default-end -->
 
 ## What this is
