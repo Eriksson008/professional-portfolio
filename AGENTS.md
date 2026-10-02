@@ -26,8 +26,11 @@ precedence over them.
 - **Docs.** Edit a doc when your change makes it wrong, or when you had to work out a constraint the
   next session would otherwise work out again. Implementation facts go in this repo's docs; a
   repeatable procedure becomes a skill.
-- **Shell.** Windows PowerShell 5.1 (`powershell`) and Git Bash are installed. PowerShell 7 (`pwsh`)
-  is not.
+- **UI.** User-facing UI work follows the `design-kit` plugin (`fredrik-local` marketplace): this
+  repo's design document wins over its `design-principles` skill, and the result is looked at with
+  `visual-loop` before it is reported done.
+- **Shell.** Windows PowerShell 5.1 (`powershell`), PowerShell 7 (`pwsh`) and Git Bash are installed.
+  Repo scripts are written for and run with `powershell`.
 - **Tier: Standard.** A change that is broad, hard to reverse, or touches data handling gets an
   independent review before it is reported done: the `reviewer` subagent in Claude Code,
   `codex review` in Codex. A change to UI behavior is checked in a browser.
